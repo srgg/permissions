@@ -1,4 +1,4 @@
-SET @user_id = 2;
+SET @user_id = 8;
 SET @resource = 'IDEA';
 SET @action = 'READ';
 
@@ -34,6 +34,9 @@ WHERE
             SELECT 1
                 FROM ppp
                 WHERE
+                    -- apply filtering by organization
+                    EXISTS( SELECT 1 FROM users u WHERE u.id = @user_id AND u.organization_id = i.organization_id
+                    ) AND
                     -- apply instance filtering if required
                     (
                         ( ppp.resource_instance IS NOT NULL AND ppp.resource_instance = i.id)

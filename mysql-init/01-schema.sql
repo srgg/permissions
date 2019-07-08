@@ -1,20 +1,34 @@
 SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
+# SET FOREIGN_KEY_CHECKS = 0;
+
+CREATE TABLE organizations (
+    id            INT AUTO_INCREMENT,
+    name          VARCHAR(100),
+    domain        VARCHAR(50),
+    CONSTRAINT pk_organizations PRIMARY KEY (id)
+) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
+CREATE UNIQUE INDEX idx_organizations_name ON organizations (name);
+CREATE UNIQUE INDEX idx_organizations_domain ON organizations (domain);
 
 CREATE TABLE users (
-  id            INT AUTO_INCREMENT,
-  name          VARCHAR(100),
-  password      VARCHAR(100),
-  password_salt VARCHAR(100),
-  CONSTRAINT pk_users PRIMARY KEY (id)
+  id                INT AUTO_INCREMENT,
+  organization_id   INT,
+  name              VARCHAR(100),
+  password          VARCHAR(100),
+  password_salt     VARCHAR(100),
+  CONSTRAINT pk_users PRIMARY KEY (id),
+  CONSTRAINT users_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
 CREATE UNIQUE INDEX idx_users_username ON users (name);
 
 
 CREATE TABLE roles (
-  id    INT AUTO_INCREMENT,
-  name  VARCHAR(100),
-  CONSTRAINT pk_roles_permissions PRIMARY KEY (id)
+  id                INT AUTO_INCREMENT,
+  organization_id   INT,
+  name              VARCHAR(100) NOT NULL,
+  description       VARCHAR(512),
+  CONSTRAINT pk_roles_permissions PRIMARY KEY (id),
+  CONSTRAINT roless_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
 CREATE UNIQUE INDEX idx_roles_name ON roles (name);
 
@@ -45,8 +59,10 @@ CREATE UNIQUE INDEX idx_permissions_02 ON permissions (user_id, resource, resour
 
 CREATE TABLE ideas (
   id            INT AUTO_INCREMENT,
+  organization_id   INT,
   owner_id      INT,
   name          VARCHAR(100),
   title         VARCHAR(100),
-  CONSTRAINT pk_ideas PRIMARY KEY (id)
+  CONSTRAINT pk_ideas PRIMARY KEY (id),
+  CONSTRAINT ideas_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
