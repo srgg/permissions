@@ -13,6 +13,7 @@ INSERT INTO users VALUES (5, 3, 'inventor1@emca', 'pw1', 'salt1');
 INSERT INTO users VALUES (6, 3, 'inventor2@emca', 'pw2', 'salt2');
 INSERT INTO users VALUES (7, 3, 'inventor3@emca', 'pw3', 'salt3');
 INSERT INTO users VALUES (8, 3, 'manager@emca', 'pw4', 'salt4');
+INSERT INTO users VALUES (9, 3, 'admin@emca', 'pw5', 'salt5');
 
 
 INSERT INTO user_roles VALUES (1,1);
@@ -24,11 +25,12 @@ INSERT INTO user_roles VALUES (5,1);
 INSERT INTO user_roles VALUES (6,1);
 INSERT INTO user_roles VALUES (7,1);
 INSERT INTO user_roles VALUES (8,2);
+INSERT INTO user_roles VALUES (9,3); -- grant organization admin role
 
-INSERT INTO permissions VALUES (1, 1, null, 'ideas', NULL, 'READ_OWN, CREATE, EDIT_OWN, DELETE_OWN');
-INSERT INTO permissions VALUES (2, 2, null, 'IDEAS', NULL, 'READ, CREATE, EDIT, DELETE');
-INSERT INTO permissions VALUES (3, null, 2, 'ideas', 1, 'READ');
-INSERT INTO permissions VALUES (4, null, 2, 'IdEaS', 2, 'READ_OWN');
+INSERT INTO permissions VALUES (0, 1, null, 'ideas', NULL, 'READ_OWN, CREATE, EDIT_OWN, DELETE_OWN');
+INSERT INTO permissions VALUES (0, 2, null, 'IDEAS', NULL, 'READ, CREATE, EDIT, DELETE');
+INSERT INTO permissions VALUES (0, null, 2, 'ideas', 1, 'READ');
+INSERT INTO permissions VALUES (0, null, 2, 'IdEaS', 2, 'READ_OWN');
 
 INSERT INTO ideas VALUES (1, 2, 1, 'idea1@acme', 'the 1st idea of inventor1@acme');
 INSERT INTO ideas VALUES (2, 2, 1, 'idea2@acme', 'the 2nd idea of inventor1@acme');

@@ -14,14 +14,14 @@ export class QueryBuilder {
         (
             SELECT Trim(SUBSTRING_INDEX(SUBSTRING_INDEX(ppp.action, ',', n.digit+1), ',', -1)) single_perm
             FROM (
-                    ${QueryBuilder.permissionQuery}               
+                    ${QueryBuilder.permissionQuery} 
                  ) ppp
                  INNER JOIN (SELECT 0 digit UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3  UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) n
                     ON LENGTH(REPLACE(ppp.action, ',' , '')) <= LENGTH(ppp.action)-n.digit
         ) p
-      WHERE (LOWER(RIGHT(p.single_perm,4)) = '_own' AND i.owner_id = :userid)
-         OR LOWER(RIGHT(p.single_perm,4)) <> '_own'
-    `;
+      WHERE
+        {{ownership_permission_filter}} 
+         LOWER(RIGHT(p.single_perm,4)) <> '_own'`;
 
     public static buildAllResourceQuery(userid: number, resource: string, action: string, checkOwnership: boolean = false, calculateRowLevelePermissions: boolean = false) {
         const allResourcesQueryTemplate = {
@@ -62,16 +62,31 @@ WHERE
 
                 ownership_permission_filter: {
                     options: {propertyName: 'ownershipFilter', propertyValue: true},
-                    sql: `(LOWER(RIGHT(p.single_perm,4)) = '_own' AND i.owner_id = :userid)`
+                    sql: `(LOWER(RIGHT(p.single_perm,4)) = '_own' AND i.owner_id = :userid) OR `
                 }
             }
         };
 
-        const qt = new QueryTemplater();
-        const sqlQueryAll = qt.processTemplates(allResourcesQueryTemplate,
+        return QueryBuilder.buildQuery(allResourcesQueryTemplate,
+            {action: action, userid: userid, domain: resource},
             {needRowLevelPermissions: calculateRowLevelePermissions, ownershipFilter: checkOwnership});
-
-        return  qt.parametrizeQuery(sqlQueryAll, {action: action, userid: userid, domain: resource}, 'mysql');
     }
-};
+
+    private static buildQuery({sql, addons}, queryParams, buildParams) {
+        const qt = new QueryTemplater();
+        // const processed:any = Object.assign({}, addons);
+        const processed:any = {};
+
+        for (const item in addons) {
+            const addon = addons[item];
+            processed[item] = {};
+            processed[item].sql = qt.processTemplates({sql: addon.sql.slice(), addons: addons}, buildParams);
+            processed[item].options = addon.options;
+        }
+
+        const result = qt.processTemplates({sql: sql, addons: processed}, buildParams);
+        const parametrized = qt.parametrizeQuery(result, queryParams, 'mysql');
+        return parametrized;
+    }
+}
 
