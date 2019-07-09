@@ -1,4 +1,4 @@
-SET @user_id = 8;
+SET @user_id = 2;
 SET @resource = 'IDEA';
 SET @action = 'READ';
 

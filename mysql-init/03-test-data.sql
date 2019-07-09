@@ -25,10 +25,10 @@ INSERT INTO user_roles VALUES (6,1);
 INSERT INTO user_roles VALUES (7,1);
 INSERT INTO user_roles VALUES (8,2);
 
-INSERT INTO permissions VALUES (1, 1, null, 'IDEA', NULL, 'READ_OWN, CREATE, EDIT_OWN, DELETE_OWN');
-INSERT INTO permissions VALUES (2, 2, null, 'IDEA', NULL, 'READ, CREATE, EDIT, DELETE');
-INSERT INTO permissions VALUES (3, null, 2, 'IDEA', 1, 'READ');
-INSERT INTO permissions VALUES (4, null, 2, 'IDEA', 2, 'READ_OWN');
+INSERT INTO permissions VALUES (1, 1, null, 'ideas', NULL, 'READ_OWN, CREATE, EDIT_OWN, DELETE_OWN');
+INSERT INTO permissions VALUES (2, 2, null, 'IDEAS', NULL, 'READ, CREATE, EDIT, DELETE');
+INSERT INTO permissions VALUES (3, null, 2, 'ideas', 1, 'READ');
+INSERT INTO permissions VALUES (4, null, 2, 'IdEaS', 2, 'READ_OWN');
 
 INSERT INTO ideas VALUES (1, 2, 1, 'idea1@acme', 'the 1st idea of inventor1@acme');
 INSERT INTO ideas VALUES (2, 2, 1, 'idea2@acme', 'the 2nd idea of inventor1@acme');

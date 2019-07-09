@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "lib": [
+      "es6",
+      "dom"
+    ],
+    "types": [
+      "node",
+      "jest"
+    ],
+    "module": "commonjs",
+    "strict": true,
+    "moduleResolution": "node",
+    "declaration": true,
+    "outDir": "lib",
+    "removeComments": true,
+    "noImplicitAny": false,
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "typeRoots": [
+      "./node_modules/@types/",
+      "./node_modules/allure2-js-commons/dist/declarations/**/",
+      "./types/**/"
+    ]
+  },
+  "exclude": [
+    "./node_modules/",
+    "./lib"
+  ],
+  "compileOnSave": false
+}
