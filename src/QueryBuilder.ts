@@ -1,5 +1,14 @@
 const QueryTemplater =  require('query-template');
 
+export interface BuildAllResourceQueryParams {
+    userId: number;
+    resource: string;
+    action: string;
+    columns?: string[];
+    checkOwnership?: boolean;
+    withRowPermissions?: boolean;
+};
+
 export class QueryBuilder {
     private static permissionQuery: string = `SELECT * FROM permissions pp
           WHERE  pp.resource = :domain
@@ -23,12 +32,27 @@ export class QueryBuilder {
         {{ownership_permission_filter}} 
          LOWER(RIGHT(p.single_perm,4)) <> '_own'`;
 
-    public static buildAllResourceQuery(userid: number, resource: string, action: string, checkOwnership: boolean = false, calculateRowLevelePermissions: boolean = false) {
+    public static buildAllResourceQuery({userId, resource, action, columns, checkOwnership, withRowPermissions}: BuildAllResourceQueryParams) {
+        const alias = 'i';
+        let cols;
+
+        if (columns) {
+            const cc: string[] = [];
+            columns.forEach((c)=>{
+                cc.push(alias.concat('.', c));
+            });
+
+            cols = cc.join(', ');
+        } else {
+            cols = alias.concat('.*');
+        }
+
+
         const allResourcesQueryTemplate = {
             sql:
-                `SELECT  i.*
+                `SELECT  ${cols}
     {{row_level_permissions}}
-FROM ${resource.toLowerCase()} i,
+FROM ${resource.toLowerCase()} ${alias},
      (
         ${QueryBuilder.permissionQuery}
      ) ppp
@@ -68,8 +92,8 @@ WHERE
         };
 
         return QueryBuilder.buildQuery(allResourcesQueryTemplate,
-            {action: action, userid: userid, domain: resource},
-            {needRowLevelPermissions: calculateRowLevelePermissions, ownershipFilter: checkOwnership});
+            {action: action, userid: userId, domain: resource},
+            {needRowLevelPermissions: withRowPermissions, ownershipFilter: checkOwnership});
     }
 
     private static buildQuery({sql, addons}, queryParams, buildParams) {
