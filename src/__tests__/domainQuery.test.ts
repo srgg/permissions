@@ -8,16 +8,20 @@ import { getConnection} from "typeorm";
 import {BuildAllResourceQueryParams, QueryBuilder} from '../QueryBuilder';
 
 async function check_query(queryopts: BuildAllResourceQueryParams, expected: string) {
-    const q = QueryBuilder.buildAllResourceQuery(queryopts);
+    const q = QueryBuilder.buildDomainQuery(queryopts);
 
     const r = await getConnection().query(q.query, q.params);
     expect(r).toEqual(JSON.parse(expected));
 }
 
-test('1st inventor should be able to read the only own ideas', async () => {
-    await check_query({userId:1, resource: 'IDEAS', action: 'READ',
-            checkOwnership: true, withRowPermissions: true},
-        `
+describe('Instance level permissions', () => {
+
+    test('1st inventor should be able to read the only own ideas', async () => {
+        await check_query({
+                userId: 1, resource: 'IDEAS', action: 'READ',
+                checkOwnership: true, withRowPermissions: true
+            },
+            `
             [
                 {
                   "id": 1,
@@ -36,12 +40,14 @@ test('1st inventor should be able to read the only own ideas', async () => {
                   "permissions":"READ,CREATE,EDIT,DELETE"
                 }
             ]`);
-});
+    });
 
-test('2nd inventor should be able to read his own ideas as well as an idea shared by the first inventor', async () => {
-    await check_query({userId:2, resource: 'IDEAS', action: 'READ',
-            checkOwnership: true, withRowPermissions: true},
-        `[
+    test('2nd inventor should be able to read his own ideas as well as an idea shared by the first inventor', async () => {
+        await check_query({
+                userId: 2, resource: 'IDEAS', action: 'READ',
+                checkOwnership: true, withRowPermissions: true
+            },
+            `[
                {
                   "id":3,
                   "organization_id":2,
@@ -67,18 +73,22 @@ test('2nd inventor should be able to read his own ideas as well as an idea share
                   "permissions":"READ,CREATE"
                }
             ]`);
-});
+    });
 
-test('3rd inventor should not be able to read anything as he has none of own and shared ideas', async () => {
-    await check_query({userId:3, resource: 'IDEAS', action: 'READ',
-            checkOwnership: true, withRowPermissions: true},
-        `[]`);
-});
+    test('3rd inventor should not be able to read anything as he has none of own and shared ideas', async () => {
+        await check_query({
+                userId: 3, resource: 'IDEAS', action: 'READ',
+                checkOwnership: true, withRowPermissions: true
+            },
+            `[]`);
+    });
 
-test('Manger should be able to read all the ideas of the entire organization', async () => {
-    await check_query({userId:4, resource: 'IDEAS', action: 'READ',
-            checkOwnership: true, withRowPermissions: true},
-        `[
+    test('Manger should be able to read all the ideas of the entire organization', async () => {
+        await check_query({
+                userId: 4, resource: 'IDEAS', action: 'READ',
+                checkOwnership: true, withRowPermissions: true
+            },
+            `[
                {
                   "id":1,
                   "organization_id":2,
@@ -112,39 +122,45 @@ test('Manger should be able to read all the ideas of the entire organization', a
                   "permissions":"READ,CREATE,EDIT,DELETE"
                }
             ]`);
-});
+    });
 
-test('Inventor should not be able to read users', async () => {
-    await check_query({userId: 1, resource: 'users', action: 'READ',
-        checkOwnership: false, withRowPermissions: true},
-        `[]`
-    );
+    test('Inventor should not be able to read users', async () => {
+        await check_query({
+                userId: 1, resource: 'users', action: 'READ',
+                checkOwnership: false, withRowPermissions: true
+            },
+            `[]`
+        );
 
-});
+    });
 
-test('Manager should not be able to read users', async () => {
-    await check_query({userId: 4, resource: 'users', action: 'READ',
-            checkOwnership: false, withRowPermissions: true},
-        `[]`
-    );
+    test('Manager should not be able to read users', async () => {
+        await check_query({
+                userId: 4, resource: 'users', action: 'READ',
+                checkOwnership: false, withRowPermissions: true
+            },
+            `[]`
+        );
 
-});
+    });
 
-test('Organization admin  should not be able to read ideas', async () => {
-    await check_query({userId: 9, resource: 'ideas', action: 'READ',
-            checkOwnership: true, withRowPermissions: true},
-        `[]`
-    );
+    test('Organization admin  should not be able to read ideas', async () => {
+        await check_query({
+                userId: 9, resource: 'ideas', action: 'READ',
+                checkOwnership: true, withRowPermissions: true
+            },
+            `[]`
+        );
 
-});
+    });
 
-test('Organization admin should be able to read all users of the entire organization', async () => {
-    await check_query({
-            userId: 9, resource: 'users', action: 'ReAd',
-            columns: ['id', 'organization_id', 'name'],
-            checkOwnership: false, withRowPermissions: true
-        },
-        `[
+    test('Organization admin should be able to read all users of the entire organization', async () => {
+        await check_query({
+                userId: 9, resource: 'users', action: 'ReAd',
+                columns: ['id', 'organization_id', 'name'],
+                checkOwnership: false, withRowPermissions: true
+            },
+            `[
                {
                   "id":5,
                   "organization_id":3,
@@ -176,4 +192,5 @@ test('Organization admin should be able to read all users of the entire organiza
                   "permissions":"READ,CREATE,EDIT,DELETE"
                }
             ]`);
+    });
 });

@@ -32,13 +32,13 @@ export class QueryBuilder {
         {{ownership_permission_filter}} 
          LOWER(RIGHT(p.single_perm,4)) <> '_own'`;
 
-    public static buildAllResourceQuery({userId, resource, action, columns, checkOwnership, withRowPermissions}: BuildAllResourceQueryParams) {
+    public static buildDomainQuery({userId, resource, action, columns, checkOwnership, withRowPermissions}: BuildAllResourceQueryParams) {
         const alias = 'i';
         let cols;
 
         if (columns) {
             const cc: string[] = [];
-            columns.forEach((c)=>{
+            columns.forEach((c) => {
                 cc.push(alias.concat('.', c));
             });
 
@@ -68,7 +68,7 @@ WHERE
                 OR ppp.resource_instance IS NULL
             ) AND (
                 -- apply action filtering
-                FIND_IN_SET(LCASE(:action), LCASE(ppp.action)) > 0
+                FIND_IN_SET(LCASE(:action), REPLACE(LCASE(ppp.action), ' ', '')) > 0
                 
                 -- apply ownership filtering if required
                 {{ownership_resource_filter}}
@@ -81,7 +81,7 @@ WHERE
 
                 ownership_resource_filter: {
                     options: {propertyName: 'ownershipFilter', propertyValue: true},
-                    sql: `OR (FIND_IN_SET(LCASE(CONCAT(:action,'_OWN')), LCASE(ppp.action)) > 0 AND i.owner_id = :userid)`
+                    sql: `OR (FIND_IN_SET(LCASE(CONCAT(:action,'_OWN')), REPLACE(LCASE(ppp.action), ' ', '')) > 0 AND i.owner_id = :userid)`
                 },
 
                 ownership_permission_filter: {
@@ -99,7 +99,7 @@ WHERE
     private static buildQuery({sql, addons}, queryParams, buildParams) {
         const qt = new QueryTemplater();
         // const processed:any = Object.assign({}, addons);
-        const processed:any = {};
+        const processed: any = {};
 
         for (const item in addons) {
             const addon = addons[item];
@@ -111,6 +111,20 @@ WHERE
         const result = qt.processTemplates({sql: sql, addons: processed}, buildParams);
         const parametrized = qt.parametrizeQuery(result, queryParams, 'mysql');
         return parametrized;
+    }
+
+    static buildIsPermittedQuery({userId, resource, action}: BuildAllResourceQueryParams) {
+        const isPermittedQueryTemplate = {
+            sql: ` SELECT 1 isPermitted FROM DUAL WHERE EXISTS (
+        ${QueryBuilder.permissionQuery}
+        AND FIND_IN_SET(LCASE(:action), REPLACE(LCASE(pp.action), ' ', ''))
+)`,
+            addons: {}
+        };
+
+        return QueryBuilder.buildQuery(isPermittedQueryTemplate,
+            {action: action, userid: userId, domain: resource},
+            {});
     }
 }
 

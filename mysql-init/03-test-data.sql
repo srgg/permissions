@@ -28,7 +28,7 @@ INSERT INTO user_roles VALUES (8,2);
 INSERT INTO user_roles VALUES (9,3); -- grant organization admin role
 
 INSERT INTO permissions VALUES (0, 1, null, 'ideas', NULL, 'READ_OWN, CREATE, EDIT_OWN, DELETE_OWN');
-INSERT INTO permissions VALUES (0, 2, null, 'IDEAS', NULL, 'READ, CREATE, EDIT, DELETE');
+INSERT INTO permissions VALUES (0, 2, null, 'IDEAS', NULL, 'READ, EDIT, DELETE');
 INSERT INTO permissions VALUES (0, null, 2, 'ideas', 1, 'READ');
 INSERT INTO permissions VALUES (0, null, 2, 'IdEaS', 2, 'READ_OWN');
 
