@@ -1,13 +1,19 @@
 const QueryTemplater =  require('query-template');
 
-export interface BuildAllResourceQueryParams {
+export interface DomainParams {
     userId: number;
     resource: string;
     action: string;
+}
+
+export interface IsPermittedQueryParams extends DomainParams {
+}
+
+export interface BuildAllResourceQueryParams extends DomainParams {
     columns?: string[];
     checkOwnership?: boolean;
     withRowPermissions?: boolean;
-};
+}
 
 export class QueryBuilder {
     private static permissionQuery: string = `SELECT * FROM permissions pp
@@ -60,7 +66,7 @@ WHERE
     exists (
         SELECT 1 FROM DUAL WHERE
             -- apply filtering by organization
-            EXISTS( SELECT 1 FROM users u WHERE u.id = :userid AND u.organization_id = i.organization_id)
+            EXISTS( SELECT 1 FROM users u WHERE u.id = :userid AND u.organization_id = ${alias}.organization_id)
             
             -- apply instance filtering if required                            
             AND (
@@ -71,8 +77,8 @@ WHERE
                 FIND_IN_SET(LCASE(:action), REPLACE(LCASE(ppp.action), ' ', '')) > 0
                 
                 -- apply ownership filtering if required
-                {{ownership_resource_filter}}
-    ))`,
+                {{ownership_resource_filter}})
+    )`,
             addons: {
                 row_level_permissions: {
                     options: {propertyName: 'needRowLevelPermissions', propertyValue: true},
@@ -92,13 +98,12 @@ WHERE
         };
 
         return QueryBuilder.buildQuery(allResourcesQueryTemplate,
-            {action: action, userid: userId, domain: resource},
+            {action: action, userid: userId, domain: resource, instanceId: null},
             {needRowLevelPermissions: withRowPermissions, ownershipFilter: checkOwnership});
     }
 
     private static buildQuery({sql, addons}, queryParams, buildParams) {
         const qt = new QueryTemplater();
-        // const processed:any = Object.assign({}, addons);
         const processed: any = {};
 
         for (const item in addons) {
@@ -113,7 +118,7 @@ WHERE
         return parametrized;
     }
 
-    static buildIsPermittedQuery({userId, resource, action}: BuildAllResourceQueryParams) {
+    static buildIsPermittedQuery({userId, resource, action}: IsPermittedQueryParams) {
         const isPermittedQueryTemplate = {
             sql: ` SELECT 1 isPermitted FROM DUAL WHERE EXISTS (
         ${QueryBuilder.permissionQuery}

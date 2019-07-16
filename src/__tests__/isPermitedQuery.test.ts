@@ -1,7 +1,7 @@
-import {BuildAllResourceQueryParams, QueryBuilder} from "../QueryBuilder";
+import {IsPermittedQueryParams, QueryBuilder} from "../QueryBuilder";
 import {getConnection} from "typeorm";
 
-async function check_query(queryopts: BuildAllResourceQueryParams, expected: string) {
+async function check_query(queryopts: IsPermittedQueryParams, expected: string) {
     const q = QueryBuilder.buildIsPermittedQuery(queryopts);
 
     const r = await getConnection().query(q.query, q.params);
