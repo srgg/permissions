@@ -95,7 +95,7 @@ describe('Instance level permissions', () => {
                   "owner_id":1,
                   "name":"idea1@acme",
                   "title":"the 1st idea of inventor1@acme",
-                  "permissions":"READ,CREATE,EDIT,DELETE"
+                  "permissions":"READ,EDIT,DELETE"
                },
                {
                   "id":2,
@@ -103,7 +103,7 @@ describe('Instance level permissions', () => {
                   "owner_id":1,
                   "name":"idea2@acme",
                   "title":"the 2nd idea of inventor1@acme",
-                  "permissions":"READ,CREATE,EDIT,DELETE"
+                  "permissions":"READ,EDIT,DELETE"
                },
                {
                   "id":3,
@@ -111,7 +111,7 @@ describe('Instance level permissions', () => {
                   "owner_id":2,
                   "name":"idea1@acme",
                   "title":"the 1st idea of inventor2@acme",
-                  "permissions":"READ,CREATE,EDIT,DELETE"
+                  "permissions":"READ,EDIT,DELETE"
                },
                {
                   "id":4,
@@ -119,7 +119,7 @@ describe('Instance level permissions', () => {
                   "owner_id":2,
                   "name":"idea2@acme",
                   "title":"the 2nd idea of inventor2@acme",
-                  "permissions":"READ,CREATE,EDIT,DELETE"
+                  "permissions":"READ,EDIT,DELETE"
                }
             ]`);
     });
