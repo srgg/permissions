@@ -27,20 +27,16 @@ SELECT  i.*
                     )) )
              ) OR
                 LOWER(RIGHT(p.single_perm,4)) <> '_own' ) permissions
-FROM ideas i,
-     (
-         SELECT * FROM permissions pp
-         WHERE  pp.resource = @resource
-           AND (
-                     pp.user_id = @user_id
-                 OR EXISTS (
-                             SELECT 1 FROM user_roles ur
-                             WHERE ur.role_id = pp.role_id AND ur.user_id= @user_id
-                         ))
-     ) ppp
+FROM ideas i
 WHERE
     exists (
-            SELECT 1 FROM DUAL WHERE
+            SELECT * FROM permissions ppp WHERE  ppp.resource = @resource
+                AND ( ppp.user_id = @user_id
+                           OR EXISTS (
+                                       SELECT 1 FROM user_roles ur
+                                       WHERE ur.role_id = ppp.role_id AND ur.user_id= @user_id
+                                   ))
+            AND
                                  -- apply filtering by organization
                 EXISTS( SELECT 1 FROM users u WHERE u.id = @user_id AND u.organization_id = i.organization_id)
 

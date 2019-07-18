@@ -62,23 +62,20 @@ export class QueryBuilder {
             sql:
                 `SELECT  ${cols}
     {{row_level_permissions}}
-FROM ${resource.toLowerCase()} ${alias},
-     (
-        ${QueryBuilder.permissionQuery}
-     ) ppp
+FROM ${resource.toLowerCase()} ${alias}
 WHERE 
     exists (
-        SELECT 1 FROM DUAL WHERE
+        ${QueryBuilder.permissionQuery}
             -- apply filtering by organization
-            EXISTS( SELECT 1 FROM users u WHERE u.id = :userid AND u.organization_id = ${alias}.organization_id)
+            AND EXISTS( SELECT 1 FROM users u WHERE u.id = :userid AND u.organization_id = ${alias}.organization_id)
             
             -- apply instance filtering if required                            
             AND (
-                ( ppp.resource_instance IS NOT NULL AND ppp.resource_instance = i.id)
-                OR ppp.resource_instance IS NULL
+                ( pp.resource_instance IS NOT NULL AND pp.resource_instance = i.id)
+                OR pp.resource_instance IS NULL
             ) AND (
                 -- apply action filtering
-                FIND_IN_SET(LCASE(:action), REPLACE(LCASE(ppp.action), ' ', '')) > 0
+                FIND_IN_SET(LCASE(:action), REPLACE(LCASE(pp.action), ' ', '')) > 0
                 
                 -- apply ownership filtering if required
                 {{ownership_resource_filter}})
@@ -91,7 +88,7 @@ WHERE
 
                 ownership_resource_filter: {
                     options: {propertyName: 'ownershipFilter', propertyValue: true},
-                    sql: `OR (FIND_IN_SET(LCASE(CONCAT(:action,'_OWN')), REPLACE(LCASE(ppp.action), ' ', '')) > 0 AND (${instanceOwnershipCondition}))`
+                    sql: `OR (FIND_IN_SET(LCASE(CONCAT(:action,'_OWN')), REPLACE(LCASE(pp.action), ' ', '')) > 0 AND (${instanceOwnershipCondition}))`
                 },
 
                 ownership_permission_filter: {
