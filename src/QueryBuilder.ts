@@ -53,7 +53,11 @@ export class QueryBuilder {
             cols = alias.concat('.*');
         }
 
-
+        const instanceOwnershipCondition: string = `(${alias}.owner_id IS NOT NULL AND ${alias}.owner_id = :userid) OR (${alias}.owner_role_id IS NOT NULL AND EXISTS(
+                                SELECT 1 FROM user_roles ur
+                                WHERE ur.role_id = ${alias}.owner_role_id AND ur.user_id= :userid
+                            ))
+`;
         const allResourcesQueryTemplate = {
             sql:
                 `SELECT  ${cols}
@@ -87,12 +91,12 @@ WHERE
 
                 ownership_resource_filter: {
                     options: {propertyName: 'ownershipFilter', propertyValue: true},
-                    sql: `OR (FIND_IN_SET(LCASE(CONCAT(:action,'_OWN')), REPLACE(LCASE(ppp.action), ' ', '')) > 0 AND i.owner_id = :userid)`
+                    sql: `OR (FIND_IN_SET(LCASE(CONCAT(:action,'_OWN')), REPLACE(LCASE(ppp.action), ' ', '')) > 0 AND (${instanceOwnershipCondition}))`
                 },
 
                 ownership_permission_filter: {
                     options: {propertyName: 'ownershipFilter', propertyValue: true},
-                    sql: `(LOWER(RIGHT(p.single_perm,4)) = '_own' AND i.owner_id = :userid) OR `
+                    sql: `(LOWER(RIGHT(p.single_perm,4)) = '_own' AND (${instanceOwnershipCondition})) OR `
                 }
             }
         };

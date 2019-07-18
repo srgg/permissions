@@ -1,4 +1,4 @@
-SET @user_id = 1;
+SET @user_id = 5;
 SET @resource = 'IDEAS';
 SET @action = 'READ';
 
@@ -20,7 +20,12 @@ SELECT  i.*
                             ON LENGTH(REPLACE(ppp.action, ',' , '')) <= LENGTH(ppp.action)-n.digit
     ) p
         WHERE
-            (LOWER(RIGHT(p.single_perm,4)) = '_own' AND i.owner_id = @user_id) OR
+            (LOWER(RIGHT(p.single_perm,4)) = '_own' AND (
+                    (i.owner_id IS NOT NULL AND i.owner_id = @user_id) OR (i.owner_role_id IS NOT NULL AND EXISTS(
+                        SELECT 1 FROM user_roles ur
+                        WHERE ur.role_id = i.owner_role_id AND ur.user_id= @user_id
+                    )) )
+             ) OR
                 LOWER(RIGHT(p.single_perm,4)) <> '_own' ) permissions
 FROM ideas i,
      (
@@ -48,7 +53,12 @@ WHERE
                             FIND_IN_SET(LCASE(@action), REPLACE(LCASE(ppp.action), ' ', '')) > 0
 
                         -- apply ownership filtering if required
-                        OR (FIND_IN_SET(LCASE(CONCAT(@action, '_OWN')), REPLACE(LCASE(ppp.action), ' ', '')) > 0 AND
-                            i.owner_id = @user_id)
+                        OR (FIND_IN_SET(LCASE(CONCAT(@action, '_OWN')), REPLACE(LCASE(ppp.action), ' ', '')) > 0 AND (
+                            (i.owner_id IS NOT NULL AND i.owner_id = @user_id) OR (i.owner_role_id IS NOT NULL AND EXISTS(
+                                SELECT 1 FROM user_roles ur
+                                WHERE ur.role_id = i.owner_role_id AND ur.user_id= @user_id
+                            )) )
+                        )
                     )
         )
+ORDER BY i.ID
