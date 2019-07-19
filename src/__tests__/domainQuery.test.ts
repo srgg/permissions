@@ -5,14 +5,34 @@
 // https://blog.morizyun.com/javascript/library-typescript-jest-unit-test.html
 
 import { getConnection} from "typeorm";
-import {BuildAllResourceQueryParams, QueryBuilder} from '../QueryBuilder';
+import {DomainParams, QueryBuilder} from '../QueryBuilder';
 
 function compare(a,b): number {
     return (a.id > b.id) ? 1 : -11
 };
 
-async function check_query(queryopts: BuildAllResourceQueryParams, expected: string) {
-    const q = QueryBuilder.buildDomainQuery(queryopts);
+interface BuildAllResourceQueryParamsTest extends DomainParams {
+    columns?: string[];
+    checkOwnership?: boolean;
+    withRowPermissions?: boolean;
+}
+
+async function check_query(queryopts: BuildAllResourceQueryParamsTest, expected: string) {
+    const rr = await getConnection().query("SELECT organization_id FROM users WHERE id = " + queryopts.userId);
+    const orgId = rr[0].organization_id;
+
+    if ( !queryopts.columns && queryopts.resource === 'IDEAS') {
+        queryopts.columns = ['id','name','organization_id', 'owner_id', 'owner_role_id', 'title'];
+    }
+
+    const q = QueryBuilder.buildDomainQuery({userId: queryopts.userId,
+        resource: queryopts.resource,
+        action: queryopts.action,
+        organizationId: orgId,
+        columns: queryopts.columns,
+        withRowPermissions: queryopts.withRowPermissions,
+        checkOwnership: queryopts.checkOwnership
+    });
 
     const r = await getConnection().query(q.query, q.params);
     expect(r.sort(compare)).toEqual(JSON.parse(expected).sort(compare));
@@ -96,7 +116,7 @@ describe('Instance level permissions', () => {
                   "owner_role_id": null,
                   "name":"idea1@acme",
                   "title":"the 1st idea of inventor1@acme",
-                  "permissions":"READ,CREATE"
+                  "permissions":"READ"
                },
                {   "id": 9,
                     "name": "shared-idea1@acme",
@@ -156,7 +176,7 @@ describe('Instance level permissions', () => {
                     "owner_id": null,
                     "owner_role_id": 4,
                     "title": "the 1st shared idea at emca",               
-                    "permissions": "READ,CREATE,EDIT,DELETE"
+                    "permissions": "READ,EDIT"
                },
                {
                     "id": 14,
@@ -165,7 +185,7 @@ describe('Instance level permissions', () => {
                     "owner_id": null,
                     "owner_role_id": 4,
                     "title": "the 2nd shared idea at emca",               
-                    "permissions": "READ,CREATE,EDIT,DELETE"
+                    "permissions": "READ,EDIT"
                }
             ]`);
     });
@@ -250,6 +270,87 @@ describe('Instance level permissions', () => {
             ]`);
     });
 
+    test('Manger at emca should be able to read all the ideas of the entire organization, even orphans', async () => {
+        await check_query({
+                userId: 8, resource: 'IDEAS', action: 'READ',
+                checkOwnership: true, withRowPermissions: true
+            },
+            `[
+               {  
+                    "id":5,
+                    "name":"idea1@emca",
+                    "organization_id":3,
+                    "owner_id":5,
+                    "owner_role_id":null,
+                    "title":"the 1st idea of inventor1@emca",
+                    "permissions":"READ,EDIT,DELETE"
+               },
+               {  
+                    "id":6,
+                    "name":"idea2@emca",
+                    "organization_id":3,
+                    "owner_id":5,
+                    "owner_role_id":null,
+                    "title":"the 2nd idea of inventor1@emca",
+                    "permissions":"READ,EDIT,DELETE"
+               },
+               {  
+                    "id":7,
+                    "name":"idea1@emca",
+                    "organization_id":3,
+                    "owner_id":5,
+                    "owner_role_id":null,
+                    "title":"the 1st idea of inventor2@emca",
+                    "permissions":"READ,EDIT,DELETE"
+               },
+               {  
+                    "id":8,
+                    "name":"idea2@emca",
+                    "organization_id":3,
+                    "owner_id":6,
+                    "owner_role_id":null,
+                    "title":"the 2nd idea of inventor2@emca",
+                    "permissions":"READ,EDIT,DELETE"
+               },
+               {  
+                    "id":13,
+                    "name":"shared-idea1@emca",
+                    "organization_id":3,
+                    "owner_id":null,
+                    "owner_role_id":4,
+                    "title":"the 1st shared idea at emca",
+                    "permissions":"READ,EDIT,DELETE"
+               },
+               {  
+                    "id":14,
+                    "name":"shared-idea2@emca",
+                    "organization_id":3,
+                    "owner_id":null,
+                    "owner_role_id":4,
+                    "title":"the 2nd shared idea at emca",
+                    "permissions":"READ,EDIT,DELETE"
+               },
+               {  
+                    "id":15,
+                    "name":"orphan-idea1@emca",
+                    "organization_id":3,
+                    "owner_id":null,
+                    "owner_role_id":null,
+                    "title":"the 1st orphan idea at emca",
+                    "permissions":"READ,EDIT,DELETE"
+               },
+               {  
+                    "id":16,
+                    "name":"orphan-idea2@emca",
+                    "organization_id":3,
+                    "owner_id":null,
+                    "owner_role_id":null,
+                    "title":"the 2nd orphan idea at emca",
+                    "permissions":"READ,EDIT,DELETE"
+               }
+            ]`);
+    });
+
     test('Inventor should not be able to read users', async () => {
         await check_query({
                 userId: 1, resource: 'users', action: 'READ',
@@ -257,7 +358,6 @@ describe('Instance level permissions', () => {
             },
             `[]`
         );
-
     });
 
     test('Manager should not be able to read users', async () => {
@@ -267,7 +367,6 @@ describe('Instance level permissions', () => {
             },
             `[]`
         );
-
     });
 
     test('Organization admin  should not be able to read ideas', async () => {

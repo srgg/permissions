@@ -75,6 +75,24 @@ CREATE TABLE ideas (
 
 DELIMITER $$
 
+CREATE FUNCTION calcPermissions(permissionList VARCHAR(255)) RETURNS VARCHAR(255)
+BEGIN
+    DECLARE permissions VARCHAR(255);
+
+    (SELECT GROUP_CONCAT(DISTINCT REPLACE(p.single_perm, '_OWN', '')) INTO permissions FROM
+        (
+            SELECT Trim(SUBSTRING_INDEX(SUBSTRING_INDEX(ppp.action, ',', n.digit+1), ',', -1)) single_perm
+            FROM (
+                     SELECT * FROM permissions pp
+                     WHERE  FIND_IN_SET(pp.id, permissionList)
+                 ) ppp
+                     INNER JOIN (SELECT 0 digit UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3  UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) n
+                                ON LENGTH(REPLACE(ppp.action, ',' , '')) <= LENGTH(ppp.action)-n.digit
+        )p );
+
+    return permissions;
+END; $$
+
 CREATE PROCEDURE checkConsistencyWithinOrganization(organization_id INT, owner_id INT, owner_role_id INT)
 BEGIN
     IF owner_id IS NULL AND owner_role_id IS NULL THEN

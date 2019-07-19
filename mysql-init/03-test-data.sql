@@ -16,9 +16,9 @@ INSERT INTO users VALUES (8, 3, 'manager@emca', 'pw4', 'salt4');
 INSERT INTO users VALUES (9, 3, 'admin@emca', 'pw5', 'salt5');
 
 
-INSERT INTO roles VALUES (4, 3, 'shared-inventors', 'Inventors that can work with shared ideas');
-SET @shared_iventors_roleid = (SELECT id FROM roles WHERE name = 'shared-inventors');
-
+INSERT INTO roles VALUES (4, 3, 'shared-idea-inventors', 'Inventors that can work with shared ideas');
+SET @shared_iventors_roleid = (SELECT id FROM roles WHERE name = 'shared-idea-inventors');
+INSERT INTO permissions VALUES (0, @shared_iventors_roleid, null, 'IdEaS', null, 'READ_OWN, EDIT_OWN');
 
 INSERT INTO user_roles VALUES (1,1);
 INSERT INTO user_roles VALUES (2,1);
@@ -44,7 +44,6 @@ INSERT INTO permissions (id, role_id, user_id, resource, resource_instance, acti
 INSERT INTO permissions VALUES (0, 2, null, 'IDEAS', NULL, 'READ, EDIT, DELETE');
 INSERT INTO permissions VALUES (0, null, 2, 'ideas', 1, 'READ');
 INSERT INTO permissions VALUES (0, null, 2, 'IdEaS', 2, 'READ_OWN');
-INSERT INTO permissions VALUES (0, @shared_iventors_roleid, null, 'IdEaS', null, 'READ_OWN, EDIT_OWN');
 
 INSERT INTO ideas (id, organization_id, owner_id, owner_role_id, name, title)
     VALUES (1, 2, 1, null, 'idea1@acme', 'the 1st idea of inventor1@acme');
