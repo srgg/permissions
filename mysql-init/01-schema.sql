@@ -79,7 +79,7 @@ CREATE FUNCTION calcPermissions(permissionList VARCHAR(255)) RETURNS VARCHAR(255
 BEGIN
     DECLARE permissions VARCHAR(255);
 
-    (SELECT GROUP_CONCAT(DISTINCT REPLACE(p.single_perm, '_OWN', '')) INTO permissions FROM
+    (SELECT GROUP_CONCAT(DISTINCT REPLACE(p.single_perm, '_OWN', '') ORDER BY p.single_perm) INTO permissions FROM
         (
             SELECT Trim(SUBSTRING_INDEX(SUBSTRING_INDEX(ppp.action, ',', n.digit+1), ',', -1)) single_perm
             FROM (

@@ -54,7 +54,7 @@ describe('Instance level permissions', () => {
                   "owner_role_id": null,
                   "name":"idea1@acme",
                   "title":"the 1st idea of inventor1@acme",
-                  "permissions":"READ,CREATE,EDIT,DELETE"
+                  "permissions":"CREATE,DELETE,EDIT,READ"
                 },
                 {
                   "id":2,
@@ -63,7 +63,7 @@ describe('Instance level permissions', () => {
                   "owner_role_id": null,
                   "name":"idea2@acme",
                   "title":"the 2nd idea of inventor1@acme",
-                  "permissions":"READ,CREATE,EDIT,DELETE"
+                  "permissions":"CREATE,DELETE,EDIT,READ"
                 },
                {   "id": 9,
                     "name": "shared-idea1@acme",
@@ -71,7 +71,7 @@ describe('Instance level permissions', () => {
                     "owner_id": null,
                     "owner_role_id": 1,
                     "title": "the 1st shared idea at acme",               
-                    "permissions": "READ,CREATE,EDIT,DELETE"
+                    "permissions": "CREATE,DELETE,EDIT,READ"
                },
                {
                     "id": 10,
@@ -80,7 +80,7 @@ describe('Instance level permissions', () => {
                     "owner_id": null,
                     "owner_role_id": 1,
                     "title": "the 2nd shared idea at acme",               
-                    "permissions": "READ,CREATE,EDIT,DELETE"
+                    "permissions": "CREATE,DELETE,EDIT,READ"
                }                
             ]`);
     });
@@ -98,7 +98,7 @@ describe('Instance level permissions', () => {
                   "owner_role_id": null,
                   "name":"idea1@acme",
                   "title":"the 1st idea of inventor2@acme",
-                  "permissions":"READ,CREATE,EDIT,DELETE"
+                  "permissions":"CREATE,DELETE,EDIT,READ"
                },
                {
                   "id":4,
@@ -107,7 +107,7 @@ describe('Instance level permissions', () => {
                   "owner_role_id": null,
                   "name":"idea2@acme",
                   "title":"the 2nd idea of inventor2@acme",
-                  "permissions":"READ,CREATE,EDIT,DELETE"
+                  "permissions":"CREATE,DELETE,EDIT,READ"
                },
                {
                   "id":1,
@@ -124,7 +124,7 @@ describe('Instance level permissions', () => {
                     "owner_id": null,
                     "owner_role_id": 1,
                     "title": "the 1st shared idea at acme",               
-                    "permissions": "READ,CREATE,EDIT,DELETE"
+                    "permissions": "CREATE,DELETE,EDIT,READ"
                },
                {
                     "id": 10,
@@ -133,7 +133,7 @@ describe('Instance level permissions', () => {
                     "owner_id": null,
                     "owner_role_id": 1,
                     "title": "the 2nd shared idea at acme",               
-                    "permissions": "READ,CREATE,EDIT,DELETE"
+                    "permissions": "CREATE,DELETE,EDIT,READ"
                }               
             ]`);
     });
@@ -150,7 +150,7 @@ describe('Instance level permissions', () => {
                     "owner_id": null,
                     "owner_role_id": 1,
                     "title": "the 1st shared idea at acme",               
-                    "permissions": "READ,CREATE,EDIT,DELETE"
+                    "permissions": "CREATE,DELETE,EDIT,READ"
                },
                {
                     "id": 10,
@@ -159,7 +159,7 @@ describe('Instance level permissions', () => {
                     "owner_id": null,
                     "owner_role_id": 1,
                     "title": "the 2nd shared idea at acme",               
-                    "permissions": "READ,CREATE,EDIT,DELETE"
+                    "permissions": "CREATE,DELETE,EDIT,READ"
                }
             ]`);
     });
@@ -176,7 +176,7 @@ describe('Instance level permissions', () => {
                     "owner_id": null,
                     "owner_role_id": 4,
                     "title": "the 1st shared idea at emca",               
-                    "permissions": "READ,EDIT"
+                    "permissions": "EDIT,READ"
                },
                {
                     "id": 14,
@@ -185,7 +185,7 @@ describe('Instance level permissions', () => {
                     "owner_id": null,
                     "owner_role_id": 4,
                     "title": "the 2nd shared idea at emca",               
-                    "permissions": "READ,EDIT"
+                    "permissions": "EDIT,READ"
                }
             ]`);
     });
@@ -203,7 +203,7 @@ describe('Instance level permissions', () => {
                   "owner_role_id": null,
                   "name":"idea1@acme",
                   "title":"the 1st idea of inventor1@acme",
-                  "permissions":"READ,EDIT,DELETE"
+                  "permissions":"DELETE,EDIT,READ"
                },
                {
                   "id":2,
@@ -212,7 +212,7 @@ describe('Instance level permissions', () => {
                   "owner_role_id": null,
                   "name":"idea2@acme",
                   "title":"the 2nd idea of inventor1@acme",
-                  "permissions":"READ,EDIT,DELETE"
+                  "permissions":"DELETE,EDIT,READ"
                },
                {
                   "id":3,
@@ -221,7 +221,7 @@ describe('Instance level permissions', () => {
                   "owner_role_id": null,
                   "name":"idea1@acme",
                   "title":"the 1st idea of inventor2@acme",
-                  "permissions":"READ,EDIT,DELETE"
+                  "permissions":"DELETE,EDIT,READ"
                },
                {
                   "id":4,
@@ -230,7 +230,7 @@ describe('Instance level permissions', () => {
                   "owner_role_id": null,
                   "name":"idea2@acme",
                   "title":"the 2nd idea of inventor2@acme",
-                  "permissions":"READ,EDIT,DELETE"
+                  "permissions":"DELETE,EDIT,READ"
                },
                {   "id": 9,
                     "name": "shared-idea1@acme",
@@ -238,7 +238,7 @@ describe('Instance level permissions', () => {
                     "owner_id": null,
                     "owner_role_id": 1,
                     "title": "the 1st shared idea at acme",               
-                    "permissions": "READ,EDIT,DELETE"
+                    "permissions": "DELETE,EDIT,READ"
                },
                {
                     "id": 10,
@@ -247,7 +247,7 @@ describe('Instance level permissions', () => {
                     "owner_id": null,
                     "owner_role_id": 1,
                     "title": "the 2nd shared idea at acme",               
-                    "permissions": "READ,EDIT,DELETE"
+                    "permissions": "DELETE,EDIT,READ"
                },
                {
                     "id": 11,
@@ -255,7 +255,7 @@ describe('Instance level permissions', () => {
                     "organization_id": 2,
                     "owner_id": null,
                     "owner_role_id": null,
-                    "permissions": "READ,EDIT,DELETE",
+                    "permissions": "DELETE,EDIT,READ",
                     "title": "the 1st orphan idea at acme"
                },
                {
@@ -264,7 +264,7 @@ describe('Instance level permissions', () => {
                     "organization_id": 2,
                     "owner_id": null,
                     "owner_role_id": null,
-                    "permissions": "READ,EDIT,DELETE",
+                    "permissions": "DELETE,EDIT,READ",
                     "title": "the 2nd orphan idea at acme"
                }
             ]`);
@@ -283,7 +283,7 @@ describe('Instance level permissions', () => {
                     "owner_id":5,
                     "owner_role_id":null,
                     "title":"the 1st idea of inventor1@emca",
-                    "permissions":"READ,EDIT,DELETE"
+                    "permissions":"DELETE,EDIT,READ"
                },
                {  
                     "id":6,
@@ -292,7 +292,7 @@ describe('Instance level permissions', () => {
                     "owner_id":5,
                     "owner_role_id":null,
                     "title":"the 2nd idea of inventor1@emca",
-                    "permissions":"READ,EDIT,DELETE"
+                    "permissions":"DELETE,EDIT,READ"
                },
                {  
                     "id":7,
@@ -301,7 +301,7 @@ describe('Instance level permissions', () => {
                     "owner_id":5,
                     "owner_role_id":null,
                     "title":"the 1st idea of inventor2@emca",
-                    "permissions":"READ,EDIT,DELETE"
+                    "permissions":"DELETE,EDIT,READ"
                },
                {  
                     "id":8,
@@ -310,7 +310,7 @@ describe('Instance level permissions', () => {
                     "owner_id":6,
                     "owner_role_id":null,
                     "title":"the 2nd idea of inventor2@emca",
-                    "permissions":"READ,EDIT,DELETE"
+                    "permissions":"DELETE,EDIT,READ"
                },
                {  
                     "id":13,
@@ -319,7 +319,7 @@ describe('Instance level permissions', () => {
                     "owner_id":null,
                     "owner_role_id":4,
                     "title":"the 1st shared idea at emca",
-                    "permissions":"READ,EDIT,DELETE"
+                    "permissions":"DELETE,EDIT,READ"
                },
                {  
                     "id":14,
@@ -328,7 +328,7 @@ describe('Instance level permissions', () => {
                     "owner_id":null,
                     "owner_role_id":4,
                     "title":"the 2nd shared idea at emca",
-                    "permissions":"READ,EDIT,DELETE"
+                    "permissions":"DELETE,EDIT,READ"
                },
                {  
                     "id":15,
@@ -337,7 +337,7 @@ describe('Instance level permissions', () => {
                     "owner_id":null,
                     "owner_role_id":null,
                     "title":"the 1st orphan idea at emca",
-                    "permissions":"READ,EDIT,DELETE"
+                    "permissions":"DELETE,EDIT,READ"
                },
                {  
                     "id":16,
@@ -346,7 +346,7 @@ describe('Instance level permissions', () => {
                     "owner_id":null,
                     "owner_role_id":null,
                     "title":"the 2nd orphan idea at emca",
-                    "permissions":"READ,EDIT,DELETE"
+                    "permissions":"DELETE,EDIT,READ"
                }
             ]`);
     });
@@ -389,31 +389,31 @@ describe('Instance level permissions', () => {
                   "id":5,
                   "organization_id":3,
                   "name":"inventor1@emca",
-                  "permissions":"READ,CREATE,EDIT,DELETE"
+                  "permissions":"CREATE,DELETE,EDIT,READ"
                },
                {
                   "id":6,
                   "organization_id":3,
                   "name":"inventor2@emca",
-                  "permissions":"READ,CREATE,EDIT,DELETE"
+                  "permissions":"CREATE,DELETE,EDIT,READ"
                },
                {
                   "id":7,
                   "organization_id":3,
                   "name":"inventor3@emca",
-                  "permissions":"READ,CREATE,EDIT,DELETE"
+                  "permissions":"CREATE,DELETE,EDIT,READ"
                },
                {
                   "id":8,
                   "organization_id":3,
                   "name":"manager@emca",
-                  "permissions":"READ,CREATE,EDIT,DELETE"
+                  "permissions":"CREATE,DELETE,EDIT,READ"
                },
                {
                   "id":9,
                   "organization_id":3,
                   "name":"admin@emca",
-                  "permissions":"READ,CREATE,EDIT,DELETE"
+                  "permissions":"CREATE,DELETE,EDIT,READ"
                }
             ]`);
     });
