@@ -54,3 +54,20 @@ describe('domain level permissions', () => {
 });
 
 
+describe('Instance level permissions', () => {
+    test('2nd inventor at ACME should be able to read all the ideas shared by other inventors', async ()=> {
+        await check_query({userId:2, domain: 'IDEAS', action: 'READ', instanceId: 1},
+            `[{"isPermitted":"1"}]`);
+    });
+
+    test('2nd inventor at ACME should not be able to read any unshared ideas of any other inventor', async ()=> {
+        await check_query({userId:2, domain: 'IDEAS', action: 'READ', instanceId: 2},
+            `[]`);
+    });
+
+    test('Inventors should not be able to read orphan ideas', async ()=> {
+        await check_query({userId:2, domain: 'IDEAS', action: 'READ', instanceId: 11},
+            `[]`);
+    });
+});
+

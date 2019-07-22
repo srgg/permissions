@@ -34,7 +34,7 @@ async function check_query(queryopts: BuildAllResourceQueryParamsTest, expected:
         orgId = rr[0].organization_id;
     }
 
-    const q = QueryBuilder.buildDomainQuery({userId: queryopts.userId,
+    const q = QueryBuilder.buildReadAllFromDomainQuery({userId: queryopts.userId,
         domain: queryopts.domain,
         action: queryopts.action,
         organizationId: orgId,
@@ -47,7 +47,7 @@ async function check_query(queryopts: BuildAllResourceQueryParamsTest, expected:
     expect(r.sort(compare)).toEqual(JSON.parse(expected).sort(compare));
 }
 
-describe('Instance level permissions', () => {
+describe('Read all from domain', () => {
 
     test('1st inventor should be able to read own ideas as well as all ideas shared to group', async () => {
         await check_query({

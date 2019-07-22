@@ -16,6 +16,8 @@ export interface BuildAllResourceQueryParams extends DomainParams {
     columns?: string[];
     checkOwnership?: boolean;
     withRowPermissions?: boolean;
+    query_extension?: string;
+    extended_params?: object;
 }
 
 export class QueryBuilder {
@@ -37,8 +39,9 @@ export class QueryBuilder {
     }
 
     static buildIsPermittedQuery({organizationId, userId, domain, action, checkOwnership, instanceId}: IsPermittedQueryParams) {
-        const q = QueryBuilder.buildDomainQuery({organizationId: organizationId, userId: userId,
+        const q = QueryBuilder.buildReadAllFromDomainQuery({organizationId: organizationId, userId: userId,
             domain: domain, action: action, columns: ['id'],
+            query_extension: instanceId ? 'AND i.id = :instanceId' : undefined, extended_params: {instanceId: instanceId},
             checkOwnership: checkOwnership, withRowPermissions: false});
 
         q.query = `SELECT 1 isPermitted FROM DUAL WHERE EXISTS(
@@ -47,7 +50,8 @@ export class QueryBuilder {
         return q;
     }
 
-    public static buildDomainQuery({organizationId, userId, domain, action, columns, checkOwnership, withRowPermissions}: BuildAllResourceQueryParams) {
+    public static buildReadAllFromDomainQuery({organizationId, userId, domain, action,
+                       columns, checkOwnership, withRowPermissions, query_extension, extended_params}: BuildAllResourceQueryParams) {
         const alias = 'ii';
         let cols;
 
@@ -100,6 +104,7 @@ FROM (
          FROM ${domain.toLowerCase()} i
          -- apply organization filtering
           WHERE i.organization_id = :organizationid
+          {{query_extention_point}}
      ) ${alias}
 WHERE ${alias}.pids IS NOT NULL
 `,
@@ -123,13 +128,22 @@ WHERE ${alias}.pids IS NOT NULL
                              )
                          )`
                 },
-
+                query_extention_point: {
+                    options: {propertyName: 'apply_query_extension', propertyValue: true},
+                    sql: `${query_extension}`
+                },
             }
         };
 
+        const queryParams = {action: action, userid: userId, resource: domain, organizationid: organizationId};
+
+        if (extended_params) {
+            Object.assign(queryParams, extended_params);
+        }
+
         return QueryBuilder.buildQuery(allResourcesQueryTemplate,
-            {action: action, userid: userId, resource: domain, organizationid: organizationId, instanceId: null},
-            {needRowLevelPermissions: withRowPermissions, ownershipFilter: checkOwnership});
+            queryParams,
+            {needRowLevelPermissions: withRowPermissions, ownershipFilter: checkOwnership, apply_query_extension: !!query_extension});
     }
 }
 
