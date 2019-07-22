@@ -8,6 +8,7 @@ export interface DomainParams {
 }
 
 export interface IsPermittedQueryParams extends DomainParams {
+    checkOwnership?: boolean;
     instanceId?: number;
 }
 
@@ -18,14 +19,6 @@ export interface BuildAllResourceQueryParams extends DomainParams {
 }
 
 export class QueryBuilder {
-    private static permissionQuery: string = `SELECT * FROM permissions pp
-          WHERE  pp.resource = :domain
-            AND (
-              pp.user_id = :userid
-              OR EXISTS (
-                SELECT 1 FROM user_roles ur
-                  WHERE ur.role_id = pp.role_id AND ur.user_id= :userid
-              ))`;
 
     private static buildQuery({sql, addons}, queryParams, buildParams) {
         const qt = new QueryTemplater();
@@ -43,18 +36,15 @@ export class QueryBuilder {
         return parametrized;
     }
 
-    static buildIsPermittedQuery({userId, domain, action}: IsPermittedQueryParams) {
-        const isPermittedQueryTemplate = {
-            sql: ` SELECT 1 isPermitted FROM DUAL WHERE EXISTS (
-        ${QueryBuilder.permissionQuery}
-        AND FIND_IN_SET(LCASE(:action), REPLACE(LCASE(pp.action), ' ', ''))
-)`,
-            addons: {}
-        };
+    static buildIsPermittedQuery({organizationId, userId, domain, action, checkOwnership, instanceId}: IsPermittedQueryParams) {
+        const q = QueryBuilder.buildDomainQuery({organizationId: organizationId, userId: userId,
+            domain: domain, action: action, columns: ['id'],
+            checkOwnership: checkOwnership, withRowPermissions: false});
 
-        return QueryBuilder.buildQuery(isPermittedQueryTemplate,
-            {action: action, userid: userId, domain: domain},
-            {});
+        q.query = `SELECT 1 isPermitted FROM DUAL WHERE EXISTS(
+  ${q.query}
+);`;
+        return q;
     }
 
     public static buildDomainQuery({organizationId, userId, domain, action, columns, checkOwnership, withRowPermissions}: BuildAllResourceQueryParams) {
@@ -111,7 +101,7 @@ FROM (
          -- apply organization filtering
           WHERE i.organization_id = :organizationid
      ) ${alias}
-WHERE ${alias}.pids IS NOT NULL;
+WHERE ${alias}.pids IS NOT NULL
 `,
             addons: {
                 row_level_permissions: {
