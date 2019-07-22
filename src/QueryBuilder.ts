@@ -2,15 +2,16 @@ const QueryTemplater =  require('query-template');
 
 export interface DomainParams {
     userId: number;
-    resource: string;
+    domain: string;
     action: string;
+    organizationId: number;
 }
 
 export interface IsPermittedQueryParams extends DomainParams {
+    instanceId?: number;
 }
 
 export interface BuildAllResourceQueryParams extends DomainParams {
-    organizationId: number;
     columns?: string[];
     checkOwnership?: boolean;
     withRowPermissions?: boolean;
@@ -42,7 +43,7 @@ export class QueryBuilder {
         return parametrized;
     }
 
-    static buildIsPermittedQuery({userId, resource, action}: IsPermittedQueryParams) {
+    static buildIsPermittedQuery({userId, domain, action}: IsPermittedQueryParams) {
         const isPermittedQueryTemplate = {
             sql: ` SELECT 1 isPermitted FROM DUAL WHERE EXISTS (
         ${QueryBuilder.permissionQuery}
@@ -52,11 +53,11 @@ export class QueryBuilder {
         };
 
         return QueryBuilder.buildQuery(isPermittedQueryTemplate,
-            {action: action, userid: userId, domain: resource},
+            {action: action, userid: userId, domain: domain},
             {});
     }
 
-    public static buildDomainQuery({organizationId, userId, resource, action, columns, checkOwnership, withRowPermissions}: BuildAllResourceQueryParams) {
+    public static buildDomainQuery({organizationId, userId, domain, action, columns, checkOwnership, withRowPermissions}: BuildAllResourceQueryParams) {
         const alias = 'ii';
         let cols;
 
@@ -106,7 +107,7 @@ FROM (
                     {{ownership_resource_filter}}
                  )
          ) pids
-         FROM ${resource.toLowerCase()} i
+         FROM ${domain.toLowerCase()} i
          -- apply organization filtering
           WHERE i.organization_id = :organizationid
      ) ${alias}
@@ -137,7 +138,7 @@ WHERE ${alias}.pids IS NOT NULL;
         };
 
         return QueryBuilder.buildQuery(allResourcesQueryTemplate,
-            {action: action, userid: userId, resource: resource, organizationid: organizationId, instanceId: null},
+            {action: action, userid: userId, resource: domain, organizationid: organizationId, instanceId: null},
             {needRowLevelPermissions: withRowPermissions, ownershipFilter: checkOwnership});
     }
 }
