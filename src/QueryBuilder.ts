@@ -78,12 +78,12 @@ FROM (
              WHERE
                 pp.resource = :resource
                 AND (
-                         pp.user_id = :userid
+                         pp.uid = :userid
                      OR EXISTS(
                                  SELECT 1
                                  FROM user_groups ur
-                                 WHERE ur.group_id = pp.group_id
-                                   AND ur.user_id = :userid
+                                 WHERE ur.gid = pp.gid
+                                   AND ur.uid = :userid
                              )
                 )
 
@@ -118,8 +118,8 @@ WHERE ${alias}.pids IS NOT NULL
                     sql: `OR ( 
                          (
                                  (  -- if owner is provided
-                                     (i.owner_id IS NOT NULL AND i.owner_id = :userid)
-                                     OR (i.owner_group_id IS NOT NULL AND pp.group_id = i.owner_group_id)
+                                     (i.owner_uid IS NOT NULL AND i.owner_uid = :userid)
+                                     OR (i.owner_gid IS NOT NULL AND pp.gid = i.owner_gid)
 
                                  )
                                  AND -- apply _OWN actions, if any

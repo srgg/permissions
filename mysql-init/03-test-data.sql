@@ -38,14 +38,14 @@ INSERT INTO user_groups VALUES (8,2);
 INSERT INTO user_groups VALUES (9,3); -- grant organization admin role
 
 
-INSERT INTO permissions (id, group_id, user_id, resource, resource_instance, action)
+INSERT INTO permissions (id, gid, uid, resource, resource_instance, action)
     VALUES (0, 1, null, 'ideas', NULL, 'READ_OWN, CREATE, EDIT_OWN, DELETE_OWN');
 
 INSERT INTO permissions VALUES (0, 2, null, 'IDEAS', NULL, 'READ, EDIT, DELETE');
 INSERT INTO permissions VALUES (0, null, 2, 'ideas', 1, 'READ');
 INSERT INTO permissions VALUES (0, null, 2, 'IdEaS', 2, 'READ_OWN');
 
-INSERT INTO ideas (id, organization_id, owner_id, owner_group_id, name, title)
+INSERT INTO ideas (id, organization_id, owner_uid, owner_gid, name, title)
     VALUES (1, 2, 1, null, 'idea1@acme', 'the 1st idea of inventor1@acme');
 
 INSERT INTO ideas VALUES (2, 2, 1, null, 'idea2@acme', 'the 2nd idea of inventor1@acme');
