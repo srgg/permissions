@@ -23,7 +23,7 @@ interface BuildAllResourceQueryParamsTest {
 
 async function check_query(queryopts: BuildAllResourceQueryParamsTest, expected: string) {
     if ( !queryopts.columns && queryopts.domain === 'IDEAS') {
-        queryopts.columns = ['id','name','organization_id', 'owner_id', 'owner_role_id', 'title'];
+        queryopts.columns = ['id','name','organization_id', 'owner_id', 'owner_group_id', 'title'];
     }
 
     let orgId;
@@ -60,7 +60,7 @@ describe('Read all from domain', () => {
                   "id": 1,
                   "organization_id":2,
                   "owner_id":1,
-                  "owner_role_id": null,
+                  "owner_group_id": null,
                   "name":"idea1@acme",
                   "title":"the 1st idea of inventor1@acme",
                   "permissions":"CREATE,DELETE,EDIT,READ"
@@ -69,7 +69,7 @@ describe('Read all from domain', () => {
                   "id":2,
                   "organization_id":2,
                   "owner_id":1,
-                  "owner_role_id": null,
+                  "owner_group_id": null,
                   "name":"idea2@acme",
                   "title":"the 2nd idea of inventor1@acme",
                   "permissions":"CREATE,DELETE,EDIT,READ"
@@ -78,7 +78,7 @@ describe('Read all from domain', () => {
                     "name": "shared-idea1@acme",
                     "organization_id": 2,
                     "owner_id": null,
-                    "owner_role_id": 1,
+                    "owner_group_id": 1,
                     "title": "the 1st shared idea at acme",               
                     "permissions": "CREATE,DELETE,EDIT,READ"
                },
@@ -87,7 +87,7 @@ describe('Read all from domain', () => {
                     "name": "shared-idea2@acme",
                     "organization_id": 2,
                     "owner_id": null,
-                    "owner_role_id": 1,
+                    "owner_group_id": 1,
                     "title": "the 2nd shared idea at acme",               
                     "permissions": "CREATE,DELETE,EDIT,READ"
                }                
@@ -104,7 +104,7 @@ describe('Read all from domain', () => {
                   "id":3,
                   "organization_id":2,
                   "owner_id":2,
-                  "owner_role_id": null,
+                  "owner_group_id": null,
                   "name":"idea1@acme",
                   "title":"the 1st idea of inventor2@acme",
                   "permissions":"CREATE,DELETE,EDIT,READ"
@@ -113,7 +113,7 @@ describe('Read all from domain', () => {
                   "id":4,
                   "organization_id":2,
                   "owner_id":2,
-                  "owner_role_id": null,
+                  "owner_group_id": null,
                   "name":"idea2@acme",
                   "title":"the 2nd idea of inventor2@acme",
                   "permissions":"CREATE,DELETE,EDIT,READ"
@@ -122,7 +122,7 @@ describe('Read all from domain', () => {
                   "id":1,
                   "organization_id":2,
                   "owner_id":1,
-                  "owner_role_id": null,
+                  "owner_group_id": null,
                   "name":"idea1@acme",
                   "title":"the 1st idea of inventor1@acme",
                   "permissions":"READ"
@@ -131,7 +131,7 @@ describe('Read all from domain', () => {
                     "name": "shared-idea1@acme",
                     "organization_id": 2,
                     "owner_id": null,
-                    "owner_role_id": 1,
+                    "owner_group_id": 1,
                     "title": "the 1st shared idea at acme",               
                     "permissions": "CREATE,DELETE,EDIT,READ"
                },
@@ -140,7 +140,7 @@ describe('Read all from domain', () => {
                     "name": "shared-idea2@acme",
                     "organization_id": 2,
                     "owner_id": null,
-                    "owner_role_id": 1,
+                    "owner_group_id": 1,
                     "title": "the 2nd shared idea at acme",               
                     "permissions": "CREATE,DELETE,EDIT,READ"
                }               
@@ -157,7 +157,7 @@ describe('Read all from domain', () => {
                     "name": "shared-idea1@acme",
                     "organization_id": 2,
                     "owner_id": null,
-                    "owner_role_id": 1,
+                    "owner_group_id": 1,
                     "title": "the 1st shared idea at acme",               
                     "permissions": "CREATE,DELETE,EDIT,READ"
                },
@@ -166,7 +166,7 @@ describe('Read all from domain', () => {
                     "name": "shared-idea2@acme",
                     "organization_id": 2,
                     "owner_id": null,
-                    "owner_role_id": 1,
+                    "owner_group_id": 1,
                     "title": "the 2nd shared idea at acme",               
                     "permissions": "CREATE,DELETE,EDIT,READ"
                }
@@ -183,7 +183,7 @@ describe('Read all from domain', () => {
                     "name": "shared-idea1@emca",
                     "organization_id": 3,
                     "owner_id": null,
-                    "owner_role_id": 4,
+                    "owner_group_id": 4,
                     "title": "the 1st shared idea at emca",               
                     "permissions": "EDIT,READ"
                },
@@ -192,7 +192,7 @@ describe('Read all from domain', () => {
                     "name": "shared-idea2@emca",
                     "organization_id": 3,
                     "owner_id": null,
-                    "owner_role_id": 4,
+                    "owner_group_id": 4,
                     "title": "the 2nd shared idea at emca",               
                     "permissions": "EDIT,READ"
                }
@@ -209,7 +209,7 @@ describe('Read all from domain', () => {
                   "id":1,
                   "organization_id":2,
                   "owner_id":1,
-                  "owner_role_id": null,
+                  "owner_group_id": null,
                   "name":"idea1@acme",
                   "title":"the 1st idea of inventor1@acme",
                   "permissions":"DELETE,EDIT,READ"
@@ -218,7 +218,7 @@ describe('Read all from domain', () => {
                   "id":2,
                   "organization_id":2,
                   "owner_id":1,
-                  "owner_role_id": null,
+                  "owner_group_id": null,
                   "name":"idea2@acme",
                   "title":"the 2nd idea of inventor1@acme",
                   "permissions":"DELETE,EDIT,READ"
@@ -227,7 +227,7 @@ describe('Read all from domain', () => {
                   "id":3,
                   "organization_id":2,
                   "owner_id":2,
-                  "owner_role_id": null,
+                  "owner_group_id": null,
                   "name":"idea1@acme",
                   "title":"the 1st idea of inventor2@acme",
                   "permissions":"DELETE,EDIT,READ"
@@ -236,7 +236,7 @@ describe('Read all from domain', () => {
                   "id":4,
                   "organization_id":2,
                   "owner_id":2,
-                  "owner_role_id": null,
+                  "owner_group_id": null,
                   "name":"idea2@acme",
                   "title":"the 2nd idea of inventor2@acme",
                   "permissions":"DELETE,EDIT,READ"
@@ -245,7 +245,7 @@ describe('Read all from domain', () => {
                     "name": "shared-idea1@acme",
                     "organization_id": 2,
                     "owner_id": null,
-                    "owner_role_id": 1,
+                    "owner_group_id": 1,
                     "title": "the 1st shared idea at acme",               
                     "permissions": "DELETE,EDIT,READ"
                },
@@ -254,7 +254,7 @@ describe('Read all from domain', () => {
                     "name": "shared-idea2@acme",
                     "organization_id": 2,
                     "owner_id": null,
-                    "owner_role_id": 1,
+                    "owner_group_id": 1,
                     "title": "the 2nd shared idea at acme",               
                     "permissions": "DELETE,EDIT,READ"
                },
@@ -263,7 +263,7 @@ describe('Read all from domain', () => {
                     "name": "orphan-idea1@acme",
                     "organization_id": 2,
                     "owner_id": null,
-                    "owner_role_id": null,
+                    "owner_group_id": null,
                     "permissions": "DELETE,EDIT,READ",
                     "title": "the 1st orphan idea at acme"
                },
@@ -272,7 +272,7 @@ describe('Read all from domain', () => {
                     "name": "orphan-idea2@acme",
                     "organization_id": 2,
                     "owner_id": null,
-                    "owner_role_id": null,
+                    "owner_group_id": null,
                     "permissions": "DELETE,EDIT,READ",
                     "title": "the 2nd orphan idea at acme"
                }
@@ -290,7 +290,7 @@ describe('Read all from domain', () => {
                     "name":"idea1@emca",
                     "organization_id":3,
                     "owner_id":5,
-                    "owner_role_id":null,
+                    "owner_group_id":null,
                     "title":"the 1st idea of inventor1@emca",
                     "permissions":"DELETE,EDIT,READ"
                },
@@ -299,7 +299,7 @@ describe('Read all from domain', () => {
                     "name":"idea2@emca",
                     "organization_id":3,
                     "owner_id":5,
-                    "owner_role_id":null,
+                    "owner_group_id":null,
                     "title":"the 2nd idea of inventor1@emca",
                     "permissions":"DELETE,EDIT,READ"
                },
@@ -308,7 +308,7 @@ describe('Read all from domain', () => {
                     "name":"idea1@emca",
                     "organization_id":3,
                     "owner_id":5,
-                    "owner_role_id":null,
+                    "owner_group_id":null,
                     "title":"the 1st idea of inventor2@emca",
                     "permissions":"DELETE,EDIT,READ"
                },
@@ -317,7 +317,7 @@ describe('Read all from domain', () => {
                     "name":"idea2@emca",
                     "organization_id":3,
                     "owner_id":6,
-                    "owner_role_id":null,
+                    "owner_group_id":null,
                     "title":"the 2nd idea of inventor2@emca",
                     "permissions":"DELETE,EDIT,READ"
                },
@@ -326,7 +326,7 @@ describe('Read all from domain', () => {
                     "name":"shared-idea1@emca",
                     "organization_id":3,
                     "owner_id":null,
-                    "owner_role_id":4,
+                    "owner_group_id":4,
                     "title":"the 1st shared idea at emca",
                     "permissions":"DELETE,EDIT,READ"
                },
@@ -335,7 +335,7 @@ describe('Read all from domain', () => {
                     "name":"shared-idea2@emca",
                     "organization_id":3,
                     "owner_id":null,
-                    "owner_role_id":4,
+                    "owner_group_id":4,
                     "title":"the 2nd shared idea at emca",
                     "permissions":"DELETE,EDIT,READ"
                },
@@ -344,7 +344,7 @@ describe('Read all from domain', () => {
                     "name":"orphan-idea1@emca",
                     "organization_id":3,
                     "owner_id":null,
-                    "owner_role_id":null,
+                    "owner_group_id":null,
                     "title":"the 1st orphan idea at emca",
                     "permissions":"DELETE,EDIT,READ"
                },
@@ -353,7 +353,7 @@ describe('Read all from domain', () => {
                     "name":"orphan-idea2@emca",
                     "organization_id":3,
                     "owner_id":null,
-                    "owner_role_id":null,
+                    "owner_group_id":null,
                     "title":"the 2nd orphan idea at emca",
                     "permissions":"DELETE,EDIT,READ"
                }

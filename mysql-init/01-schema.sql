@@ -22,41 +22,41 @@ CREATE TABLE users (
 CREATE UNIQUE INDEX idx_users_username ON users (organization_id, name);
 
 
-CREATE TABLE roles (
+CREATE TABLE groups (
   id                INT AUTO_INCREMENT,
   organization_id   INT,
   name              VARCHAR(100) NOT NULL,
   description       VARCHAR(512),
-  CONSTRAINT pk_roles_permissions PRIMARY KEY (id),
-  CONSTRAINT roless_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT pk_groups PRIMARY KEY (id),
+  CONSTRAINT groups_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
-CREATE UNIQUE INDEX idx_roles_name ON roles (organization_id, name);
+CREATE UNIQUE INDEX idx_groups_name ON groups (organization_id, name);
 
 
-CREATE TABLE user_roles (
+CREATE TABLE user_groups (
   user_id   INT NOT NULL,
-  role_id   INT NOT NULL,
-  CONSTRAINT pk_user_roles PRIMARY KEY (user_id, role_id),
-  CONSTRAINT userroles_fk01 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT userroles_fk02 FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+  group_id   INT NOT NULL,
+  CONSTRAINT pk_user_groups PRIMARY KEY (user_id, group_id),
+  CONSTRAINT usergroups_fk01 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT usergroups_fk02 FOREIGN KEY (group_id) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
 
 CREATE TABLE permissions (
   id         INT AUTO_INCREMENT,
-  role_id  INT,
+  group_id  INT,
   user_id  INT,
   resource VARCHAR(100),
   resource_instance INT,
   action   VARCHAR(100),
-  CHECK ((role_id IS NOT NULL AND user_id IS NULL) OR (role_id IS NULL AND user_id IS NOT NULL)),
+  CHECK ((group_id IS NOT NULL AND user_id IS NULL) OR (group_id IS NULL AND user_id IS NOT NULL)),
   CHECK (action IS NOT NULL OR resource IS NOT NULL ),
   CHECK (resource_instance IS NULL OR resource IS NOT NULL), -- Resource should be set if resource instance is provided
   CONSTRAINT pk_permissions PRIMARY KEY (id),
-  CONSTRAINT permissions_fk01 FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT permissions_fk01 FOREIGN KEY (group_id) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT permissions_fk02 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
 
-CREATE UNIQUE INDEX idx_permissions_01 ON permissions (role_id, resource, resource_instance);
+CREATE UNIQUE INDEX idx_permissions_01 ON permissions (group_id, resource, resource_instance);
 CREATE UNIQUE INDEX idx_permissions_02 ON permissions (user_id, resource, resource_instance);
 
 
@@ -64,13 +64,13 @@ CREATE TABLE ideas (
   id            INT AUTO_INCREMENT,
   organization_id   INT NOT NULL,
   owner_id      INT,
-  owner_role_id INT,
+  owner_group_id INT,
   name          VARCHAR(100),
   title         VARCHAR(100),
   CONSTRAINT pk_ideas PRIMARY KEY (id),
   CONSTRAINT ideas_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT ideas_fk02 FOREIGN KEY (owner_id) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT ideas_fk03 FOREIGN KEY (owner_role_id) REFERENCES roles (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT ideas_fk03 FOREIGN KEY (owner_group_id) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
 
 DELIMITER $$
@@ -93,24 +93,24 @@ BEGIN
     return permissions;
 END; $$
 
-CREATE PROCEDURE checkConsistencyWithinOrganization(organization_id INT, owner_id INT, owner_role_id INT)
+CREATE PROCEDURE checkConsistencyWithinOrganization(organization_id INT, owner_uid INT, owner_gid INT)
 BEGIN
-    IF owner_id IS NULL AND owner_role_id IS NULL THEN
+    IF owner_uid IS NULL AND owner_gid IS NULL THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cannot add or update row: owner_id and owner_role_id can not be null in the same time.';
+            SET MESSAGE_TEXT = 'Cannot add or update row: owner_id and owner_group_id can not be null in the same time.';
     END IF;
 
     IF organization_id IS NULL THEN
-        IF owner_id IS NULL OR owner_role_id IS NULL THEN
+        IF owner_uid IS NULL OR owner_gid IS NULL THEN
             SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Cannot add or update row: owner_id and owner_role_id can not be null.';
+                SET MESSAGE_TEXT = 'Cannot add or update row: owner_id and owner_group_id can not be null.';
         END IF;
 
-        SET organization_id = (SELECT u.organization_id FROM users u where u.id= owner_id);
+        SET organization_id = (SELECT u.organization_id FROM users u where u.id= owner_uid);
     END IF;
 
-    IF owner_id IS NOT NULL THEN
-        SET @user_org_id  = (SELECT u.organization_id FROM users u where u.id= owner_id);
+    IF owner_uid IS NOT NULL THEN
+        SET @user_org_id  = (SELECT u.organization_id FROM users u where u.id= owner_uid);
 
         IF @user_org_id <> organization_id THEN
             SIGNAL SQLSTATE '45000'
@@ -118,41 +118,41 @@ BEGIN
         END IF;
     END IF;
 
-    IF owner_role_id IS NOT NULL THEN
-        SET @role_org_id  = (SELECT r.organization_id FROM roles r where r.id= owner_role_id);
+    IF owner_gid IS NOT NULL THEN
+        SET @groups_org_id  = (SELECT r.organization_id FROM groups r where r.id= owner_gid);
 
-        IF @role_org_id <> organization_id AND @role_org_id <> 1 THEN
+        IF @groups_org_id <> organization_id AND @groups_org_id <> 1 THEN
             SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Cannot add or update row: role organization mismatch.';
+                SET MESSAGE_TEXT = 'Cannot add or update row: group organization mismatch.';
         END IF;
     END IF;
 END; $$
 
-CREATE TRIGGER user_roles_insert BEFORE INSERT ON user_roles FOR EACH ROW
+CREATE TRIGGER user_groups_insert BEFORE INSERT ON user_groups FOR EACH ROW
 BEGIN
     IF @DISABLE_TRIGGERS <> 1 THEN
-        call checkConsistencyWithinOrganization(null, New.user_id, NEW.role_id);
+        call checkConsistencyWithinOrganization(null, New.user_id, NEW.group_id);
     END IF;
 END; $$
 
-CREATE TRIGGER user_roles_update BEFORE UPDATE ON user_roles FOR EACH ROW
+CREATE TRIGGER user_groups_update BEFORE UPDATE ON user_groups FOR EACH ROW
 BEGIN
     IF @DISABLE_TRIGGERS <> 1 THEN
-        call checkConsistencyWithinOrganization(null, New.user_id, NEW.role_id);
+        call checkConsistencyWithinOrganization(null, New.user_id, NEW.group_id);
     END IF;
 END; $$
 
 CREATE TRIGGER ideas_insert BEFORE INSERT ON ideas FOR EACH ROW
 BEGIN
     IF @DISABLE_TRIGGERS <> 1 THEN
-        call checkConsistencyWithinOrganization(NEW.organization_id, NEW.owner_id, NEW.owner_role_id);
+        call checkConsistencyWithinOrganization(NEW.organization_id, NEW.owner_id, NEW.owner_group_id);
     END IF;
 END; $$
 
 CREATE TRIGGER ideas_update BEFORE UPDATE ON ideas FOR EACH ROW
 BEGIN
     IF @DISABLE_TRIGGERS <> 1 THEN
-        call checkConsistencyWithinOrganization(NEW.organization_id, NEW.owner_id, NEW.owner_role_id);
+        call checkConsistencyWithinOrganization(NEW.organization_id, NEW.owner_id, NEW.owner_group_id);
     END IF;
 END; $$
 
