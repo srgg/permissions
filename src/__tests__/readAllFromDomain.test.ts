@@ -44,7 +44,16 @@ async function check_query(queryopts: BuildAllResourceQueryParamsTest, expected:
     });
 
     const r = await getConnection().query(q.query, q.params);
-    expect(r.sort(compare)).toEqual(JSON.parse(expected).sort(compare));
+
+    const expectedObj = JSON.parse(expected);
+    // const expectedProps = Object.getOwnPropertyNames(expectedObj);
+    // const actualProps = Object.getOwnPropertyNames(r);
+    // for (var key in actualProps) {
+    //     if (!(key in expectedProps)) {
+    //         r[key] = undefined;
+    //     }
+    // }
+    expect(r.sort(compare)).toEqual(expectedObj.sort(compare));
 }
 
 describe('Read all from domain', () => {
@@ -183,7 +192,7 @@ describe('Read all from domain', () => {
                     "name": "shared-idea1@emca",
                     "organization_id": 3,
                     "owner_uid": null,
-                    "owner_gid": 4,
+                    "owner_gid": 100,
                     "title": "the 1st shared idea at emca",               
                     "permissions": "EDIT,READ"
                },
@@ -192,7 +201,7 @@ describe('Read all from domain', () => {
                     "name": "shared-idea2@emca",
                     "organization_id": 3,
                     "owner_uid": null,
-                    "owner_gid": 4,
+                    "owner_gid": 100,
                     "title": "the 2nd shared idea at emca",               
                     "permissions": "EDIT,READ"
                }
@@ -326,7 +335,7 @@ describe('Read all from domain', () => {
                     "name":"shared-idea1@emca",
                     "organization_id":3,
                     "owner_uid":null,
-                    "owner_gid":4,
+                    "owner_gid":100,
                     "title":"the 1st shared idea at emca",
                     "permissions":"DELETE,EDIT,READ"
                },
@@ -335,7 +344,7 @@ describe('Read all from domain', () => {
                     "name":"shared-idea2@emca",
                     "organization_id":3,
                     "owner_uid":null,
-                    "owner_gid":4,
+                    "owner_gid":100,
                     "title":"the 2nd shared idea at emca",
                     "permissions":"DELETE,EDIT,READ"
                },
@@ -422,6 +431,18 @@ describe('Read all from domain', () => {
                   "id":9,
                   "organization_id":3,
                   "name":"admin@emca",
+                  "permissions":"CREATE,DELETE,EDIT,READ"
+               },
+               {
+                  "id":10,
+                  "organization_id":3,
+                  "name":"reviewer1@emca",
+                  "permissions":"CREATE,DELETE,EDIT,READ"
+               },
+               {
+                  "id":11,
+                  "organization_id":3,
+                  "name":"reviewer2@emca",
                   "permissions":"CREATE,DELETE,EDIT,READ"
                }
             ]`);

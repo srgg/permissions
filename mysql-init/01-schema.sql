@@ -73,6 +73,18 @@ CREATE TABLE ideas (
   CONSTRAINT ideas_fk03 FOREIGN KEY (owner_gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
 
+CREATE TABLE comments (
+  id            INT AUTO_INCREMENT,
+  owner_uid     INT,
+  owner_gid     INT,
+  idea_id       INT,
+  text          VARCHAR(512),
+  CHECK (owner_gid IS NULL ), # group ownership is not supported for comments
+  CONSTRAINT pk_comments PRIMARY KEY (id),
+  CONSTRAINT comments_fk01 FOREIGN KEY (owner_uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT comments_fk02 FOREIGN KEY (idea_id) REFERENCES ideas (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
+
 DELIMITER $$
 
 CREATE FUNCTION calcPermissions(permissionList VARCHAR(255)) RETURNS VARCHAR(255)
