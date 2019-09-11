@@ -1,4 +1,4 @@
-import { getConnection, createConnection, getConnectionManager } from "typeorm";
+import { getConnectionManager } from "typeorm";
 import {Idea} from "../entity/idea";
 import {User} from "../entity/user";
 

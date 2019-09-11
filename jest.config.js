@@ -8,7 +8,7 @@ module.exports = {
             tsConfigFile: "tsconfig.json"
         }
     },
-    testMatch: ["**/__tests__/**/*.+(ts|tsx|js)"],
+    testMatch: ["**/__tests__/**/*.test.+(ts|tsx|js)"],
     testPathIgnorePatterns: ["/node_modules/", "/dist/", "/lib/", "/__tests__/setup.ts"],
     setupFilesAfterEnv: [
        "./src/__tests__/setup.ts"

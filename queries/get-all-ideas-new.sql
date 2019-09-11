@@ -1,4 +1,6 @@
-SET @userId = 5;
+SET @userId = (SELECT id FROM users where name = 'inventor1@emca');
+SET @userId = (SELECT id FROM users where name = 'reviewer1@acme');
+SET @userId = (SELECT id FROM users where name = 'inventor1@acme');
 SET @resource = 'IDEAS';
 SET @action = 'READ';
 # SET @action = 'CREATE';
