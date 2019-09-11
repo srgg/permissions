@@ -87,6 +87,15 @@ CREATE TABLE comments (
 
 DELIMITER $$
 
+CREATE FUNCTION triggersEnabled() RETURNS BOOL
+BEGIN
+    IF @DISABLE_TRIGGERS = 1 THEN
+        return FALSE;
+    ELSE
+        return TRUE;
+    END IF;
+END; $$
+
 CREATE FUNCTION calcPermissions(permissionList VARCHAR(255)) RETURNS VARCHAR(255)
 BEGIN
     DECLARE permissions VARCHAR(255);
@@ -142,28 +151,28 @@ END; $$
 
 CREATE TRIGGER user_groups_insert BEFORE INSERT ON user_groups FOR EACH ROW
 BEGIN
-    IF @DISABLE_TRIGGERS <> 1 THEN
+    IF triggersEnabled() THEN
         call checkConsistencyWithinOrganization(null, New.uid, NEW.gid);
     END IF;
 END; $$
 
 CREATE TRIGGER user_groups_update BEFORE UPDATE ON user_groups FOR EACH ROW
 BEGIN
-    IF @DISABLE_TRIGGERS <> 1 THEN
+    IF triggersEnabled() THEN
         call checkConsistencyWithinOrganization(null, New.uid, NEW.gid);
     END IF;
 END; $$
 
 CREATE TRIGGER ideas_insert BEFORE INSERT ON ideas FOR EACH ROW
 BEGIN
-    IF @DISABLE_TRIGGERS <> 1 THEN
+    IF triggersEnabled() THEN
         call checkConsistencyWithinOrganization(NEW.organization_id, NEW.owner_uid, NEW.owner_gid);
     END IF;
 END; $$
 
 CREATE TRIGGER ideas_update BEFORE UPDATE ON ideas FOR EACH ROW
 BEGIN
-    IF @DISABLE_TRIGGERS <> 1 THEN
+    IF triggersEnabled() THEN
         call checkConsistencyWithinOrganization(NEW.organization_id, NEW.owner_uid, NEW.owner_gid);
     END IF;
 END; $$
