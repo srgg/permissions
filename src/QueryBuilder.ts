@@ -87,7 +87,7 @@ FROM (
                              )
                 )
             AND EXISTS (
-                SELECT 1 FROM permissions ps WHERE ps.id IN (
+                SELECT 1 FROM permissions pp WHERE pp.id IN (
                     select p.id
                     FROM permissions p
                     WHERE p.resource = :resource
@@ -106,12 +106,12 @@ FROM (
                -- do authorization check filtering
 
                AND ( -- apply instance filtering if required
-                     (ps.resource_instance IS NOT NULL AND ps.resource_instance = i.id)
-                     OR ps.resource_instance IS NULL)
+                     (pp.resource_instance IS NOT NULL AND pp.resource_instance = i.id)
+                     OR pp.resource_instance IS NULL)
 
 
                AND ( -- apply action filtering
-                     (FIND_IN_SET(LCASE(:action), REPLACE(LCASE(ps.action), ' ', '')) > 0)
+                     (FIND_IN_SET(LCASE(:action), REPLACE(LCASE(pp.action), ' ', '')) > 0)
 
                     -- apply owner actions, if applicable
                     {{ownership_resource_filter}}
@@ -136,12 +136,12 @@ WHERE ${alias}.pids IS NOT NULL
                          (
                                  (  -- if owner is provided
                                      (i.owner_uid IS NOT NULL AND i.owner_uid = :userid)
-                                     OR (i.owner_gid IS NOT NULL AND ps.gid = i.owner_gid)
+                                     OR (i.owner_gid IS NOT NULL AND pp.gid = i.owner_gid)
 
                                  )
                                  AND -- apply _OWN actions, if any
                                  FIND_IN_SET(LCASE(CONCAT(:action, '_OWN')),
-                                             REPLACE(LCASE(ps.action), ' ', '')) > 0
+                                             REPLACE(LCASE(pp.action), ' ', '')) > 0
                              )
                          )`
                 },
