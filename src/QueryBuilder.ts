@@ -88,15 +88,15 @@ FROM (
                 )
             AND EXISTS (
                 SELECT 1 FROM permissions ps WHERE ps.id IN (
-                    select pp.id
-                    FROM permissions pp
-                    WHERE pp.resource = :resource
+                    select p.id
+                    FROM permissions p
+                    WHERE p.resource = :resource
                     AND (
-                        pp.uid = :userid
+                        p.uid = :userid
                         OR EXISTS(
                             SELECT 1
                                 FROM user_groups ug
-                                WHERE ug.gid = pp.gid
+                                WHERE ug.gid = p.gid
                                 AND ug.uid = :userid
                         )
                     )
