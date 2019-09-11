@@ -15,12 +15,12 @@ FROM (
              WHERE
                 pp.resource = @resource
                 AND (
-                         pp.user_id = @userId
+                         pp.uid = @userId
                      OR EXISTS(
                                  SELECT 1
-                                 FROM user_roles ur
-                                 WHERE ur.role_id = pp.role_id
-                                   AND ur.user_id = @userid
+                                 FROM user_groups ug
+                                 WHERE ug.gid = pp.gid
+                                   AND ug.uid = @userid
                              )
                 )
 
@@ -38,8 +38,8 @@ FROM (
                      OR (
                          (
                                  (  -- if owner is provided
-                                         (i.owner_id IS NOT NULL AND i.owner_id = @userid)
-                                         OR (i.owner_role_id IS NOT NULL AND pp.role_id = i.owner_role_id)
+                                         (i.owner_uid IS NOT NULL AND i.owner_uid = @userid)
+                                         OR (i.owner_gid IS NOT NULL AND pp.gid = i.owner_gid)
 
                                      )
                                  AND -- apply _OWN actions, if any
