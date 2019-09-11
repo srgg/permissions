@@ -50,7 +50,7 @@ async function check_read_all_query(queryopts: BuildAllResourceQueryParamsTest, 
     const sortedR = r.sort(compareIt).map(o => { return Object.assign({}, o)});
     const sortedE = JSON.parse(expected).sort(compareIt).map(o => {return Object.assign({}, o)});
 
-    expect(sortedE).toEqual(sortedR);
+    expect(sortedR).toEqual(sortedE);
 }
 
 

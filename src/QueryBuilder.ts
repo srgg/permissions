@@ -86,20 +86,37 @@ FROM (
                                    AND ur.uid = :userid
                              )
                 )
+            AND EXISTS (
+                SELECT 1 FROM permissions ps WHERE ps.id IN (
+                    select pp.id
+                    FROM permissions pp
+                    WHERE pp.resource = :resource
+                    AND (
+                        pp.uid = :userid
+                        OR EXISTS(
+                            SELECT 1
+                                FROM user_groups ug
+                                WHERE ug.gid = pp.gid
+                                AND ug.uid = :userid
+                        )
+                    )
+
+                )
 
                -- do authorization check filtering
 
                AND ( -- apply instance filtering if required
-                     (pp.resource_instance IS NOT NULL AND pp.resource_instance = i.id)
-                     OR pp.resource_instance IS NULL)
+                     (ps.resource_instance IS NOT NULL AND ps.resource_instance = i.id)
+                     OR ps.resource_instance IS NULL)
 
 
                AND ( -- apply action filtering
-                     (FIND_IN_SET(LCASE(:action), REPLACE(LCASE(pp.action), ' ', '')) > 0)
+                     (FIND_IN_SET(LCASE(:action), REPLACE(LCASE(ps.action), ' ', '')) > 0)
 
                     -- apply owner actions, if applicable
                     {{ownership_resource_filter}}
                  )
+            )
          ) pids
          FROM ${domain.toLowerCase()} i
          -- apply organization filtering
@@ -119,12 +136,12 @@ WHERE ${alias}.pids IS NOT NULL
                          (
                                  (  -- if owner is provided
                                      (i.owner_uid IS NOT NULL AND i.owner_uid = :userid)
-                                     OR (i.owner_gid IS NOT NULL AND pp.gid = i.owner_gid)
+                                     OR (i.owner_gid IS NOT NULL AND ps.gid = i.owner_gid)
 
                                  )
                                  AND -- apply _OWN actions, if any
                                  FIND_IN_SET(LCASE(CONCAT(:action, '_OWN')),
-                                             REPLACE(LCASE(pp.action), ' ', '')) > 0
+                                             REPLACE(LCASE(ps.action), ' ', '')) > 0
                              )
                          )`
                 },

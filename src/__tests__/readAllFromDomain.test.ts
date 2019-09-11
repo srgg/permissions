@@ -22,7 +22,7 @@ describe('Read all from domain', () => {
                   "owner_gid": null,
                   "name":"idea1@acme",
                   "title":"the 1st idea of inventor1@acme",
-                  "permissions":"CREATE,DELETE,EDIT,READ"
+                  "permissions":"CREATE,CREATE_COMMENT,DELETE,EDIT,READ_COMMENT,READ"
                 },
                 {
                   "id":2,
@@ -31,7 +31,7 @@ describe('Read all from domain', () => {
                   "owner_gid": null,
                   "name":"idea2@acme",
                   "title":"the 2nd idea of inventor1@acme",
-                  "permissions":"CREATE,DELETE,EDIT,READ"
+                  "permissions":"CREATE,CREATE_COMMENT,DELETE,EDIT,READ_COMMENT,READ"
                 },
                {   "id": 9,
                     "name": "shared-idea1@acme",
@@ -39,7 +39,7 @@ describe('Read all from domain', () => {
                     "owner_uid": null,
                     "owner_gid": 1,
                     "title": "the 1st shared idea at acme",               
-                    "permissions": "CREATE,DELETE,EDIT,READ"
+                    "permissions": "CREATE,CREATE_COMMENT,DELETE,EDIT,READ_COMMENT,READ"
                },
                {
                     "id": 10,
@@ -48,7 +48,7 @@ describe('Read all from domain', () => {
                     "owner_uid": null,
                     "owner_gid": 1,
                     "title": "the 2nd shared idea at acme",               
-                    "permissions": "CREATE,DELETE,EDIT,READ"
+                    "permissions": "CREATE,CREATE_COMMENT,DELETE,EDIT,READ_COMMENT,READ"
                }                
             ]`);
     });
@@ -60,13 +60,22 @@ describe('Read all from domain', () => {
             },
             `[
                {
+                  "id":1,
+                  "organization_id":2,
+                  "owner_uid":1,
+                  "owner_gid": null,
+                  "name":"idea1@acme",
+                  "title":"the 1st idea of inventor1@acme",
+                  "permissions":"CREATE_COMMENT,READ_COMMENT,READ"
+               },
+               {
                   "id":3,
                   "organization_id":2,
                   "owner_uid":2,
                   "owner_gid": null,
                   "name":"idea1@acme",
                   "title":"the 1st idea of inventor2@acme",
-                  "permissions":"CREATE,DELETE,EDIT,READ"
+                  "permissions":"CREATE,CREATE_COMMENT,DELETE,EDIT,READ_COMMENT,READ"
                },
                {
                   "id":4,
@@ -75,16 +84,7 @@ describe('Read all from domain', () => {
                   "owner_gid": null,
                   "name":"idea2@acme",
                   "title":"the 2nd idea of inventor2@acme",
-                  "permissions":"CREATE,DELETE,EDIT,READ"
-               },
-               {
-                  "id":1,
-                  "organization_id":2,
-                  "owner_uid":1,
-                  "owner_gid": null,
-                  "name":"idea1@acme",
-                  "title":"the 1st idea of inventor1@acme",
-                  "permissions":"READ"
+                  "permissions":"CREATE,CREATE_COMMENT,DELETE,EDIT,READ_COMMENT,READ"
                },
                {   "id": 9,
                     "name": "shared-idea1@acme",
@@ -118,7 +118,7 @@ describe('Read all from domain', () => {
                     "owner_uid": null,
                     "owner_gid": 1,
                     "title": "the 1st shared idea at acme",               
-                    "permissions": "CREATE,DELETE,EDIT,READ"
+                    "permissions": "CREATE,CREATE_COMMENT,DELETE,EDIT,READ_COMMENT,READ"
                },
                {
                     "id": 10,
@@ -127,7 +127,7 @@ describe('Read all from domain', () => {
                     "owner_uid": null,
                     "owner_gid": 1,
                     "title": "the 2nd shared idea at acme",               
-                    "permissions": "CREATE,DELETE,EDIT,READ"
+                    "permissions": "CREATE,CREATE_COMMENT,DELETE,EDIT,READ_COMMENT,READ"
                }
             ]`);
     });
@@ -144,7 +144,7 @@ describe('Read all from domain', () => {
                     "owner_uid": null,
                     "owner_gid": 100,
                     "title": "the 1st shared idea at emca",               
-                    "permissions": "EDIT,READ"
+                    "permissions": "CREATE,CREATE_COMMENT,DELETE,EDIT,READ_COMMENT,READ"
                },
                {
                     "id": 14,
@@ -153,7 +153,7 @@ describe('Read all from domain', () => {
                     "owner_uid": null,
                     "owner_gid": 100,
                     "title": "the 2nd shared idea at emca",               
-                    "permissions": "EDIT,READ"
+                    "permissions": "CREATE,CREATE_COMMENT,DELETE,EDIT,READ_COMMENT,READ"
                }
             ]`);
     });
