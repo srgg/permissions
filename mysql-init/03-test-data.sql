@@ -20,13 +20,13 @@ INSERT INTO users VALUES (11, @emca, 'reviewer2@emca', 'pw7', 'salt7');
 
 
 -- Shared Idea Inventors
-INSERT INTO groups VALUES (100, @emca, 'shared-idea-inventors', 'Inventors that can work with shared ideas');
-SET @shared_iventors_gid = (SELECT id FROM groups WHERE name = 'shared-idea-inventors');
+SET @shared_iventors_gid = 100;
+INSERT INTO groups (id, organization_id, name, description) VALUES (@shared_iventors_gid, @emca, 'shared-idea-inventors', 'Inventors that can work with shared ideas');
 INSERT INTO permissions (gid,resource,action) VALUES (@shared_iventors_gid, 'IdEaS', 'READ_OWN, EDIT_OWN');
 
 -- Reviewers
-INSERT INTO groups  VALUES (101, @emca, 'idea-reviewers', 'Supervisors that can read the entire idea  and can commented on it');
-SET @reveiwers_gid = (SELECT id FROM groups WHERE name = 'idea-reviewers');
+SET @reveiwers_gid = 101;
+INSERT INTO groups  (id, organization_id, name, description) VALUES (@reveiwers_gid, @emca, 'idea-reviewers', 'Supervisors that can read the entire idea  and can commented on it');
 INSERT INTO permissions (gid,resource,action) VALUES (@reveiwers_gid, 'Comments', 'DELETE_OWN, EDIT_OWN');
 INSERT INTO permissions (gid,resource,action) VALUES (@reveiwers_gid, 'Ideas', 'READ');
 

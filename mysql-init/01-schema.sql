@@ -25,10 +25,12 @@ CREATE UNIQUE INDEX idx_users_username ON users (organization_id, name);
 CREATE TABLE groups (
   id                INT AUTO_INCREMENT,
   organization_id   INT,
+  parent_gid        INT DEFAULT NULL,
   name              VARCHAR(100) NOT NULL,
   description       VARCHAR(512),
   CONSTRAINT pk_groups PRIMARY KEY (id),
-  CONSTRAINT groups_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT groups_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT groups_fk02 FOREIGN KEY (parent_gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
 CREATE UNIQUE INDEX idx_groups_name ON groups (organization_id, name);
 
@@ -174,6 +176,26 @@ CREATE TRIGGER ideas_update BEFORE UPDATE ON ideas FOR EACH ROW
 BEGIN
     IF triggersEnabled() THEN
         call checkConsistencyWithinOrganization(NEW.organization_id, NEW.owner_uid, NEW.owner_gid);
+    END IF;
+END; $$
+
+CREATE TRIGGER groups_insert BEFORE INSERT ON groups FOR EACH ROW
+BEGIN
+    IF triggersEnabled() THEN
+        IF NEW.parent_gid IS NOT NULL THEN
+            SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Group hierarchy is not supported, parent_gid MUST be NULL!';
+        END IF;
+    END IF;
+END; $$
+
+CREATE TRIGGER groups_update BEFORE UPDATE ON groups FOR EACH ROW
+BEGIN
+    IF triggersEnabled() THEN
+        IF NEW.parent_gid IS NOT NULL THEN
+            SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Group hierarchy is not supported, parent_gid MUST be NULL!';
+        END IF;
     END IF;
 END; $$
 
