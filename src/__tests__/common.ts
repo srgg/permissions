@@ -38,6 +38,8 @@ async function check_read_all_query(queryopts: BuildAllResourceQueryParamsTest, 
         checkOwnership: queryopts.checkOwnership
     });
 
+
+    console.log("SQL query:", q.query);
     const r = await getConnection().query(q.query, q.params);
     // const expectedObj = JSON.parse(expected);
     // const expectedProps = Object.getOwnPropertyNames(expectedObj);
@@ -48,8 +50,17 @@ async function check_read_all_query(queryopts: BuildAllResourceQueryParamsTest, 
     //     }
     // }
     const sortedR = r.sort(compareIt).map(o => { return Object.assign({}, o)});
-    const sortedE = JSON.parse(expected).sort(compareIt).map(o => {return Object.assign({}, o)});
+    const quotedE =
+        // quote unquoted field names
+        expected.replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2": ')
+        // replace single quotes with a double ones
+        .replace(/:\s*'([^']+)'/g, ': "$1"');
 
+    console.log("strict json:", quotedE);
+
+    const sortedE = JSON.parse(quotedE).sort(compareIt).map(o => {return Object.assign({}, o)});
+
+    console.log("\nThe following data was received:",sortedR, "\n\n");
     expect(sortedR).toEqual(sortedE);
 }
 

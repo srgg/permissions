@@ -21,7 +21,7 @@ INSERT INTO users VALUES (9, @emca, 'admin@emca', 'pw5', 'salt5');
 -- Shared Idea Inventors
 SET @shared_iventors_gid = 100;
 INSERT INTO groups (id, organization_id, name, description) VALUES (@shared_iventors_gid, @emca, 'shared-idea-inventors', 'Inventors that can work with shared ideas');
-INSERT INTO permissions (gid,resource,action) VALUES (@shared_iventors_gid, 'IdEaS', 'READ_OWN, EDIT_OWN');
+INSERT INTO permissions (gid,resource,action) VALUES (@shared_iventors_gid, 'IdEaS', 'READ_OWN, READ_SHARED_OWN, EDIT_SHARED_OWN');
 
 INSERT INTO user_groups VALUES (1,1);
 INSERT INTO user_groups VALUES (2,1);
@@ -65,7 +65,7 @@ SET @DISABLE_TRIGGERS=NULL;
 
 INSERT INTO ideas VALUES (5, @emca, 5, null, 'idea1@emca', 'the 1st idea of inventor1@emca' );
 INSERT INTO ideas VALUES (6, @emca, 5, null, 'idea2@emca', 'the 2nd idea of inventor1@emca' );
-INSERT INTO ideas VALUES (7, @emca, 5, null, 'idea1@emca', 'the 1st idea of inventor2@emca' );
+INSERT INTO ideas VALUES (7, @emca, 6, null, 'idea1@emca', 'the 1st idea of inventor2@emca' );
 INSERT INTO ideas VALUES (8, @emca, 6, null, 'idea2@emca', 'the 2nd idea of inventor2@emca' );
 
 
@@ -76,6 +76,11 @@ SET @DISABLE_TRIGGERS=1;
 INSERT INTO ideas VALUES (15, @emca, null, null, 'orphan-idea1@emca', 'the 1st orphan idea at emca' );
 INSERT INTO ideas VALUES (16, @emca, null, null, 'orphan-idea2@emca', 'the 2nd orphan idea at emca' );
 SET @DISABLE_TRIGGERS=NULL;
+
+
+INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (5, 'ideas', 7, 'READ');
+INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (5, 'IdEaS', 8, 'READ_OWN');
+
 
 -- --------------------
 -- Comments and idea reviewers

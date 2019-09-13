@@ -134,27 +134,55 @@ describe('Read all from domain', () => {
 
     test('Inventors at emca should not be able to Delete ideas shared to role/group', async () => {
         await checkReadAllQuery({
-                userId: 7, domain: 'IDEAS', action: 'READ',
+                userId: 5, domain: 'IDEAS', action: 'READ',
                 checkOwnership: true, withRowPermissions: true
             },
             `[
-               {   "id": 13,
-                    "name": "shared-idea1@emca",
-                    "organization_id": 3,
-                    "owner_uid": null,
-                    "owner_gid": 100,
-                    "title": "the 1st shared idea at emca",               
-                    "permissions": "CREATE,CREATE_COMMENT,DELETE,EDIT,READ_COMMENT,READ"
-               },
-               {
-                    "id": 14,
-                    "name": "shared-idea2@emca",
-                    "organization_id": 3,
-                    "owner_uid": null,
-                    "owner_gid": 100,
-                    "title": "the 2nd shared idea at emca",               
-                    "permissions": "CREATE,CREATE_COMMENT,DELETE,EDIT,READ_COMMENT,READ"
-               }
+                  {
+                    id: 5,
+                    name: 'idea1@emca',
+                    organization_id: 3,
+                    owner_uid: 5,
+                    owner_gid: null,
+                    title: 'the 1st idea of inventor1@emca',
+                    permissions: 'CREATE,CREATE_COMMENT,DELETE,EDIT,EDIT_SHARED,READ_COMMENT,READ,READ_SHARED'
+                  },
+                  {
+                    id: 6,
+                    name: 'idea2@emca',
+                    organization_id: 3,
+                    owner_uid: 5,
+                    owner_gid: null,
+                    title: 'the 2nd idea of inventor1@emca',
+                    permissions: 'CREATE,CREATE_COMMENT,DELETE,EDIT,EDIT_SHARED,READ_COMMENT,READ,READ_SHARED'
+                  },
+                  {
+                    id: 7,
+                    name: 'idea1@emca',
+                    organization_id: 3,
+                    owner_uid: 6,
+                    owner_gid: null,
+                    title: 'the 1st idea of inventor2@emca',
+                    permissions: 'EDIT,READ'
+                  },
+                  {
+                    id: 13,
+                    name: 'shared-idea1@emca',
+                    organization_id: 3,
+                    owner_uid: null,
+                    owner_gid: 100,
+                    title: 'the 1st shared idea at emca',
+                    permissions: 'EDIT_SHARED,READ,READ_SHARED'
+                  },
+                  {
+                    id: 14,
+                    name: 'shared-idea2@emca',
+                    organization_id: 3,
+                    owner_uid: null,
+                    owner_gid: 100,
+                    title: 'the 2nd shared idea at emca',
+                    permissions: 'EDIT_SHARED,READ,READ_SHARED'
+                  }
             ]`);
     });
 

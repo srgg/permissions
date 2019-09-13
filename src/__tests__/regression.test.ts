@@ -15,12 +15,28 @@ describe('Regression tests', () => {
 
         await checkReadAllQuery({
                 userId: uid, domain: 'IDEAS', action: 'READ',
-                columns: ['name'],
+                columns: ['name', 'title'],
                 checkOwnership: true, withRowPermissions: true
             },
             `[                           {
                     "name": "idea1@regression.test",
+                    "title": "the 1st idea of idea1@regression.test",
                     "permissions": "CREATE,READ"
+               }
+            ]`);
+    });
+
+    test('ReadAllQuery: READ_OWN should be handled properly', async () => {
+        // Issue:
+        await checkReadAllQuery({
+                userId: uid, domain: 'IDEAS', action: 'READ_OWN',
+                columns: ['name', 'title'],
+                checkOwnership: true, withRowPermissions: true
+            },
+            `[                           {
+                    "name": "idea1@regression.test",
+                    "permissions": "CREATE,READ",
+                    "title": "the 1st idea of idea1@regression.test"
                }
             ]`);
     });

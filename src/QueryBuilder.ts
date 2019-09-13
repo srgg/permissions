@@ -86,6 +86,19 @@ FROM (
                                    AND ur.uid = :userid
                              )
                 )
+               --
+               AND (
+                      -- apply instance filtering if required
+                     (pp.resource_instance IS NOT NULL AND pp.resource_instance = i.id)
+                     
+                     -- or apply resource ownership filtering, if applicable
+                     OR (
+                         pp.resource_instance IS NULL
+                         
+                         {{own_resource_filter}}
+                    )
+                )
+                
             AND EXISTS (
                 SELECT 1 FROM permissions pp WHERE pp.id IN (
                     select p.id
@@ -114,7 +127,7 @@ FROM (
                      (FIND_IN_SET(LCASE(:action), REPLACE(LCASE(pp.action), ' ', '')) > 0)
 
                     -- apply owner actions, if applicable
-                    {{ownership_resource_filter}}
+                    {{own_action_filter}}
                  )
             )
          ) pids
@@ -130,19 +143,22 @@ WHERE ${alias}.pids IS NOT NULL
                     options: {propertyName: 'needRowLevelPermissions', propertyValue: true},
                     sql: ` , calcPermissions(${alias}.pids) as permissions`
                 },
-                ownership_resource_filter: {
-                    options: {propertyName: 'ownershipFilter', propertyValue: true},
-                    sql: `OR ( 
-                         (
-                                 (  -- if owner is provided
-                                     (i.owner_uid IS NOT NULL AND i.owner_uid = :userid)
-                                     OR (i.owner_gid IS NOT NULL AND pp.gid = i.owner_gid)
 
-                                 )
-                                 AND -- apply _OWN actions, if any
+                own_resource_filter: {
+                    options: {propertyName: 'ownershipFilter', propertyValue: true},
+                    sql: `AND (  -- if owner is provided
+                                (i.owner_uid IS NOT NULL AND i.owner_uid = :userid)
+                                    OR (i.owner_gid IS NOT NULL AND pp.gid = i.owner_gid)
+                          )`
+                },
+                own_action_filter: {
+                    options: {propertyName: 'ownershipFilter', propertyValue: true},
+                    sql: `OR (                          
+                                -- apply _OWN actions, if any
                                  FIND_IN_SET(LCASE(CONCAT(:action, '_OWN')),
                                              REPLACE(LCASE(pp.action), ' ', '')) > 0
-                             )
+                                
+                                {{own_resource_filter}}                             
                          )`
                 },
                 query_extention_point: {
