@@ -1,45 +1,31 @@
 import {getConnection} from "typeorm";
-import {QueryBuilder} from "../QueryBuilder";
+import {ParametrizedQuery, QueryBuilder} from "../QueryBuilder";
 
 
 function compareIt(a,b): number {
     return (a.id > b.id) ? 1 : -11
 }
 
+interface IsPermittedQueryParamsTest {
+    user: number | string;
+    domain: string;
+    action: string;
+    organizationId?: number;
+    instanceId?: number;
+    checkOwnership?: boolean;
+}
+
 interface BuildAllResourceQueryParamsTest {
-    userId: number;
+    user: number | string;
     domain: string;
     action: string;
     organizationId?: number;
     columns?: string[];
     checkOwnership?: boolean;
-    withRowPermissions?: boolean;
 }
 
-async function check_read_all_query(queryopts: BuildAllResourceQueryParamsTest, expected: string) {
-    if ( !queryopts.columns && queryopts.domain === 'IDEAS') {
-        queryopts.columns = ['id','name','organization_id', 'owner_uid', 'owner_gid', 'title'];
-    }
-
-    let orgId;
-    if (queryopts.organizationId) {
-        orgId = queryopts.organizationId;
-    } else {
-        const rr = await getConnection().query("SELECT organization_id FROM users WHERE id = " + queryopts.userId);
-        orgId = rr[0].organization_id;
-    }
-
-    const q = QueryBuilder.buildReadAllFromDomainQuery({userId: queryopts.userId,
-        domain: queryopts.domain,
-        action: queryopts.action,
-        organizationId: orgId,
-        columns: queryopts.columns,
-        withRowPermissions: queryopts.withRowPermissions,
-        checkOwnership: queryopts.checkOwnership
-    });
-
-
-    console.log("SQL query:", q.query);
+async function execute_query_and_check(q: ParametrizedQuery, expected: string) {
+    // console.log("SQL query:", q.query);
     const r = await getConnection().query(q.query, q.params);
     // const expectedObj = JSON.parse(expected);
     // const expectedProps = Object.getOwnPropertyNames(expectedObj);
@@ -49,22 +35,86 @@ async function check_read_all_query(queryopts: BuildAllResourceQueryParamsTest, 
     //         r[key] = undefined;
     //     }
     // }
+
     const sortedR = r.sort(compareIt).map(o => { return Object.assign({}, o)});
     const quotedE =
         // quote unquoted field names
         expected.replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2": ')
         // replace single quotes with a double ones
-        .replace(/:\s*'([^']+)'/g, ': "$1"');
-
-    console.log("strict json:", quotedE);
+            .replace(/:\s*'([^']+)'/g, ': "$1"');
 
     const sortedE = JSON.parse(quotedE).sort(compareIt).map(o => {return Object.assign({}, o)});
 
-    console.log("\nThe following data was received:",sortedR, "\n\n");
+    // console.log("\nThe following data was received:",sortedR, "\n\n");
     expect(sortedR).toEqual(sortedE);
+
+}
+
+async function retrieveUserIdIfNeeded(user: number|string): Promise<number> {
+    let uid: number;
+    if(typeof user == 'string'){
+        const r = await getConnection().query("SELECT id FROM users WHERE name = '" + user + "'");
+        uid = r[0].id;
+    } else if (typeof user == 'number'){
+        uid = user;
+    } else {
+        throw new Error('"user" has a wrong type, it must be either a number or a string');
+    }
+
+    return uid;
+}
+
+async function check_read_all_query(queryopts: BuildAllResourceQueryParamsTest, expected: string) {
+    if ( !queryopts.columns && queryopts.domain === 'IDEAS') {
+        queryopts.columns = ['id','name','organization_id', 'owner_uid', 'owner_gid', 'title', 'permitted'];
+    }
+
+    const uid: number = await retrieveUserIdIfNeeded(queryopts.user);
+
+    let orgId;
+    if (queryopts.organizationId) {
+        orgId = queryopts.organizationId;
+    } else {
+        const rr = await getConnection().query("SELECT organization_id FROM users WHERE id = " + uid);
+        orgId = rr[0].organization_id;
+    }
+
+    const q = QueryBuilder.buildReadAllFromDomainQuery({userId: uid,
+        domain: queryopts.domain,
+        action: queryopts.action,
+        organizationId: orgId,
+        columns: queryopts.columns,
+        checkOwnership: queryopts.checkOwnership
+    });
+
+    await execute_query_and_check(q, expected);
+}
+
+async function check_ispermitted_query(queryopts: IsPermittedQueryParamsTest, expected: string) {
+    const uid: number = await retrieveUserIdIfNeeded(queryopts.user);
+
+    let orgId;
+    if (queryopts.organizationId) {
+        orgId = queryopts.organizationId;
+    } else {
+        const rr = await getConnection().query("SELECT organization_id FROM users WHERE id = " + uid);
+        orgId = rr[0].organization_id;
+    }
+
+    const q = QueryBuilder.buildIsPermittedQuery({
+        userId: uid,
+        domain: queryopts.domain,
+        action: queryopts.action,
+        organizationId: orgId,
+        checkOwnership: queryopts.checkOwnership === undefined ?  false : queryopts.checkOwnership,
+        instanceId: queryopts.instanceId
+    });
+
+    await execute_query_and_check(q, expected);
 }
 
 
 export {
-    check_read_all_query as checkReadAllQuery
+    check_read_all_query as checkReadAllQuery,
+    check_ispermitted_query as checkIsPermittedQuery
 }

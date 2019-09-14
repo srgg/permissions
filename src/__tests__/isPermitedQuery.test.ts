@@ -1,54 +1,24 @@
-import {IsPermittedQueryParams, QueryBuilder} from "../QueryBuilder";
-import {getConnection} from "typeorm";
-
-interface IsPermittedQueryParamsTest {
-    userId: number;
-    domain: string;
-    action: string;
-    organizationId?: number;
-    instanceId?: number;
-}
-
-async function check_query(queryopts: IsPermittedQueryParamsTest, expected: string) {
-    let orgId;
-    if (queryopts.organizationId) {
-        orgId = queryopts.organizationId;
-    } else {
-        const rr = await getConnection().query("SELECT organization_id FROM users WHERE id = " + queryopts.userId);
-        orgId = rr[0].organization_id;
-    }
-
-    const q = QueryBuilder.buildIsPermittedQuery({
-        userId: queryopts.userId,
-        domain: queryopts.domain,
-        action: queryopts.action,
-        organizationId: orgId,
-        instanceId: queryopts.instanceId
-    });
-
-    const r = await getConnection().query(q.query, q.params);
-    expect(r).toEqual(JSON.parse(expected));
-}
+import { checkIsPermittedQuery} from "./common";
 
 describe('domain level permissions', () => {
 
     test('Inventor should be able to create a new idea', async ()=> {
-        await check_query({userId:1, domain: 'IDEAS', action: 'CREATE'},
-            `[{"isPermitted":"1"}]`);
+        await checkIsPermittedQuery({user:'inventor1@acme', domain: 'IDEAS', checkOwnership:true, action: 'CREATE'},
+            `[{isPermitted:'1'}]`);
     });
 
     test('Inventor should be able to work on own ideas', async ()=> {
-        await check_query({userId:1, domain: 'IDEAS', action: 'EDIT_OWN'},
-            `[{"isPermitted":"1"}]`);
+        await checkIsPermittedQuery({user:'inventor1@acme', domain: 'IDEAS', checkOwnership:true, action: 'EDIT_OWN'},
+            `[{isPermitted:'1'}]`);
     });
 
     test('Manager should not be able to create a new idea', async ()=> {
-        await check_query({userId:4, domain: 'IDEAS', action: 'CREATE'},
+        await checkIsPermittedQuery({user:'manager@acme', domain: 'IDEAS', checkOwnership:true, action: 'CREATE'},
             `[]`);
     });
 
     test('Organization admin should not be able to create a new idea', async ()=> {
-        await check_query({userId:9, domain: 'IDEAS', action: 'CREATE'},
+        await checkIsPermittedQuery({user:'admin@emca', domain: 'IDEAS', checkOwnership:true, action: 'CREATE'},
             `[]`);
     });
 });
@@ -56,17 +26,17 @@ describe('domain level permissions', () => {
 
 describe('Instance level permissions', () => {
     test('2nd inventor at ACME should be able to read all the ideas shared by other inventors', async ()=> {
-        await check_query({userId:2, domain: 'IDEAS', action: 'READ', instanceId: 1},
-            `[{"isPermitted":"1"}]`);
+        await checkIsPermittedQuery({user:'inventor2@acme', domain: 'IDEAS', action: 'READ', checkOwnership:true, instanceId: 1},
+            `[{isPermitted:'1'}]`);
     });
 
     test('2nd inventor at ACME should not be able to read any unshared ideas of any other inventor', async ()=> {
-        await check_query({userId:2, domain: 'IDEAS', action: 'READ', instanceId: 2},
+        await checkIsPermittedQuery({user:'inventor2@acme', domain: 'IDEAS', action: 'READ',  checkOwnership: true, instanceId: 2},
             `[]`);
     });
 
     test('Inventors should not be able to read orphan ideas', async ()=> {
-        await check_query({userId:2, domain: 'IDEAS', action: 'READ', instanceId: 11},
+        await checkIsPermittedQuery({user:'inventor2@acme', domain: 'IDEAS', action: 'READ', checkOwnership:true, instanceId: 11},
             `[]`);
     });
 });

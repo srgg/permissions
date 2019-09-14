@@ -15,14 +15,18 @@ export interface IsPermittedQueryParams extends DomainParams {
 export interface BuildAllResourceQueryParams extends DomainParams {
     columns?: string[];
     checkOwnership?: boolean;
-    withRowPermissions?: boolean;
     query_extension?: string;
     extended_params?: object;
 }
 
+export interface ParametrizedQuery {
+    query: string;
+    params: any[];
+}
+
 export class QueryBuilder {
 
-    private static buildQuery({sql, addons}, queryParams, buildParams) {
+    private static buildQuery({sql, addons}, queryParams, buildParams): ParametrizedQuery {
         const qt = new QueryTemplater();
         const processed: any = {};
 
@@ -38,11 +42,11 @@ export class QueryBuilder {
         return parametrized;
     }
 
-    static buildIsPermittedQuery({organizationId, userId, domain, action, checkOwnership, instanceId}: IsPermittedQueryParams) {
+    static buildIsPermittedQuery({organizationId, userId, domain, action, checkOwnership, instanceId}: IsPermittedQueryParams): ParametrizedQuery {
         const q = QueryBuilder.buildReadAllFromDomainQuery({organizationId: organizationId, userId: userId,
             domain: domain, action: action, columns: ['id'],
-            query_extension: instanceId ? 'AND i.id = :instanceId' : undefined, extended_params: {instanceId: instanceId},
-            checkOwnership: checkOwnership, withRowPermissions: false});
+            query_extension: instanceId ? 'AND iii.id = :instanceId' : undefined, extended_params: {instanceId: instanceId},
+            checkOwnership: checkOwnership});
 
         q.query = `SELECT 1 isPermitted FROM DUAL WHERE EXISTS(
   ${q.query}
@@ -51,8 +55,8 @@ export class QueryBuilder {
     }
 
     public static buildReadAllFromDomainQuery({organizationId, userId, domain, action,
-                       columns, checkOwnership, withRowPermissions, query_extension, extended_params}: BuildAllResourceQueryParams) {
-        const alias = 'ii';
+                       columns, checkOwnership, query_extension, extended_params}: BuildAllResourceQueryParams): ParametrizedQuery {
+        const alias = 'iii';
         let cols;
 
         if (columns) {
@@ -67,101 +71,58 @@ export class QueryBuilder {
         }
 
         const allResourcesQueryTemplate = {
-            sql:`
-SELECT ${cols}
-    {{row_level_permissions}}       
-FROM (
-         SELECT i.*
-              , (
-             SELECT GROUP_CONCAT(pp.id) as id
-             FROM permissions pp
-             WHERE
-                pp.resource = :resource
-                AND (
-                         pp.uid = :userid
-                     OR EXISTS(
-                                 SELECT 1
-                                 FROM user_groups ur
-                                 WHERE ur.gid = pp.gid
-                                   AND ur.uid = :userid
-                             )
-                )
-               --
-               AND (
-                      -- apply instance filtering if required
-                     (pp.resource_instance IS NOT NULL AND pp.resource_instance = i.id)
-                     
-                     -- or apply resource ownership filtering, if applicable
-                     OR (
-                         pp.resource_instance IS NULL
-                         
-                         {{own_resource_filter}}
-                    )
-                )
-                
-            AND EXISTS (
-                SELECT 1 FROM permissions pp WHERE pp.id IN (
-                    select p.id
-                    FROM permissions p
-                    WHERE p.resource = :resource
-                    AND (
-                        p.uid = :userid
-                        OR EXISTS(
-                            SELECT 1
-                                FROM user_groups ug
-                                WHERE ug.gid = p.gid
-                                AND ug.uid = :userid
+            sql:`SELECT ${cols}
+    FROM (
+    SELECT ii.*, calculatePermittedActionsOrNull(:action, ii.is_owner, ii.pids) permitted
+    FROM (
+         SELECT i.*,
+                (
+                    {{ownership_filtering}}
+                    {{ownership_is_not_applicable}}
+                ) is_owner,
+                (
+                    SELECT GROUP_CONCAT(pp.id) as id
+                    FROM permissions pp
+                    WHERE pp.resource = :resource
+                      AND ( -- include only permissions granted to user either directly or by group membership
+                                pp.uid = :userid
+                            OR EXISTS(
+                                SELECT 1
+                                FROM user_groups ur
+                                WHERE ur.gid = pp.gid
+                                  AND ur.uid = :userid
+                            )
                         )
-                    )
-
-                )
-
-               -- do authorization check filtering
-
-               AND ( -- apply instance filtering if required
-                     (pp.resource_instance IS NOT NULL AND pp.resource_instance = i.id)
-                     OR pp.resource_instance IS NULL)
-
-
-               AND ( -- apply action filtering
-                     (FIND_IN_SET(LCASE(:action), REPLACE(LCASE(pp.action), ' ', '')) > 0)
-
-                    -- apply owner actions, if applicable
-                    {{own_action_filter}}
-                 )
-            )
-         ) pids
+                      AND (
+                        -- apply instance filtering, if required
+                            (pp.resource_instance IS NOT NULL AND pp.resource_instance = i.id)
+                            OR pp.resource_instance IS NULL
+                        )
+                ) pids
          FROM ${domain.toLowerCase()} i
-         -- apply organization filtering
-          WHERE i.organization_id = :organizationid
-          {{query_extention_point}}
-     ) ${alias}
-WHERE ${alias}.pids IS NOT NULL
-`,
+         WHERE
+           -- apply organization filtering
+           i.organization_id = :organizationid
+     ) ii ) ${alias} WHERE ${alias}.permitted IS NOT NULL
+            {{query_extension_point}}` ,
             addons: {
-                row_level_permissions: {
-                    options: {propertyName: 'needRowLevelPermissions', propertyValue: true},
-                    sql: ` , calcPermissions(${alias}.pids) as permissions`
-                },
-
-                own_resource_filter: {
+                ownership_filtering: {
                     options: {propertyName: 'ownershipFilter', propertyValue: true},
-                    sql: `AND (  -- if owner is provided
-                                (i.owner_uid IS NOT NULL AND i.owner_uid = :userid)
-                                    OR (i.owner_gid IS NOT NULL AND pp.gid = i.owner_gid)
-                          )`
+                    sql: `(i.owner_uid IS NOT NULL AND i.owner_uid = :userid)
+                        OR (i.owner_gid IS NOT NULL AND
+                            EXISTS(
+                                SELECT 1
+                                FROM user_groups ur
+                                WHERE ur.gid = i.owner_gid
+                                  AND ur.uid = :userid
+                            )
+                        )`
                 },
-                own_action_filter: {
-                    options: {propertyName: 'ownershipFilter', propertyValue: true},
-                    sql: `OR (                          
-                                -- apply _OWN actions, if any
-                                 FIND_IN_SET(LCASE(CONCAT(:action, '_OWN')),
-                                             REPLACE(LCASE(pp.action), ' ', '')) > 0
-                                
-                                {{own_resource_filter}}                             
-                         )`
+                ownership_is_not_applicable: { // if ownership is not applicable, then each resource will be treated as owned by everyone
+                    options: {propertyName: 'ownershipFilter', propertyValue: false },
+                    sql: `(1)`
                 },
-                query_extention_point: {
+                query_extension_point: {
                     options: {propertyName: 'apply_query_extension', propertyValue: true},
                     sql: `${query_extension}`
                 },
@@ -176,7 +137,7 @@ WHERE ${alias}.pids IS NOT NULL
 
         return QueryBuilder.buildQuery(allResourcesQueryTemplate,
             queryParams,
-            {needRowLevelPermissions: withRowPermissions, ownershipFilter: checkOwnership, apply_query_extension: !!query_extension});
+            {ownershipFilter: checkOwnership, apply_query_extension: !!query_extension});
     }
 }
 

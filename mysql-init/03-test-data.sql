@@ -19,9 +19,12 @@ INSERT INTO users VALUES (9, @emca, 'admin@emca', 'pw5', 'salt5');
 
 
 -- Shared Idea Inventors
+SET @shared_ideas_gid = 111;
+INSERT INTO groups (id, organization_id, name, description) VALUES (@shared_ideas_gid, @emca, 'shared-ideas', 'Group includes all the imported/shared ideas.');
+
 SET @shared_iventors_gid = 100;
 INSERT INTO groups (id, organization_id, name, description) VALUES (@shared_iventors_gid, @emca, 'shared-idea-inventors', 'Inventors that can work with shared ideas');
-INSERT INTO permissions (gid,resource,action) VALUES (@shared_iventors_gid, 'IdEaS', 'READ_OWN, READ_SHARED_OWN, EDIT_SHARED_OWN');
+-- INSERT INTO permissions (gid,resource,action) VALUES (@shared_iventors_gid, 'IdEaS', 'READ_OWN, READ_SHARED_OWN, EDIT_SHARED_OWN');
 
 INSERT INTO user_groups VALUES (1,1);
 INSERT INTO user_groups VALUES (2,1);
@@ -69,8 +72,19 @@ INSERT INTO ideas VALUES (7, @emca, 6, null, 'idea1@emca', 'the 1st idea of inve
 INSERT INTO ideas VALUES (8, @emca, 6, null, 'idea2@emca', 'the 2nd idea of inventor2@emca' );
 
 
-INSERT INTO ideas VALUES (13, @emca, null, @shared_iventors_gid, 'shared-idea1@emca', 'the 1st shared idea at emca' );
-INSERT INTO ideas VALUES (14, @emca, null, @shared_iventors_gid, 'shared-idea2@emca', 'the 2nd shared idea at emca' );
+-- INSERT INTO ideas VALUES (13, @emca, null, @shared_iventors_gid, 'shared-idea1@emca', 'the 1st shared idea at emca' );
+-- INSERT INTO ideas VALUES (14, @emca, null, @shared_iventors_gid, 'shared-idea2@emca', 'the 2nd shared idea at emca' );
+SET @ideaManager_gid = 2;
+INSERT INTO ideas VALUES (13, @emca, null, @ideaManager_gid, 'shared-idea1@emca', 'the 1st shared idea at emca' );
+INSERT INTO ideas VALUES (14, @emca, null, @ideaManager_gid, 'shared-idea2@emca', 'the 2nd shared idea at emca' );
+
+INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@shared_iventors_gid, 'ideas', 13, 'READ,READ_SHARED, EDIT_SHARED');
+INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@shared_iventors_gid, 'ideas', 14, 'READ,READ_SHARED, EDIT_SHARED');
+
+SET @idea_reviwer_gid = (SELECT id FROM groups WHERE name = 'idea-reviewer');
+INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@idea_reviwer_gid, 'ideas', 13, 'READ,READ_SHARED');
+INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@idea_reviwer_gid, 'ideas', 14, 'READ,READ_SHARED');
+
 
 SET @DISABLE_TRIGGERS=1;
 INSERT INTO ideas VALUES (15, @emca, null, null, 'orphan-idea1@emca', 'the 1st orphan idea at emca' );
@@ -78,8 +92,8 @@ INSERT INTO ideas VALUES (16, @emca, null, null, 'orphan-idea2@emca', 'the 2nd o
 SET @DISABLE_TRIGGERS=NULL;
 
 
-INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (5, 'ideas', 7, 'READ');
-INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (5, 'IdEaS', 8, 'READ_OWN');
+INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (5, 'ideas', 7, 'READ, EDIT');
+INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (5, 'IdEaS', 8, 'READ_OWN, EDIT_OWN');
 
 
 -- --------------------
@@ -91,17 +105,21 @@ INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (5, 'IdEa
 -- INSERT INTO groups  (id, organization_id, name, description) VALUES (@reveiwers_gid, @emca, 'idea-reviewers', 'Supervisors that can read the entire idea  and can commented on it');
 -- INSERT INTO permissions (gid,resource,action) VALUES (@reveiwers_gid, 'Comments', 'DELETE_OWN, EDIT_OWN');
 -- INSERT INTO permissions (gid,resource,action) VALUES (@reveiwers_gid, 'Ideas', 'READ');
-SET @idea_reviwer_gid = (SELECT id FROM groups WHERE name = 'idea-reviewer');
 
-INSERT INTO users (organization_id, name, password, password_salt) VALUES (@acme, 'reviewer1@acme', 'pw6', 'salt6');
+INSERT INTO users (organization_id, name, password, password_salt) VALUES (@emca, 'reviewer1@emca', 'pw6', 'salt6');
 SET @reviewer1 = LAST_INSERT_ID();
 INSERT INTO user_groups VALUES (@reviewer1, @idea_reviwer_gid);
 
-INSERT INTO users (organization_id, name, password, password_salt) VALUES (@acme, 'reviewer2@acme', 'pw7', 'salt7');
+INSERT INTO users (organization_id, name, password, password_salt) VALUES (@emca, 'reviewer2@emca', 'pw7', 'salt7');
 SET @reviewer2 = LAST_INSERT_ID();
 INSERT INTO user_groups vALUES (@reviewer2, @idea_reviwer_gid);
 
--- Create comments for all the ideas
+-- Create comments
+INSERT INTO comments (owner_uid, idea_id, text) VALUES (@reviewer1, 13, '1st comment by rewiewer1@emca on the 1st shared idea at emca');
+INSERT INTO comments (owner_uid, idea_id, text) VALUES (@reviewer1, 14, '1st comment by rewiewer1@emca on the 2nd shared idea at emca');
+
+INSERT INTO comments (owner_uid, idea_id, text) VALUES (@reviewer2, 13, '1st comment by rewiewer2@emca on the 1st shared idea at emca');
+INSERT INTO comments (owner_uid, idea_id, text) VALUES (@reviewer2, 14, '1st comment by rewiewer2@emca on the 2nd shared idea at emca');
 
 -- DECLARE cursor_name CURSOR FOR Select * FROM ideas ;
 --

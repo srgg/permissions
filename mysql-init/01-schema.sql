@@ -98,11 +98,11 @@ BEGIN
     END IF;
 END; $$
 
-CREATE FUNCTION calcPermissions(permissionList VARCHAR(255)) RETURNS VARCHAR(255)
+CREATE FUNCTION calculatePermittedActionsOrNull(requestedAction VARCHAR(100), isOwner BOOL, permissionList VARCHAR(255)) RETURNS VARCHAR(512)
 BEGIN
-    DECLARE permissions VARCHAR(255);
+    DECLARE permissions VARCHAR(512);
 
-    (SELECT GROUP_CONCAT(DISTINCT REPLACE(p.single_perm, '_OWN', '') ORDER BY p.single_perm) INTO permissions FROM
+    (SELECT GROUP_CONCAT(DISTINCT p.single_perm ORDER BY p.single_perm) INTO permissions FROM
         (
             SELECT Trim(SUBSTRING_INDEX(SUBSTRING_INDEX(ppp.action, ',', n.digit+1), ',', -1)) single_perm
             FROM (
@@ -111,9 +111,18 @@ BEGIN
                  ) ppp
                      INNER JOIN (SELECT 0 digit UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3  UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) n
                                 ON LENGTH(REPLACE(ppp.action, ',' , '')) <= LENGTH(ppp.action)-n.digit
-        )p );
+        )p
+     WHERE isOwner OR (NOT isOwner AND RIGHT(LCASE(p.single_perm), 4) <> '_own'));
 
-    return permissions;
+    -- ensure that requested action is permitted
+    IF FIND_IN_SET(LCASE(requestedAction), permissions) > 0 OR (
+            isOwner AND (FIND_IN_SET(LCASE(CONCAT(requestedAction, '_OWN')),  permissions) > 0)
+        ) THEN
+            #return REPLACE(permissions, '_OWN', '');
+        RETURN permissions;
+    ELSE
+        RETURN NULL;
+    END IF;
 END; $$
 
 CREATE PROCEDURE checkConsistencyWithinOrganization(organization_id INT, owner_uid INT, owner_gid INT)
