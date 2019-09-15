@@ -357,6 +357,25 @@ describe('Read all from a particular Domain', () => {
             );
         });
 
+        test('1st reviewer at emca should be able to read shared ideas of the entire organization', async () => {
+            await checkReadAllQuery({
+                    user: 'reviewer1@emca', domain: 'ideas', action: 'ReAd',
+                    columns: ['id', 'name', 'permitted'],
+                    checkOwnership: true
+                },
+                `[
+               {  
+                    id:13,
+                    name:'shared-idea1@emca',
+                    permitted:'CREATE-COMMENT,READ,READ_SHARED'
+               },
+               {  
+                    id:14,
+                    name:'shared-idea2@emca',
+                    permitted:'CREATE-COMMENT,READ,READ_SHARED'
+               }
+            ]`);
+        });
     });
 
     describe('Read all from USERS', () => {
@@ -416,18 +435,73 @@ describe('Read all from a particular Domain', () => {
                   permitted:'CREATE,DELETE,EDIT,READ'
                },
                {
-                  id:433,
+                  id:435,
                   organization_id:3,
                   name:'reviewer1@emca',
                   permitted:'CREATE,DELETE,EDIT,READ'
                },
                {
-                  id:434,
+                  id:436,
                   organization_id:3,
                   name:'reviewer2@emca',
                   permitted:'CREATE,DELETE,EDIT,READ'
                }
             ]`);
         });
+    });
+
+    describe('Read all from COMMENTS', () => {
+        // test('1st reviewer at emca should be able to read the only comments on shared ideas of the entire organization', async () => {
+        //     await checkReadAllQuery({
+        //             user: 'reviewer1@emca', domain: 'comments', action: 'ReAd',
+        //             columns: ['id', 'owner_uid', 'idea_id', 'text', 'permitted'],
+        //             checkOwnership: true
+        //             // ,organizationId: null
+        //         },
+        //         `[
+        //         {
+        //             id: 439,
+        //             idea_id: 13,
+        //             owner_uid: 435,
+        //             permitted: 'DELETE_OWN,EDIT_OWN,READ_OWN',
+        //             text: '1st comment by rewiewer1@emca on the 1st shared idea at emca'
+        //         },
+        //         {
+        //             id: 440,
+        //             idea_id: 14,
+        //             owner_uid: 435,
+        //             permitted: 'DELETE_OWN,EDIT_OWN,READ_OWN',
+        //             text: '1st comment by rewiewer1@emca on the 2nd shared idea at emca'
+        //         },
+        //         {
+        //             id: 441,
+        //             idea_id: 13,
+        //             owner_uid: 436,
+        //             permitted: 'DELETE_OWN,EDIT_OWN,READ_OWN',
+        //             text: '1st comment by rewiewer2@emca on the 1st shared idea at emca'
+        //         },
+        //         {
+        //             id: 442,
+        //             idea_id: 14,
+        //             owner_uid: 436,
+        //             permitted: 'DELETE_OWN,EDIT_OWN,READ_OWN',
+        //             text: '1st comment by rewiewer2@emca on the 2nd shared idea at emca'
+        //         },
+        //         {
+        //             id: 443,
+        //             idea_id: 13,
+        //             owner_uid: 5,
+        //             permitted: 'DELETE_OWN,EDIT_OWN,READ_OWN',
+        //             text: '1st comment by inventor1@emca on the 1st shared idea at emca'
+        //         },
+        //         {
+        //             id: 444,
+        //             idea_id: 14,
+        //             owner_uid: 5,
+        //             permitted: 'DELETE_OWN,EDIT_OWN,READ_OWN',
+        //             text: '1st comment by inventor1@emca on the 2nd shared idea at emca'
+        //         }
+        //     ]`);
+        // });
     });
 });

@@ -4,7 +4,7 @@ export interface DomainParams {
     userId: number;
     domain: string;
     action: string;
-    organizationId: number;
+    organizationId?: number | null;
 }
 
 export interface IsPermittedQueryParams extends DomainParams {
@@ -101,8 +101,9 @@ export class QueryBuilder {
                 ) pids
          FROM ${domain.toLowerCase()} i
          WHERE
-           -- apply organization filtering
-           i.organization_id = :organizationid
+            TRUE != FALSE
+            {{organization_filtering}}
+            
      ) ii ) ${alias} WHERE ${alias}.permitted IS NOT NULL
             {{query_extension_point}}` ,
             addons: {
@@ -122,6 +123,12 @@ export class QueryBuilder {
                     options: {propertyName: 'ownershipFilter', propertyValue: false },
                     sql: `(1)`
                 },
+                organization_filtering: { // if ownership is not applicable, then each resource will be treated as owned by everyone
+                    options: {propertyName: 'organizationFilter', propertyValue: true },
+                    sql:
+                        ` AND (-- apply organization filtering
+i.organization_id = :organizationid)`
+                },
                 query_extension_point: {
                     options: {propertyName: 'apply_query_extension', propertyValue: true},
                     sql: `${query_extension}`
@@ -137,7 +144,8 @@ export class QueryBuilder {
 
         return QueryBuilder.buildQuery(allResourcesQueryTemplate,
             queryParams,
-            {ownershipFilter: checkOwnership, apply_query_extension: !!query_extension});
+            {ownershipFilter: checkOwnership, apply_query_extension: !!query_extension,
+                organizationFilter: organizationId != null});
     }
 }
 

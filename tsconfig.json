@@ -19,6 +19,7 @@
     "sourceMap": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "strictNullChecks": true,
     "typeRoots": [
       "./node_modules/@types/",
       "./node_modules/allure2-js-commons/dist/declarations/**/",

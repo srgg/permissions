@@ -19,7 +19,7 @@ interface BuildAllResourceQueryParamsTest {
     user: number | string;
     domain: string;
     action: string;
-    organizationId?: number;
+    organizationId?: number | null;
     columns?: string[];
     checkOwnership?: boolean;
 }
@@ -72,7 +72,9 @@ async function check_read_all_query(queryopts: BuildAllResourceQueryParamsTest, 
     const uid: number = await retrieveUserIdIfNeeded(queryopts.user);
 
     let orgId;
-    if (queryopts.organizationId) {
+    if (queryopts.organizationId === null) {
+        orgId = null;
+    } else if (queryopts.organizationId) {
         orgId = queryopts.organizationId;
     } else {
         const rr = await getConnection().query("SELECT organization_id FROM users WHERE id = " + uid);
@@ -94,7 +96,9 @@ async function check_ispermitted_query(queryopts: IsPermittedQueryParamsTest, ex
     const uid: number = await retrieveUserIdIfNeeded(queryopts.user);
 
     let orgId;
-    if (queryopts.organizationId) {
+    if (queryopts.organizationId === null) {
+        orgId = null;
+    } else if (queryopts.organizationId) {
         orgId = queryopts.organizationId;
     } else {
         const rr = await getConnection().query("SELECT organization_id FROM users WHERE id = " + uid);
