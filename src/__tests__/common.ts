@@ -92,7 +92,7 @@ async function check_read_all_query(queryopts: BuildAllResourceQueryParamsTest, 
     await execute_query_and_check(q, expected);
 }
 
-async function check_ispermitted_query(queryopts: IsPermittedQueryParamsTest, expected: string) {
+async function check_permitted_query(queryopts: IsPermittedQueryParamsTest, expected: string) {
     const uid: number = await retrieveUserIdIfNeeded(queryopts.user);
 
     let orgId;
@@ -120,5 +120,5 @@ async function check_ispermitted_query(queryopts: IsPermittedQueryParamsTest, ex
 
 export {
     check_read_all_query as checkReadAllQuery,
-    check_ispermitted_query as checkIsPermittedQuery
+    check_permitted_query as checkIsPermittedQuery
 }
