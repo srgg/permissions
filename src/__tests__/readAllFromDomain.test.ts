@@ -5,6 +5,7 @@
 // https://blog.morizyun.com/javascript/library-typescript-jest-unit-test.html
 
 import { checkReadAllQuery} from "./common";
+import { checkReadAllSubQuery} from "./common";
 
 describe('Read all from a particular Domain', () => {
 
@@ -367,12 +368,12 @@ describe('Read all from a particular Domain', () => {
                {  
                     id:13,
                     name:'shared-idea1@emca',
-                    permitted:'CREATE-COMMENT,READ,READ_SHARED'
+                    permitted:'CREATE-COMMENT_SHARED,READ,READ-COMMENT_SHARED,READ_SHARED'
                },
                {  
                     id:14,
                     name:'shared-idea2@emca',
-                    permitted:'CREATE-COMMENT,READ,READ_SHARED'
+                    permitted:'CREATE-COMMENT_SHARED,READ,READ-COMMENT_SHARED,READ_SHARED'
                }
             ]`);
         });
@@ -451,57 +452,57 @@ describe('Read all from a particular Domain', () => {
     });
 
     describe('Read all from COMMENTS', () => {
-        // test('1st reviewer at emca should be able to read the only comments on shared ideas of the entire organization', async () => {
-        //     await checkReadAllQuery({
-        //             user: 'reviewer1@emca', domain: 'comments', action: 'ReAd',
-        //             columns: ['id', 'owner_uid', 'idea_id', 'text', 'permitted'],
-        //             checkOwnership: true
-        //             // ,organizationId: null
-        //         },
-        //         `[
-        //         {
-        //             id: 439,
-        //             idea_id: 13,
-        //             owner_uid: 435,
-        //             permitted: 'DELETE_OWN,EDIT_OWN,READ_OWN',
-        //             text: '1st comment by rewiewer1@emca on the 1st shared idea at emca'
-        //         },
-        //         {
-        //             id: 440,
-        //             idea_id: 14,
-        //             owner_uid: 435,
-        //             permitted: 'DELETE_OWN,EDIT_OWN,READ_OWN',
-        //             text: '1st comment by rewiewer1@emca on the 2nd shared idea at emca'
-        //         },
-        //         {
-        //             id: 441,
-        //             idea_id: 13,
-        //             owner_uid: 436,
-        //             permitted: 'DELETE_OWN,EDIT_OWN,READ_OWN',
-        //             text: '1st comment by rewiewer2@emca on the 1st shared idea at emca'
-        //         },
-        //         {
-        //             id: 442,
-        //             idea_id: 14,
-        //             owner_uid: 436,
-        //             permitted: 'DELETE_OWN,EDIT_OWN,READ_OWN',
-        //             text: '1st comment by rewiewer2@emca on the 2nd shared idea at emca'
-        //         },
-        //         {
-        //             id: 443,
-        //             idea_id: 13,
-        //             owner_uid: 5,
-        //             permitted: 'DELETE_OWN,EDIT_OWN,READ_OWN',
-        //             text: '1st comment by inventor1@emca on the 1st shared idea at emca'
-        //         },
-        //         {
-        //             id: 444,
-        //             idea_id: 14,
-        //             owner_uid: 5,
-        //             permitted: 'DELETE_OWN,EDIT_OWN,READ_OWN',
-        //             text: '1st comment by inventor1@emca on the 2nd shared idea at emca'
-        //         }
-        //     ]`);
-        // });
+        test('1st reviewer at emca should be able to read comments on shared ideas the only (of the entire organization)', async () => {
+            await checkReadAllSubQuery({
+                    user: 'reviewer1@emca', domain: 'ideas.comments', action: 'READ-COMMENT_SHARED',
+                    columns: ['id', 'owner_uid', 'ideas_id', 'text'],
+                    checkOwnership: true
+                    // ,organizationId: null
+                },
+                `[
+                {
+                    id: 439,
+                    ideas_id: 13,
+                    owner_uid: 435,
+                    permitted: 'CREATE-COMMENT_SHARED,READ,READ-COMMENT_SHARED,READ_SHARED',
+                    text: '1st comment by rewiewer1@emca on the 1st shared idea at emca'
+                },
+                {
+                    id: 440,
+                    ideas_id: 14,
+                    owner_uid: 435,
+                    permitted: 'CREATE-COMMENT_SHARED,READ,READ-COMMENT_SHARED,READ_SHARED',
+                    text: '1st comment by rewiewer1@emca on the 2nd shared idea at emca'
+                },
+                {
+                    id: 441,
+                    ideas_id: 13,
+                    owner_uid: 436,
+                    permitted: 'CREATE-COMMENT_SHARED,READ,READ-COMMENT_SHARED,READ_SHARED',
+                    text: '1st comment by rewiewer2@emca on the 1st shared idea at emca'
+                },
+                {
+                    id: 442,
+                    ideas_id: 14,
+                    owner_uid: 436,
+                    permitted: 'CREATE-COMMENT_SHARED,READ,READ-COMMENT_SHARED,READ_SHARED',
+                    text: '1st comment by rewiewer2@emca on the 2nd shared idea at emca'
+                },
+                {
+                    id: 443,
+                    ideas_id: 13,
+                    owner_uid: 5,
+                    permitted: 'CREATE-COMMENT_SHARED,READ,READ-COMMENT_SHARED,READ_SHARED',
+                    text: '1st comment by inventor1@emca on the 1st shared idea at emca'
+                },
+                {
+                    id: 444,
+                    ideas_id: 14,
+                    owner_uid: 5,
+                    permitted: 'CREATE-COMMENT_SHARED,READ,READ-COMMENT_SHARED,READ_SHARED',
+                    text: '1st comment by inventor1@emca on the 2nd shared idea at emca'
+                }
+            ]`);
+        });
     });
 });

@@ -1,4 +1,5 @@
 const QueryTemplater =  require('query-template');
+const assert = require('assert');
 
 export interface DomainParams {
     userId: number;
@@ -40,6 +41,41 @@ export class QueryBuilder {
         const result = qt.processTemplates({sql: sql, addons: processed}, buildParams);
         const parametrized = qt.parametrizeQuery(result, queryParams, 'mysql');
         return parametrized;
+    }
+
+    public static buildReadAllFromSubDomainQuery({organizationId, userId, domain, action,
+            columns, checkOwnership, query_extension, extended_params}: BuildAllResourceQueryParams): ParametrizedQuery {
+
+        const domains: string[] = domain.split('.');
+        assert(domains.length === 2);
+
+        const primaryDomain = domains[0].toLowerCase();
+        const secondaryDomain = domains[1].toLowerCase();
+
+        const alias = 'l';
+        let cols;
+
+        if (columns) {
+            const cc: string[] = [];
+            columns.forEach((c) => {
+                cc.push(alias.concat('.', c));
+            });
+
+            cols = cc.join(', ');
+        } else {
+            cols = alias.concat('.*');
+        }
+
+        const q = QueryBuilder.buildReadAllFromDomainQuery({organizationId: organizationId, userId: userId,
+            domain: primaryDomain, action: action, columns: ['id', 'permitted'],
+            checkOwnership: checkOwnership});
+
+        q.query = `SELECT ${cols}, pd.permitted
+FROM ${secondaryDomain} ${alias}
+  JOIN (
+  ${q.query}
+) pd ON ${alias}.${primaryDomain}_id =  pd.id`;
+        return q;
     }
 
     static buildIsPermittedQuery({organizationId, userId, domain, action, checkOwnership, instanceId}: IsPermittedQueryParams): ParametrizedQuery {

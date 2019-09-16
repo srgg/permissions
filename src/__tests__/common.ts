@@ -24,6 +24,15 @@ interface BuildAllResourceQueryParamsTest {
     checkOwnership?: boolean;
 }
 
+interface BuildAllResourceQueryParamsTest {
+    user: number | string;
+    domain: string;
+    action: string;
+    organizationId?: number | null;
+    columns?: string[];
+    checkOwnership?: boolean;
+}
+
 async function execute_query_and_check(q: ParametrizedQuery, expected: string) {
     // console.log("SQL query:", q.query);
     const r = await getConnection().query(q.query, q.params);
@@ -112,8 +121,23 @@ async function check_permitted_query(queryopts: IsPermittedQueryParamsTest, expe
     await execute_query_and_check(q, expected);
 }
 
+async function check_read_all_subquery(queryopts: BuildAllResourceQueryParamsTest, expected: string) {
+    const uid: number = await retrieveUserIdIfNeeded(queryopts.user);
+    const oid: number | null = await retrieveOrganizationIdIfNeeded(uid, queryopts.organizationId);
+
+    const q = QueryBuilder.buildReadAllFromSubDomainQuery({userId: uid,
+        domain: queryopts.domain,
+        action: queryopts.action,
+        organizationId: oid,
+        columns: queryopts.columns,
+        checkOwnership: queryopts.checkOwnership
+    });
+
+    await execute_query_and_check(q, expected);
+}
 
 export {
     check_read_all_query as checkReadAllQuery,
+    check_read_all_subquery as checkReadAllSubQuery,
     check_permitted_query as checkIsPermittedQuery
 }

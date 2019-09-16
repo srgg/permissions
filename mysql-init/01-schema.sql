@@ -79,16 +79,16 @@ CREATE TABLE idea_comments (
   id            INT AUTO_INCREMENT,
   owner_uid     INT,
   owner_gid     INT,
-  idea_id       INT,
+  ideas_id       INT,
   text          VARCHAR(512),
   CHECK (owner_gid IS NULL ), # group ownership is not supported for comments
   CONSTRAINT pk_comments PRIMARY KEY (id),
   CONSTRAINT comments_fk01 FOREIGN KEY (owner_uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT comments_fk02 FOREIGN KEY (idea_id) REFERENCES ideas (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT comments_fk02 FOREIGN KEY (ideas_id) REFERENCES ideas (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
 
 -- In order to prevent useless organization_id duplication in comments
-CREATE VIEW comments AS SELECT c.*, i.organization_id FROM idea_comments c join ideas i on c.idea_id = i.id;
+CREATE VIEW comments AS SELECT c.*, i.organization_id FROM idea_comments c join ideas i on c.ideas_id = i.id;
 
 DELIMITER $$
 

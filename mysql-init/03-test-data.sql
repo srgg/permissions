@@ -125,14 +125,14 @@ SET @reviewer2 = LAST_INSERT_ID();
 INSERT INTO user_groups vALUES (@reviewer2, @idea_reviwer_gid);
 
 -- Create comments
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (@reviewer1, 9, '1st comment by rewiewer1@acme on the 1st shared idea at acme');
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (@reviewer1, 10, '1st comment by rewiewer1@acme on the 2nd shared idea at acme');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@reviewer1, 9, '1st comment by rewiewer1@acme on the 1st shared idea at acme');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@reviewer1, 10, '1st comment by rewiewer1@acme on the 2nd shared idea at acme');
 
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (@reviewer2, 9, '1st comment by rewiewer2@acme on the 1st shared idea at acme');
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (@reviewer2, 10, '1st comment by rewiewer2@acme on the 2nd shared idea at acme');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@reviewer2, 9, '1st comment by rewiewer2@acme on the 1st shared idea at acme');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@reviewer2, 10, '1st comment by rewiewer2@acme on the 2nd shared idea at acme');
 
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (1, 9, '1st comment by inventor1@acme on the 1st shared idea at acme');
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (1, 10, '1st comment by inventor1@acme on the 2nd shared idea at acme');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (1, 9, '1st comment by inventor1@acme on the 1st shared idea at acme');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (1, 10, '1st comment by inventor1@acme on the 2nd shared idea at acme');
 
 
 -- -----------------------------------
@@ -152,20 +152,20 @@ SET @reviewer2 = LAST_INSERT_ID();
 INSERT INTO user_groups vALUES (@reviewer2, @idea_reviwer_gid);
 
 -- Create comments
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (@reviewer1, 13, '1st comment by rewiewer1@emca on the 1st shared idea at emca');
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (@reviewer1, 14, '1st comment by rewiewer1@emca on the 2nd shared idea at emca');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@reviewer1, 13, '1st comment by rewiewer1@emca on the 1st shared idea at emca');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@reviewer1, 14, '1st comment by rewiewer1@emca on the 2nd shared idea at emca');
 
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (@reviewer2, 13, '1st comment by rewiewer2@emca on the 1st shared idea at emca');
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (@reviewer2, 14, '1st comment by rewiewer2@emca on the 2nd shared idea at emca');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@reviewer2, 13, '1st comment by rewiewer2@emca on the 1st shared idea at emca');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@reviewer2, 14, '1st comment by rewiewer2@emca on the 2nd shared idea at emca');
 
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (@inventor1_emca, 13, '1st comment by inventor1@emca on the 1st shared idea at emca');
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (@inventor1_emca, 14, '1st comment by inventor1@emca on the 2nd shared idea at emca');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@inventor1_emca, 13, '1st comment by inventor1@emca on the 1st shared idea at emca');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@inventor1_emca, 14, '1st comment by inventor1@emca on the 2nd shared idea at emca');
 
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (@inventor1_emca, 7, '1st comment by inventor1@emca on the 1st idea of inventor2@emca');
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (@inventor1_emca, 8, '1st comment by inventor1@emca on the 2nd idea of inventor2@emca');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@inventor1_emca, 7, '1st comment by inventor1@emca on the 1st idea of inventor2@emca');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@inventor1_emca, 8, '1st comment by inventor1@emca on the 2nd idea of inventor2@emca');
 
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (@inventor2_emca, 7, '1st comment by inventor2@emca on the 1st idea of inventor2@emca');
-INSERT INTO comments (owner_uid, idea_id, text) VALUES (@inventor2_emca, 8, '1st comment by inventor2@emca on the 2nd idea of inventor2@emca');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@inventor2_emca, 7, '1st comment by inventor2@emca on the 1st idea of inventor2@emca');
+INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@inventor2_emca, 8, '1st comment by inventor2@emca on the 2nd idea of inventor2@emca');
 
 -- DECLARE cursor_name CURSOR FOR Select * FROM ideas ;
 --
