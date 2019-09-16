@@ -64,27 +64,31 @@ async function retrieveUserIdIfNeeded(user: number|string): Promise<number> {
     return uid;
 }
 
+async function retrieveOrganizationIdIfNeeded(uid: number, organization?: number|null): Promise<number|null> {
+    let orgId;
+    if (organization === null) {
+        orgId = null;
+    } else if (organization) {
+        orgId = organization;
+    } else {
+        const rr = await getConnection().query("SELECT organization_id FROM users WHERE id = " + uid);
+        orgId = rr[0].organization_id;
+    }
+    return orgId;
+}
+
 async function check_read_all_query(queryopts: BuildAllResourceQueryParamsTest, expected: string) {
     if ( !queryopts.columns && queryopts.domain === 'IDEAS') {
         queryopts.columns = ['id','name','organization_id', 'owner_uid', 'owner_gid', 'title', 'permitted'];
     }
 
     const uid: number = await retrieveUserIdIfNeeded(queryopts.user);
-
-    let orgId;
-    if (queryopts.organizationId === null) {
-        orgId = null;
-    } else if (queryopts.organizationId) {
-        orgId = queryopts.organizationId;
-    } else {
-        const rr = await getConnection().query("SELECT organization_id FROM users WHERE id = " + uid);
-        orgId = rr[0].organization_id;
-    }
+    const oid: number | null = await retrieveOrganizationIdIfNeeded(uid, queryopts.organizationId);
 
     const q = QueryBuilder.buildReadAllFromDomainQuery({userId: uid,
         domain: queryopts.domain,
         action: queryopts.action,
-        organizationId: orgId,
+        organizationId: oid,
         columns: queryopts.columns,
         checkOwnership: queryopts.checkOwnership
     });
@@ -94,22 +98,13 @@ async function check_read_all_query(queryopts: BuildAllResourceQueryParamsTest, 
 
 async function check_permitted_query(queryopts: IsPermittedQueryParamsTest, expected: string) {
     const uid: number = await retrieveUserIdIfNeeded(queryopts.user);
-
-    let orgId;
-    if (queryopts.organizationId === null) {
-        orgId = null;
-    } else if (queryopts.organizationId) {
-        orgId = queryopts.organizationId;
-    } else {
-        const rr = await getConnection().query("SELECT organization_id FROM users WHERE id = " + uid);
-        orgId = rr[0].organization_id;
-    }
+    const oid: number | null = await retrieveOrganizationIdIfNeeded(uid, queryopts.organizationId);
 
     const q = QueryBuilder.buildIsPermittedQuery({
         userId: uid,
         domain: queryopts.domain,
         action: queryopts.action,
-        organizationId: orgId,
+        organizationId: oid,
         checkOwnership: queryopts.checkOwnership === undefined ?  false : queryopts.checkOwnership,
         instanceId: queryopts.instanceId
     });
