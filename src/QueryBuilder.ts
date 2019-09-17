@@ -90,6 +90,73 @@ FROM ${secondaryDomain} ${alias}
         return q;
     }
 
+    private static buildAllLowLevelQuery({organizationId, userId, domain, checkOwnership}: BuildAllResourceQueryParams): ParametrizedQuery {
+
+        const allResourcesQueryTemplate = {
+            sql:
+                `SELECT i.*,
+    (
+        {{ownership_filtering}}
+        {{ownership_is_not_applicable}}
+    ) is_owner,
+    (
+        SELECT GROUP_CONCAT(pp.id) as id
+        FROM permissions pp
+        WHERE pp.resource = :resource
+          AND ( -- include only permissions granted to user either directly or by group membership
+                    pp.uid = :userid
+                OR EXISTS(
+                    SELECT 1
+                    FROM user_groups ur
+                    WHERE ur.gid = pp.gid
+                      AND ur.uid = :userid
+                )
+            )
+          AND (
+            -- apply instance filtering, if required
+                (pp.resource_instance IS NOT NULL AND pp.resource_instance = i.id)
+                OR pp.resource_instance IS NULL
+            )
+    ) pids
+ FROM ${domain.toLowerCase()} i
+ WHERE
+    TRUE != FALSE
+    {{organization_filtering}}`,
+            addons: {
+                ownership_filtering: {
+                    options: {propertyName: 'ownershipFilter', propertyValue: true},
+                    sql: `(i.owner_uid IS NOT NULL AND i.owner_uid = :userid)
+                        OR (i.owner_gid IS NOT NULL AND
+                            EXISTS(
+                                SELECT 1
+                                FROM user_groups ur
+                                WHERE ur.gid = i.owner_gid
+                                  AND ur.uid = :userid
+                            )
+                        )`
+                },
+                ownership_is_not_applicable: { // if ownership is not applicable, then each resource will be treated as owned by everyone
+                    options: {propertyName: 'ownershipFilter', propertyValue: false},
+                    sql: `(1)`
+                },
+                organization_filtering: { // if ownership is not applicable, then each resource will be treated as owned by everyone
+                    options: {propertyName: 'organizationFilter', propertyValue: true},
+                    sql:
+                        ` AND (-- apply organization filtering
+i.organization_id = :organizationid)`
+                }
+            }
+        };
+
+        const queryParams = { userid: userId, resource: domain, organizationid: organizationId};
+
+        return QueryBuilder.buildQuery(allResourcesQueryTemplate,
+            queryParams,
+            {ownershipFilter: checkOwnership,
+                organizationFilter: organizationId != null});
+
+    }
+
     public static buildReadAllFromDomainQuery({organizationId, userId, domain, action,
                        columns, checkOwnership, query_extension, extended_params}: BuildAllResourceQueryParams): ParametrizedQuery {
         const alias = 'iii';
@@ -106,65 +173,23 @@ FROM ${secondaryDomain} ${alias}
             cols = alias.concat('.*');
         }
 
+        const q = QueryBuilder.buildAllLowLevelQuery({
+            action: 'ACTION-DOES-NOT-MATTER-FOR-LOW-LEVEL-SINCE-IT-IS-NOT-TAKEN-INTO-ACCOUNT',
+            userId:userId,
+            domain: domain,
+            organizationId: organizationId,
+            checkOwnership: checkOwnership},
+        );
+
         const allResourcesQueryTemplate = {
             sql:`SELECT ${cols}
     FROM (
-    SELECT ii.*, calculatePermittedActionsOrNull(:action, ii.is_owner, ii.pids) permitted
+    SELECT ii.*, calculatePermittedActionsOrNull('${action}', ii.is_owner, ii.pids) permitted
     FROM (
-         SELECT i.*,
-                (
-                    {{ownership_filtering}}
-                    {{ownership_is_not_applicable}}
-                ) is_owner,
-                (
-                    SELECT GROUP_CONCAT(pp.id) as id
-                    FROM permissions pp
-                    WHERE pp.resource = :resource
-                      AND ( -- include only permissions granted to user either directly or by group membership
-                                pp.uid = :userid
-                            OR EXISTS(
-                                SELECT 1
-                                FROM user_groups ur
-                                WHERE ur.gid = pp.gid
-                                  AND ur.uid = :userid
-                            )
-                        )
-                      AND (
-                        -- apply instance filtering, if required
-                            (pp.resource_instance IS NOT NULL AND pp.resource_instance = i.id)
-                            OR pp.resource_instance IS NULL
-                        )
-                ) pids
-         FROM ${domain.toLowerCase()} i
-         WHERE
-            TRUE != FALSE
-            {{organization_filtering}}
-            
+        ${q.query}
      ) ii ) ${alias} WHERE ${alias}.permitted IS NOT NULL
             {{query_extension_point}}` ,
             addons: {
-                ownership_filtering: {
-                    options: {propertyName: 'ownershipFilter', propertyValue: true},
-                    sql: `(i.owner_uid IS NOT NULL AND i.owner_uid = :userid)
-                        OR (i.owner_gid IS NOT NULL AND
-                            EXISTS(
-                                SELECT 1
-                                FROM user_groups ur
-                                WHERE ur.gid = i.owner_gid
-                                  AND ur.uid = :userid
-                            )
-                        )`
-                },
-                ownership_is_not_applicable: { // if ownership is not applicable, then each resource will be treated as owned by everyone
-                    options: {propertyName: 'ownershipFilter', propertyValue: false },
-                    sql: `(1)`
-                },
-                organization_filtering: { // if ownership is not applicable, then each resource will be treated as owned by everyone
-                    options: {propertyName: 'organizationFilter', propertyValue: true },
-                    sql:
-                        ` AND (-- apply organization filtering
-i.organization_id = :organizationid)`
-                },
                 query_extension_point: {
                     options: {propertyName: 'apply_query_extension', propertyValue: true},
                     sql: `${query_extension}`
@@ -178,10 +203,12 @@ i.organization_id = :organizationid)`
             Object.assign(queryParams, extended_params);
         }
 
-        return QueryBuilder.buildQuery(allResourcesQueryTemplate,
+        const dq =   QueryBuilder.buildQuery(allResourcesQueryTemplate,
             queryParams,
-            {ownershipFilter: checkOwnership, apply_query_extension: !!query_extension,
-                organizationFilter: organizationId != null});
+            {apply_query_extension: !!query_extension});
+
+        dq.params = q.params.concat(dq.params);
+        return dq;
     }
 }
 
