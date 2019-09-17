@@ -139,8 +139,8 @@ INSERT INTO comments (owner_uid, ideas_id, text) VALUES (1, 10, '1st comment by 
 -- EMCA
 -- ----------------------------------
 
-INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@idea_reviwer_gid, 'ideas', 13, 'READ,READ_SHARED');
-INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@idea_reviwer_gid, 'ideas', 14, 'READ,READ_SHARED');
+INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@idea_reviwer_gid, 'ideas', 13, 'READ,READ_SHARED,READ-COMMENT_SHARED');
+INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@idea_reviwer_gid, 'ideas', 14, 'READ,READ_SHARED, READ-COMMENT_SHARED');
 
 --  Grant Permissions to shared ideas
 INSERT INTO users (organization_id, name, password, password_salt) VALUES (@emca, 'reviewer1@emca', 'pw6', 'salt6');

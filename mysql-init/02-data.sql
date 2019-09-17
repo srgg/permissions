@@ -14,7 +14,7 @@ INSERT INTO permissions (gid,resource,action) VALUES (@admin_gid, 'users', 'READ
 
 -- Comments
 INSERT INTO permissions (gid,resource,action) VALUES (@reviewer_gid, 'Comments', 'READ_OWN, DELETE_OWN, EDIT_OWN');
-INSERT INTO permissions (gid,resource,action) VALUES (@reviewer_gid, 'Ideas', 'READ_SHARED, CREATE-COMMENT_SHARED, READ-COMMENT_SHARED');
+INSERT INTO permissions (gid,resource,action) VALUES (@reviewer_gid, 'Ideas', 'READ_SHARED, CREATE-COMMENT_SHARED');
 
 --  EDIT_COMMENT_OWN MUST NOT be granted as it cause that inventor will be able to EDIT all comments for the particular idea,
 -- whereas s/he instead of restricting to the own comments only.
