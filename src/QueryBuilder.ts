@@ -52,7 +52,7 @@ export class QueryBuilder {
         const primaryDomain = domains[0].toLowerCase();
         const secondaryDomain = domains[1].toLowerCase();
 
-        const alias = 'l';
+        const alias = 'lll';
         let cols;
 
         if (columns) {
@@ -66,16 +66,45 @@ export class QueryBuilder {
             cols = alias.concat('.*');
         }
 
+        const sq = QueryBuilder.buildAllLowLevelQuery({
+            action: 'ACTION-DOES-NOT-MATTER-FOR-LOW-LEVEL-SINCE-IT-IS-NOT-TAKEN-INTO-ACCOUNT',
+            userId:userId,
+            domain: secondaryDomain,
+            organizationId: null /*organization will be checked at the primary domain query */,
+            checkOwnership: checkOwnership},
+        );
+
         const q = QueryBuilder.buildReadAllFromDomainQuery({organizationId: organizationId, userId: userId,
             domain: primaryDomain, action: action, columns: ['id', 'permitted'],
             checkOwnership: checkOwnership});
 
-        q.query = `SELECT ${cols}, pd.permitted
-FROM ${secondaryDomain} ${alias}
-  JOIN (
-  ${q.query}
-) pd ON ${alias}.${primaryDomain}_id =  pd.id`;
-        return q;
+        const allSubResourcesQueryTemplate = {
+            sql:
+`
+SELECT ${cols}
+FROM (
+SELECT ll.*, concat_ws(',', '${action}',calculatePermittedActions(ll.is_owner, ll.pids)) as permitted
+FROM ( SELECT l.* FROM (
+${sq.query}
+) l
+-- Limiting sub-domain resources by joining them on permitted primary resources
+         JOIN (
+-- BEGIN OF a standard READ ALL FROM DOMAIN query: get permitted resources from the primary domain
+${q.query}
+
+-- END OF a standard READ ALL FROM DOMAIN query: get permitted resources from the primary domain
+) pd ON l.ideas_id =  pd.id
+) ll
+) lll`,
+            addons: {}
+        };
+
+        const dq = QueryBuilder.buildQuery(allSubResourcesQueryTemplate,
+            {},
+            {});
+
+        dq.params = sq.params.concat(q.params);
+        return dq;
     }
 
     static buildIsPermittedQuery({organizationId, userId, domain, action, checkOwnership, instanceId}: IsPermittedQueryParams): ParametrizedQuery {

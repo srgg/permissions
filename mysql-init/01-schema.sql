@@ -101,7 +101,7 @@ BEGIN
     END IF;
 END; $$
 
-CREATE FUNCTION calculatePermittedActionsOrNull(requestedAction VARCHAR(100), isOwner BOOL, permissionList VARCHAR(255)) RETURNS VARCHAR(512)
+CREATE FUNCTION calculatePermittedActions(isOwner BOOL, permissionList VARCHAR(255)) RETURNS VARCHAR(512)
 BEGIN
     DECLARE permissions VARCHAR(512);
 
@@ -116,6 +116,14 @@ BEGIN
                                 ON LENGTH(REPLACE(ppp.action, ',' , '')) <= LENGTH(ppp.action)-n.digit
         )p
      WHERE isOwner OR (NOT isOwner AND RIGHT(LCASE(p.single_perm), 4) <> '_own'));
+
+    RETURN permissions;
+END; $$
+
+CREATE FUNCTION calculatePermittedActionsOrNull(requestedAction VARCHAR(100), isOwner BOOL, permissionList VARCHAR(255)) RETURNS VARCHAR(512)
+BEGIN
+    DECLARE permissions VARCHAR(512);
+    SELECT calculatePermittedActions(isOwner, permissionList) INTO permissions;
 
     -- ensure that requested action is permitted
     IF FIND_IN_SET(LCASE(requestedAction), permissions) > 0 OR (
