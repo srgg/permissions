@@ -47,19 +47,19 @@ CREATE TABLE permissions (
   id         INT AUTO_INCREMENT,
   gid  INT,
   uid  INT,
-  resource VARCHAR(100),
+  domain VARCHAR(100),
   resource_instance INT,
   action   VARCHAR(100),
   CHECK ((gid IS NOT NULL AND uid IS NULL) OR (gid IS NULL AND uid IS NOT NULL)),
-  CHECK (action IS NOT NULL OR resource IS NOT NULL ),
-  CHECK (resource_instance IS NULL OR resource IS NOT NULL), -- Resource should be set if resource instance is provided
+  CHECK (action IS NOT NULL OR domain IS NOT NULL ),
+  CHECK (resource_instance IS NULL OR domain IS NOT NULL), -- Resource should be set if resource instance is provided
   CONSTRAINT pk_permissions PRIMARY KEY (id),
   CONSTRAINT permissions_fk01 FOREIGN KEY (gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT permissions_fk02 FOREIGN KEY (uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
 
-CREATE UNIQUE INDEX idx_permissions_01 ON permissions (gid, resource, resource_instance);
-CREATE UNIQUE INDEX idx_permissions_02 ON permissions (uid, resource, resource_instance);
+CREATE UNIQUE INDEX idx_permissions_01 ON permissions (gid, domain, resource_instance);
+CREATE UNIQUE INDEX idx_permissions_02 ON permissions (uid, domain, resource_instance);
 
 
 CREATE TABLE ideas (

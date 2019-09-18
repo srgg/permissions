@@ -46,10 +46,10 @@ INSERT INTO user_groups VALUES (8,2);
 INSERT INTO user_groups VALUES (9,3); -- grant organization admin role
 
 
-INSERT INTO permissions (gid,resource,action)
+INSERT INTO permissions (gid,domain,action)
     VALUES (1, 'ideas', 'READ_OWN, CREATE, EDIT_OWN, DELETE_OWN');
 
-INSERT INTO permissions (gid,resource,action) VALUES (2, 'IDEAS', 'READ, EDIT, DELETE');
+INSERT INTO permissions (gid,domain,action) VALUES (2, 'IDEAS', 'READ, EDIT, DELETE');
 
 call shareResourceToUser(2, 'ideas', 1, 'READ');
 call shareResourceToUser(2, 'IdEaS', 2, 'READ_OWN');

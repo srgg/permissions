@@ -1,14 +1,14 @@
 
 DELIMITER $$
 
-CREATE PROCEDURE shareResourceToGroup(gid INT, resource VARCHAR(100), instance_id INT, permitted_actions VARCHAR(256))
+CREATE PROCEDURE shareResourceToGroup(gid INT, domain VARCHAR(100), instance_id INT, permitted_actions VARCHAR(256))
 BEGIN
-    INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (gid, resource, instance_id, permitted_actions);
+    INSERT INTO permissions (gid,domain,resource_instance,action) VALUES (gid, domain, instance_id, permitted_actions);
 END; $$
 
-CREATE PROCEDURE shareResourceToUser(uid INT, resource VARCHAR(100), instance_id INT, permitted_actions VARCHAR (256))
+CREATE PROCEDURE shareResourceToUser(uid INT, domain VARCHAR(100), instance_id INT, permitted_actions VARCHAR (256))
 BEGIN
-    INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (uid, resource, instance_id, permitted_actions);
+    INSERT INTO permissions (uid,domain,resource_instance,action) VALUES (uid, domain, instance_id, permitted_actions);
 END; $$
 
 DELIMITER ;

@@ -131,7 +131,7 @@ ${q.query}
     (
         SELECT GROUP_CONCAT(pp.id) as id
         FROM permissions pp
-        WHERE pp.resource = :resource
+        WHERE pp.domain = :domain
           AND ( -- include only permissions granted to user either directly or by group membership
                     pp.uid = :userid
                 OR EXISTS(
@@ -177,7 +177,7 @@ i.organization_id = :organizationid)`
             }
         };
 
-        const queryParams = { userid: userId, resource: domain, organizationid: organizationId};
+        const queryParams = { userid: userId, domain: domain, organizationid: organizationId};
 
         return QueryBuilder.buildQuery(allResourcesQueryTemplate,
             queryParams,
@@ -226,7 +226,7 @@ i.organization_id = :organizationid)`
             }
         };
 
-        const queryParams = {action: action, userid: userId, resource: domain, organizationid: organizationId};
+        const queryParams = {action: action, userid: userId, domain: domain, organizationid: organizationId};
 
         if (extended_params) {
             Object.assign(queryParams, extended_params);

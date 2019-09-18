@@ -4,8 +4,8 @@ SET @test = LAST_INSERT_ID();
 INSERT INTO groups (organization_id, name, description) VALUES (@test, 'role1', 'Role to test multiple permissions');
 SET @gid = LAST_INSERT_ID();
 
-INSERT INTO permissions (gid,resource,action) VALUES (@gid, 'Ideas', 'READ_OWN');
-INSERT INTO permissions (gid,resource,action) VALUES (@gid, 'Ideas', 'CREATE');
+INSERT INTO permissions (gid,domain,action) VALUES (@gid, 'Ideas', 'READ_OWN');
+INSERT INTO permissions (gid,domain,action) VALUES (@gid, 'Ideas', 'CREATE');
 
 
 INSERT INTO users (organization_id,name, password,password_salt) VALUES (@test, 'user1@regression.test', 'pw1', 'salt1');
