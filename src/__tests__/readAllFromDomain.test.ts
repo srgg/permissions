@@ -165,7 +165,7 @@ describe('Read all from a particular Domain', () => {
                     owner_uid: 6,
                     owner_gid: null,
                     title: 'the 1st idea of inventor2@emca',
-                    permitted: 'CREATE,EDIT,READ'
+                    permitted: 'CREATE,EDIT,READ,READ-COMMENT_SHARED'
                   },
                   {
                     id: 13,
@@ -174,7 +174,7 @@ describe('Read all from a particular Domain', () => {
                     owner_uid: null,
                     owner_gid: 2,
                     title: 'the 1st shared idea at emca',
-                    permitted: 'CREATE,EDIT_SHARED,READ,READ_SHARED'
+                    permitted: 'CREATE,EDIT_SHARED,READ,READ-COMMENT_SHARED,READ_SHARED'
                   },
                   {
                     id: 14,
@@ -183,7 +183,7 @@ describe('Read all from a particular Domain', () => {
                     owner_uid: null,
                     owner_gid: 2,
                     title: 'the 2nd shared idea at emca',
-                    permitted: 'CREATE,EDIT_SHARED,READ,READ_SHARED'
+                    permitted: 'CREATE,EDIT_SHARED,READ,READ-COMMENT_SHARED,READ_SHARED'
                   }
             ]`);
         });
@@ -451,7 +451,7 @@ describe('Read all from a particular Domain', () => {
         });
     });
 
-    describe('Read all from COMMENTS', () => {
+    describe('Read all from IDEAS.COMMENTS', () => {
         test('1st reviewer at emca should be able to read comments on shared ideas the only (of the entire organization)', async () => {
             await checkReadAllSubQuery({
                     user: 'reviewer1@emca', domain: 'ideas.comments', action: 'READ-COMMENT_SHARED',
@@ -504,5 +504,72 @@ describe('Read all from a particular Domain', () => {
                 }
             ]`);
         });
+
+        test('1st inventor at emca should be able to read comments on shared ideas including p2p sharing.', async () => {
+            await checkReadAllSubQuery({
+                    user: 'inventor1@emca', domain: 'ideas.comments', action: 'READ-COMMENT_SHARED',
+                    columns: ['id', 'owner_uid', 'ideas_id', 'text', 'permitted'],
+                    checkOwnership: true
+                },
+                `[
+                {
+                    id: 439,
+                    ideas_id: 13,
+                    owner_uid: 435,
+                    permitted: 'READ-COMMENT_SHARED',
+                    text: '1st comment by rewiewer1@emca on the 1st shared idea at emca'
+                },
+                {
+                    id: 440,
+                    ideas_id: 14,
+                    owner_uid: 435,
+                    permitted: 'READ-COMMENT_SHARED',
+                    text: '1st comment by rewiewer1@emca on the 2nd shared idea at emca'
+                },
+                {
+                    id: 441,
+                    ideas_id: 13,
+                    owner_uid: 436,
+                    permitted: 'READ-COMMENT_SHARED',
+                    text: '1st comment by rewiewer2@emca on the 1st shared idea at emca'
+                },
+                {
+                    id: 442,
+                    ideas_id: 14,
+                    owner_uid: 436,
+                    permitted: 'READ-COMMENT_SHARED',
+                    text: '1st comment by rewiewer2@emca on the 2nd shared idea at emca'
+                },
+                {
+                    id: 443,
+                    ideas_id: 13,
+                    owner_uid: 5,
+                    permitted: 'READ-COMMENT_SHARED,DELETE_OWN,EDIT_OWN',
+                    text: '1st comment by inventor1@emca on the 1st shared idea at emca'
+                },
+                {
+                    id: 444,
+                    ideas_id: 14,
+                    owner_uid: 5,
+                    permitted: 'READ-COMMENT_SHARED,DELETE_OWN,EDIT_OWN',
+                    text: '1st comment by inventor1@emca on the 2nd shared idea at emca'
+                },
+                {
+                    id: 445,
+                    ideas_id: 7,
+                    owner_uid: 5,
+                    permitted: 'READ-COMMENT_SHARED,DELETE_OWN,EDIT_OWN',
+                    text: '1st comment by inventor1@emca on the 1st idea of inventor2@emca'
+                },
+                {
+                    id: 447,
+                    ideas_id: 7,
+                    owner_uid: 6,
+                    permitted: 'READ-COMMENT_SHARED',
+                    text: '1st comment by inventor2@emca on the 1st idea of inventor2@emca'
+                }
+            ]`);
+        });
+
     });
 });

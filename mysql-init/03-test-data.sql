@@ -80,8 +80,8 @@ SET @ideaManager_gid = 2;
 INSERT INTO ideas VALUES (13, @emca, null, @ideaManager_gid, 'shared-idea1@emca', 'the 1st shared idea at emca' );
 INSERT INTO ideas VALUES (14, @emca, null, @ideaManager_gid, 'shared-idea2@emca', 'the 2nd shared idea at emca' );
 
-INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@shared_iventors_gid, 'ideas', 13, 'READ,READ_SHARED, EDIT_SHARED');
-INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@shared_iventors_gid, 'ideas', 14, 'READ,READ_SHARED, EDIT_SHARED');
+INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@shared_iventors_gid, 'ideas', 13, 'READ,READ_SHARED, EDIT_SHARED, READ-COMMENT_SHARED');
+INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@shared_iventors_gid, 'ideas', 14, 'READ,READ_SHARED, EDIT_SHARED, READ-COMMENT_SHARED');
 
 
 SET @DISABLE_TRIGGERS=1;
@@ -90,8 +90,8 @@ INSERT INTO ideas VALUES (16, @emca, null, null, 'orphan-idea2@emca', 'the 2nd o
 SET @DISABLE_TRIGGERS=NULL;
 
 
-INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (5, 'ideas', 7, 'READ, EDIT');
-INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (5, 'IdEaS', 8, 'READ_OWN, EDIT_OWN');
+INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (5, 'ideas', 7, 'READ,READ-COMMENT_SHARED,EDIT');
+INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (5, 'IdEaS', 8, 'READ_OWN, READ-COMMENT_SHARED_OWN,EDIT_OWN');
 
 
 -- --------------------
