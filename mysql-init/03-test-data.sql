@@ -50,8 +50,9 @@ INSERT INTO permissions (gid,resource,action)
     VALUES (1, 'ideas', 'READ_OWN, CREATE, EDIT_OWN, DELETE_OWN');
 
 INSERT INTO permissions (gid,resource,action) VALUES (2, 'IDEAS', 'READ, EDIT, DELETE');
-INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (2, 'ideas', 1, 'READ');
-INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (2, 'IdEaS', 2, 'READ_OWN');
+
+call shareResourceToUser(2, 'ideas', 1, 'READ');
+call shareResourceToUser(2, 'IdEaS', 2, 'READ_OWN');
 
 INSERT INTO ideas (id, organization_id, owner_uid, owner_gid, name, title)
     VALUES (1, @acme, 1, null, 'idea1@acme', 'the 1st idea of inventor1@acme');
@@ -80,8 +81,8 @@ SET @ideaManager_gid = 2;
 INSERT INTO ideas VALUES (13, @emca, null, @ideaManager_gid, 'shared-idea1@emca', 'the 1st shared idea at emca' );
 INSERT INTO ideas VALUES (14, @emca, null, @ideaManager_gid, 'shared-idea2@emca', 'the 2nd shared idea at emca' );
 
-INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@shared_iventors_gid, 'ideas', 13, 'READ,READ_SHARED, EDIT_SHARED, READ-COMMENT_SHARED');
-INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@shared_iventors_gid, 'ideas', 14, 'READ,READ_SHARED, EDIT_SHARED, READ-COMMENT_SHARED');
+call shareResourceToGroup(@shared_iventors_gid, 'ideas', 13, 'READ,READ_SHARED, EDIT_SHARED, READ-COMMENT_SHARED');
+call shareResourceToGroup(@shared_iventors_gid, 'ideas', 14, 'READ,READ_SHARED, EDIT_SHARED, READ-COMMENT_SHARED');
 
 
 SET @DISABLE_TRIGGERS=1;
@@ -90,8 +91,8 @@ INSERT INTO ideas VALUES (16, @emca, null, null, 'orphan-idea2@emca', 'the 2nd o
 SET @DISABLE_TRIGGERS=NULL;
 
 
-INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (5, 'ideas', 7, 'READ,READ-COMMENT_SHARED,EDIT');
-INSERT INTO permissions (uid,resource,resource_instance,action) VALUES (5, 'IdEaS', 8, 'READ_OWN, READ-COMMENT_SHARED_OWN,EDIT_OWN');
+call shareResourceToUser(@inventor1_emca, 'ideas', 7, 'READ,READ-COMMENT_SHARED,EDIT');
+call shareResourceToUser(@inventor1_emca, 'IdEaS', 8, 'READ_OWN, READ-COMMENT_SHARED_OWN,EDIT_OWN');
 
 
 -- --------------------
@@ -113,8 +114,8 @@ SET @idea_reviwer_gid = (SELECT id FROM groups WHERE name = 'idea-reviewer');
 -- -----------------------------------
 -- ACME
 -- ----------------------------------
-INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@idea_reviwer_gid, 'ideas', 9, 'READ,READ_SHARED');
-INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@idea_reviwer_gid, 'ideas', 10, 'READ,READ_SHARED');
+call shareResourceToGroup(@idea_reviwer_gid, 'ideas', 9, 'READ,READ_SHARED');
+call shareResourceToGroup(@idea_reviwer_gid, 'ideas', 10, 'READ,READ_SHARED');
 
 INSERT INTO users (organization_id, name, password, password_salt) VALUES (@acme, 'reviewer1@acme', 'pw6', 'salt6');
 SET @reviewer1 = LAST_INSERT_ID();
@@ -139,8 +140,8 @@ INSERT INTO comments (owner_uid, ideas_id, text) VALUES (1, 10, '1st comment by 
 -- EMCA
 -- ----------------------------------
 
-INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@idea_reviwer_gid, 'ideas', 13, 'READ,READ_SHARED,READ-COMMENT_SHARED');
-INSERT INTO permissions (gid,resource,resource_instance,action) VALUES (@idea_reviwer_gid, 'ideas', 14, 'READ,READ_SHARED, READ-COMMENT_SHARED');
+call shareResourceToGroup(@idea_reviwer_gid, 'ideas', 13, 'READ,READ_SHARED,READ-COMMENT_SHARED');
+call shareResourceToGroup(@idea_reviwer_gid, 'ideas', 14, 'READ,READ_SHARED, READ-COMMENT_SHARED');
 
 --  Grant Permissions to shared ideas
 INSERT INTO users (organization_id, name, password, password_salt) VALUES (@emca, 'reviewer1@emca', 'pw6', 'salt6');
@@ -166,11 +167,3 @@ INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@inventor1_emca, 8, '1s
 
 INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@inventor2_emca, 7, '1st comment by inventor2@emca on the 1st idea of inventor2@emca');
 INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@inventor2_emca, 8, '1st comment by inventor2@emca on the 2nd idea of inventor2@emca');
-
--- DECLARE cursor_name CURSOR FOR Select * FROM ideas ;
---
--- DELIMITER $$
---
--- CREATE PROCEDURE checkConsistencyWithinOrganization(organization_id INT, owner_uid INT, owner_gid INT)
--- BEGIN
--- END;
