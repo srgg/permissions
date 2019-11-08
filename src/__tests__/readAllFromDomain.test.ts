@@ -572,4 +572,144 @@ describe('Read all from a particular Domain', () => {
         });
 
     });
+
+    describe('Read all from Permissions', () => {
+        test('Organization admin should be able to read all permissions of the entire organization and builtin ones', async () => {
+            await checkReadAllQuery({
+                    user: 'admin@emca', domain: 'permissions', action: 'ReAd',
+                    columns: ['id', 'organization_id', 'gid', 'uid', 'resource_instance', 'permitted'],
+                    checkOwnership: false
+                },
+                `[
+                {
+                    id: 433,
+                    organization_id: 1,
+                    gid: 3,
+                    uid: null,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: null
+                },
+                {
+                    id: 434,
+                    organization_id: 1,
+                    gid: 3,
+                    uid: null,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: null
+                },
+                {
+                    id: 435,
+                    organization_id: 1,
+                    gid: 433,
+                    uid: null,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: null
+                },
+                {
+                    id: 436,
+                    organization_id: 1,
+                    uid: null,
+                    gid: 433,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: null
+                },
+                {
+                    id: 437,
+                    organization_id: 1,
+                    gid: 1,
+                    uid: null,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: null
+                },
+                {
+                    id: 438,
+                    organization_id: 1,
+                    gid: 1,
+                    uid: null,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: null
+                },
+                {
+                    id: 439,
+                    gid: 1,
+                    uid: null,
+                    organization_id: 1,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: null
+                },
+                {
+                    id: 440,
+                    organization_id: 1,
+                    gid: 2,
+                    uid: null,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: null
+                },
+                {
+                    id: 443,
+                    organization_id: 3,
+                    gid: 100,
+                    uid: null,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: 13
+                },
+                {
+                    id: 444,
+                    organization_id: 3,
+                    gid: 100,
+                    uid: null,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: 14
+                },
+                {
+                    id: 445,
+                    organization_id: 3,
+                    gid: null,
+                    uid: 5,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: 7
+                },
+                {
+                    id: 446,
+                    organization_id: 3,
+                    gid: null,
+                    uid: 5,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: 8
+                },
+                {
+                    id: 447,
+                    organization_id: 1,
+                    gid: 433,
+                    uid: null,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: 9
+                },
+                {
+                    id: 448,
+                    organization_id: 1,
+                    gid: 433,
+                    uid: null,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: 10
+                },
+                {
+                    id: 449,
+                    organization_id: 1,
+                    gid: 433,
+                    uid: null,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: 13
+                },
+                {
+                    id: 450,
+                    organization_id: 1,
+                    gid: 433,
+                    uid: null,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: 14
+                }
+            ]`);
+        })
+    })
 });

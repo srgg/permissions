@@ -131,7 +131,8 @@ ${q.query}
     (
         SELECT GROUP_CONCAT(pp.id) as id
         FROM permissions pp
-        WHERE pp.domain = :domain
+        WHERE (pp.organization_id = :organizationid OR pp.organization_id = 1) AND pp.domain = :domain
+--         WHERE pp.domain = :domain
           AND ( -- include only permissions granted to user either directly or by group membership
                     pp.uid = :userid
                 OR EXISTS(
@@ -172,7 +173,7 @@ ${q.query}
                     options: {propertyName: 'organizationFilter', propertyValue: true},
                     sql:
                         ` AND (-- apply organization filtering
-i.organization_id = :organizationid)`
+i.organization_id = :organizationid OR i.organization_id = 1)`
                 }
             }
         };

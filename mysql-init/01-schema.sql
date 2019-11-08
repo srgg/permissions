@@ -45,6 +45,7 @@ CREATE TABLE user_groups (
 
 CREATE TABLE permissions (
   id         INT AUTO_INCREMENT,
+  organization_id INT NOT NULL,
   gid  INT,
   uid  INT,
   domain VARCHAR(100),
@@ -54,8 +55,9 @@ CREATE TABLE permissions (
   CHECK (action IS NOT NULL OR domain IS NOT NULL ),
   CHECK (resource_instance IS NULL OR domain IS NOT NULL), -- Resource should be set if resource instance is provided
   CONSTRAINT pk_permissions PRIMARY KEY (id),
-  CONSTRAINT permissions_fk01 FOREIGN KEY (gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT permissions_fk02 FOREIGN KEY (uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT permissions_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT permissions_fk02 FOREIGN KEY (gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT permissions_fk03 FOREIGN KEY (uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
 
 CREATE UNIQUE INDEX idx_permissions_01 ON permissions (gid, domain, resource_instance);
@@ -216,6 +218,44 @@ BEGIN
             SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Group hierarchy is not supported, parent_gid MUST be NULL!';
         END IF;
+    END IF;
+END; $$
+
+CREATE FUNCTION getOrganizationIDForGidOrUid(gid INT, uid INT) RETURNS INT
+BEGIN
+    DECLARE org_id INT;
+
+    IF gid IS NOT NULL THEN
+        SELECT g.organization_id FROM groups g WHERE g.id = gid INTO org_id;
+    ELSE
+        IF uid IS NOT NULL THEN
+            SET org_id  = (SELECT u.organization_id FROM users u where u.id= uid);
+        ELSE
+            SET org_id = NULL;
+        END IF;
+    END IF;
+
+    RETURN org_id;
+END; $$
+
+
+CREATE TRIGGER permissions_insert BEFORE INSERT ON permissions FOR EACH ROW
+BEGIN
+    DECLARE oid INT;
+
+    IF triggersEnabled() THEN
+        SELECT getOrganizationIDForGidOrUid(NEW.gid, NEW.uid) INTO oid;
+        SET NEW.organization_id = oid;
+    END IF;
+END; $$
+
+CREATE TRIGGER permissions_update BEFORE INSERT ON permissions FOR EACH ROW
+BEGIN
+    DECLARE oid INT;
+
+    IF triggersEnabled() THEN
+        SELECT getOrganizationIDForGidOrUid(NEW.gid, NEW.uid) INTO oid;
+        SET NEW.organization_id = oid;
     END IF;
 END; $$
 

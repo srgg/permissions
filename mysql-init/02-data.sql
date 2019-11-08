@@ -11,6 +11,7 @@ INSERT INTO groups (organization_id, name, description) VALUES (1, 'idea-reviewe
 SET @reviewer_gid = LAST_INSERT_ID();
 
 INSERT INTO permissions (gid,domain,action) VALUES (@admin_gid, 'users', 'READ, CREATE, EDIT, DELETE');
+INSERT INTO permissions (gid,domain,action) VALUES (@admin_gid, 'permissions', 'READ, CREATE, EDIT, DELETE');
 
 -- Comments
 INSERT INTO permissions (gid,domain,action) VALUES (@reviewer_gid, 'Comments', 'READ_OWN, DELETE_OWN, EDIT_OWN');
