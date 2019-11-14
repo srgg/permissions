@@ -398,52 +398,60 @@ describe('Read all from a particular Domain', () => {
             );
         });
 
-        test('Organization admin should be able to read all users of the entire organization', async () => {
+        test('Organization admin should be able to read all users of the entire organization, result should contains user groups', async () => {
             await checkReadAllQuery({
                     user: 'admin@emca', domain: 'users', action: 'ReAd',
-                    columns: ['id', 'organization_id', 'name', 'permitted'],
+                    columns: ['id', 'organization_id', 'name', 'permitted',
+                        '(SELECT GROUP_CONCAT( g.name)  FROM groups g, user_groups ug WHERE g.id = ug.gid AND ug.uid = iii.id) as groups'],
                     checkOwnership: false
                 },
                 `[
                {
                   id:5,
                   organization_id:3,
+                  groups: 'inventor,shared-idea-inventors',
                   name:'inventor1@emca',
                   permitted:'CREATE,DELETE,EDIT,READ'
                },
                {
                   id:6,
                   organization_id:3,
+                  groups: 'inventor,shared-idea-inventors',
                   name:'inventor2@emca',
                   permitted:'CREATE,DELETE,EDIT,READ'
                },
                {
                   id:7,
                   organization_id:3,
+                  groups: 'inventor,shared-idea-inventors',
                   name:'inventor3@emca',
                   permitted:'CREATE,DELETE,EDIT,READ'
                },
                {
                   id:8,
                   organization_id:3,
+                  groups: 'idea-manager',
                   name:'manager@emca',
                   permitted:'CREATE,DELETE,EDIT,READ'
                },
                {
                   id:9,
                   organization_id:3,
+                  groups: 'admin',
                   name:'admin@emca',
                   permitted:'CREATE,DELETE,EDIT,READ'
                },
                {
                   id:435,
                   organization_id:3,
+                  groups: 'idea-reviewer',
                   name:'reviewer1@emca',
                   permitted:'CREATE,DELETE,EDIT,READ'
                },
                {
                   id:436,
                   organization_id:3,
+                  groups: 'idea-reviewer',
                   name:'reviewer2@emca',
                   permitted:'CREATE,DELETE,EDIT,READ'
                }

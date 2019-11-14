@@ -58,7 +58,12 @@ export class QueryBuilder {
         if (columns) {
             const cc: string[] = [];
             columns.forEach((c) => {
-                cc.push(alias.concat('.', c));
+                if (c.trim().charAt(0) == '('){
+                    // alias must not to be applied to calculated fields
+                    cc.push(c)
+                } else {
+                    cc.push(alias.concat('.', c));
+                }
             });
 
             cols = cc.join(', ');
@@ -195,7 +200,12 @@ i.organization_id = :organizationid OR i.organization_id = 1)`
         if (columns) {
             const cc: string[] = [];
             columns.forEach((c) => {
-                cc.push(alias.concat('.', c));
+                if (c.trim().charAt(0) == '('){
+                    // alias must not to be applied to calculated fields
+                    cc.push(c)
+                } else {
+                    cc.push(alias.concat('.', c));
+                }
             });
 
             cols = cc.join(', ');

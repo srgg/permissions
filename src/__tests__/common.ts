@@ -24,15 +24,6 @@ interface BuildAllResourceQueryParamsTest {
     checkOwnership?: boolean;
 }
 
-interface BuildAllResourceQueryParamsTest {
-    user: number | string;
-    domain: string;
-    action: string;
-    organizationId?: number | null;
-    columns?: string[];
-    checkOwnership?: boolean;
-}
-
 async function execute_query_and_check(q: ParametrizedQuery, expected: string) {
     // console.log("SQL query:", q.query);
     const r = await getConnection().query(q.query, q.params);
