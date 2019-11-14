@@ -1,0 +1,9 @@
+#!/bin/sh
+
+trap stop_services INT
+
+function stop_services() {
+    docker-compose down -v
+}
+
+docker-compose up
