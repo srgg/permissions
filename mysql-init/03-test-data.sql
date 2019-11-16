@@ -1,5 +1,25 @@
 #SET sql_mode=(SELECT CONCAT(@@sql_mode,',NO_AUTO_VALUE_ON_ZERO'));
 
+-- Platform admin
+
+/*
+   PLATFORM ADMIN USERS MUST NOT BELONG TO A SHARED ORGANIZATION (THE ONE WITH ID '1'),
+   they MUST belong to a separate organization
+
+   That will prevent listing  Platform Admins
+   in the results returned by 'read all users'executed from any other organization
+*/
+SET @plat_oid = 4;
+INSERT INTO organizations VALUES (@plat_oid, 'PLATFORM', 'paltform.com');
+
+SET @platform_admin_uid=128;
+INSERT INTO users VALUES (@platform_admin_uid, @plat_oid, 'platform-admin@platform', 'pw2', 'salt2');
+
+SELECT id INTO @platform_admin_gid FROM groups WHERE name= 'platform admin';
+
+INSERT INTO user_groups VALUES (@platform_admin_uid, @platform_admin_gid);
+
+--
 SET @acme = 2;
 INSERT INTO organizations VALUES (@acme, 'ACME', 'acme.com');
 

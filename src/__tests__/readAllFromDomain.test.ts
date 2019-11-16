@@ -459,6 +459,75 @@ describe('Read all from a particular Domain', () => {
         });
     });
 
+    test('Organization admin should not be able to read organizations', async () => {
+        await checkReadAllQuery({
+                user: 'admin@emca', domain: 'organizations', action: 'ReAd',
+                checkOwnership: false,
+                organizationId: null
+            },
+            `[]`
+        );
+    });
+
+    test('Platform admin should be able to read all organizations', async () => {
+        await checkReadAllQuery({
+                user: 'platform-admin@platform', domain: 'organizations', action: 'ReAd',
+                checkOwnership: false,
+                organizationId: null
+            },
+            `[
+            {
+                domain: 'common.dot',
+                id: 1,
+                is_owner: 1,
+                name: 'common organization',
+                permitted: 'CREATE,DELETE,EDIT,READ',
+                pids: '1'
+            },
+            {
+                domain: 'paltform.com',
+                id: 4,
+                is_owner: 1,
+                name: 'PLATFORM',
+                permitted: 'CREATE,DELETE,EDIT,READ',
+                pids: '1'
+            },
+            {
+                domain: 'acme.com',
+                id: 2,
+                is_owner: 1,
+                name: 'ACME',
+                permitted: 'CREATE,DELETE,EDIT,READ',
+                pids: '1'
+            },
+            {
+                domain: 'emca.com',
+                id: 3,
+                is_owner: 1,
+                name: 'EMCA',
+                permitted: 'CREATE,DELETE,EDIT,READ',
+                pids: '1'
+            },
+            {
+                domain: 'test-hierarchy.com',
+                id: 433,
+                is_owner: 1,
+                name: 'TEST Group hierarchy',
+                permitted: 'CREATE,DELETE,EDIT,READ',
+                pids: '1'
+            },
+            {
+                domain: 'regression.test',
+                id: 434,
+                is_owner: 1,
+                name: 'Regression test',
+                permitted: 'CREATE,DELETE,EDIT,READ',
+                pids: '1'
+            }]`
+        );
+    });
+
+
     describe('Read all from IDEAS.COMMENTS', () => {
         test('1st reviewer at emca should be able to read comments on shared ideas the only (of the entire organization)', async () => {
             await checkReadAllSubQuery({
@@ -589,6 +658,14 @@ describe('Read all from a particular Domain', () => {
                     checkOwnership: false
                 },
                 `[
+                {
+                    id: 1,
+                    organization_id: 1,
+                    gid: 4,
+                    uid: null,
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resource_instance: null
+                },
                 {
                     id: 433,
                     organization_id: 1,

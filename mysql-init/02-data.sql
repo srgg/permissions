@@ -10,6 +10,11 @@ INSERT INTO groups (id, organization_id, name, description) VALUES (@admin_gid, 
 INSERT INTO groups (organization_id, name, description) VALUES (1, 'idea-reviewer', 'Built-in role: supervisors that can read the entire idea  and can commented on it');
 SET @reviewer_gid = LAST_INSERT_ID();
 
+SET @platform_admin_gid = 4;
+INSERT INTO groups (id, organization_id, name, description) VALUES (@platform_admin_gid, 1, 'platform admin', 'Built-in role: entire platform admin');
+
+INSERT INTO permissions (id, gid,domain,action) VALUES (1, @platform_admin_gid, 'organizations', 'READ, CREATE, EDIT, DELETE');
+
 INSERT INTO permissions (gid,domain,action) VALUES (@admin_gid, 'users', 'READ, CREATE, EDIT, DELETE');
 INSERT INTO permissions (gid,domain,action) VALUES (@admin_gid, 'permissions', 'READ, CREATE, EDIT, DELETE');
 
