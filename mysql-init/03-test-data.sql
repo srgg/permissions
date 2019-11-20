@@ -66,11 +66,6 @@ INSERT INTO user_groups VALUES (8,2);
 INSERT INTO user_groups VALUES (9,3); -- grant organization admin role
 
 
-INSERT INTO permissions (gid,domain,action)
-    VALUES (1, 'ideas', 'READ_OWN, CREATE, EDIT_OWN, DELETE_OWN');
-
-INSERT INTO permissions (gid,domain,action) VALUES (2, 'IDEAS', 'READ, EDIT, DELETE');
-
 call shareResourceToUser(2, 'ideas', 1, 'READ');
 call shareResourceToUser(2, 'IdEaS', 2, 'READ_OWN');
 
@@ -101,8 +96,12 @@ SET @ideaManager_gid = 2;
 INSERT INTO ideas VALUES (13, @emca, null, @ideaManager_gid, 'shared-idea1@emca', 'the 1st shared idea at emca' );
 INSERT INTO ideas VALUES (14, @emca, null, @ideaManager_gid, 'shared-idea2@emca', 'the 2nd shared idea at emca' );
 
-call shareResourceToGroup(@shared_iventors_gid, 'ideas', 13, 'READ,READ_SHARED, EDIT_SHARED, READ-COMMENT_SHARED');
-call shareResourceToGroup(@shared_iventors_gid, 'ideas', 14, 'READ,READ_SHARED, EDIT_SHARED, READ-COMMENT_SHARED');
+/*
+    shared-inventors group is not a built in one,
+    therefore it is not necessary to provide organization_id. It will be calculated automatically.
+*/
+call shareResourceToGroup(null, @shared_iventors_gid, 'ideas', 13, 'READ,READ_SHARED, EDIT_SHARED, READ-COMMENT_SHARED');
+call shareResourceToGroup(null, @shared_iventors_gid, 'ideas', 14, 'READ,READ_SHARED, EDIT_SHARED, READ-COMMENT_SHARED');
 
 
 SET @DISABLE_TRIGGERS=1;
@@ -134,8 +133,12 @@ SET @idea_reviwer_gid = (SELECT id FROM groups WHERE name = 'idea-reviewer');
 -- -----------------------------------
 -- ACME
 -- ----------------------------------
-call shareResourceToGroup(@idea_reviwer_gid, 'ideas', 9, 'READ,READ_SHARED');
-call shareResourceToGroup(@idea_reviwer_gid, 'ideas', 10, 'READ,READ_SHARED');
+
+/*
+    Since `idea-reviewer` is a built in group - it is required to provide a correspondent organization id
+ */
+call shareResourceToGroup((SELECT organization_id FROM ideas WHERE id = 9), @idea_reviwer_gid, 'ideas', 9, 'READ,READ_SHARED');
+call shareResourceToGroup((SELECT organization_id FROM ideas WHERE id = 10), @idea_reviwer_gid, 'ideas', 10, 'READ,READ_SHARED');
 
 INSERT INTO users (organization_id, name, password, password_salt) VALUES (@acme, 'reviewer1@acme', 'pw6', 'salt6');
 SET @reviewer1 = LAST_INSERT_ID();
@@ -160,8 +163,12 @@ INSERT INTO comments (owner_uid, ideas_id, text) VALUES (1, 10, '1st comment by 
 -- EMCA
 -- ----------------------------------
 
-call shareResourceToGroup(@idea_reviwer_gid, 'ideas', 13, 'READ,READ_SHARED,READ-COMMENT_SHARED');
-call shareResourceToGroup(@idea_reviwer_gid, 'ideas', 14, 'READ,READ_SHARED, READ-COMMENT_SHARED');
+/*
+    Since `idea-reviewer` is a built in group - it is required to provide a correspondent organization id
+ */
+
+call shareResourceToGroup((SELECT organization_id FROM ideas WHERE id = 13), @idea_reviwer_gid, 'ideas', 13, 'READ,READ_SHARED,READ-COMMENT_SHARED');
+call shareResourceToGroup((SELECT organization_id FROM ideas WHERE id = 14), @idea_reviwer_gid, 'ideas', 14, 'READ,READ_SHARED, READ-COMMENT_SHARED');
 
 --  Grant Permissions to shared ideas
 INSERT INTO users (organization_id, name, password, password_salt) VALUES (@emca, 'reviewer1@emca', 'pw6', 'salt6');

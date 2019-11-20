@@ -221,18 +221,31 @@ BEGIN
     END IF;
 END; $$
 
-CREATE FUNCTION getOrganizationIDForGidOrUid(gid INT, uid INT) RETURNS INT
+CREATE FUNCTION getOrganizationIDForGidOrUid(oid INT, gid INT, uid INT) RETURNS INT
 BEGIN
     DECLARE org_id INT;
 
     IF gid IS NOT NULL THEN
-        SELECT g.organization_id FROM groups g WHERE g.id = gid INTO org_id;
+        SELECT g.organization_id FROM groups g WHERE g.id = gid AND organization_id != 1 INTO org_id;
     ELSE
         IF uid IS NOT NULL THEN
             SET org_id  = (SELECT u.organization_id FROM users u where u.id= uid);
         ELSE
             SET org_id = NULL;
         END IF;
+    END IF;
+
+    IF oid IS NOT NULL THEN
+        IF org_id IS NOT NULL THEN
+            -- kinda just in case check
+            IF org_id != oid THEN
+                SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'Cannot add or update row: user organization mismatch.';
+
+            END IF;
+        END IF;
+
+        RETURN oid;
     END IF;
 
     RETURN org_id;
@@ -244,7 +257,7 @@ BEGIN
     DECLARE oid INT;
 
     IF triggersEnabled() THEN
-        SELECT getOrganizationIDForGidOrUid(NEW.gid, NEW.uid) INTO oid;
+        SELECT getOrganizationIDForGidOrUid(New.organization_id, NEW.gid, NEW.uid) INTO oid;
         SET NEW.organization_id = oid;
     END IF;
 END; $$
@@ -254,7 +267,7 @@ BEGIN
     DECLARE oid INT;
 
     IF triggersEnabled() THEN
-        SELECT getOrganizationIDForGidOrUid(NEW.gid, NEW.uid) INTO oid;
+        SELECT getOrganizationIDForGidOrUid(New.organization_id, NEW.gid, NEW.uid) INTO oid;
         SET NEW.organization_id = oid;
     END IF;
 END; $$

@@ -654,86 +654,106 @@ describe('Read all from a particular Domain', () => {
         test('Organization admin should be able to read all permissions of the entire organization and builtin ones', async () => {
             await checkReadAllQuery({
                     user: 'admin@emca', domain: 'permissions', action: 'ReAd',
-                    columns: ['id', 'organization_id', 'gid', 'uid', 'resource_instance', 'permitted'],
+                    columns: ['id', 'organization_id', 'domain', '(SELECT name FROM groups where id = iii.gid) as "group"', 'uid', 'resource_instance', 'action', 'permitted'],
                     checkOwnership: false
                 },
                 `[
                 {
                     id: 1,
                     organization_id: 1,
-                    gid: 4,
+                    domain: 'organizations',
+                    group: 'platform admin',
                     uid: null,
+                    action: 'READ, CREATE, EDIT, DELETE',
                     permitted: 'CREATE,DELETE,EDIT,READ',
                     resource_instance: null
                 },
                 {
                     id: 433,
                     organization_id: 1,
-                    gid: 3,
+                    domain: 'users',
+                    group: 'admin',
                     uid: null,
+                    action: 'READ, CREATE, EDIT, DELETE',
                     permitted: 'CREATE,DELETE,EDIT,READ',
                     resource_instance: null
                 },
                 {
                     id: 434,
                     organization_id: 1,
-                    gid: 3,
+                    domain: 'permissions',
+                    group: 'admin',
                     uid: null,
+                    action: 'READ, CREATE, EDIT, DELETE',
                     permitted: 'CREATE,DELETE,EDIT,READ',
                     resource_instance: null
                 },
                 {
                     id: 435,
                     organization_id: 1,
-                    gid: 433,
+                    domain: 'Comments',
+                    group: 'idea-reviewer',
                     uid: null,
+                    action: 'READ_OWN, DELETE_OWN, EDIT_OWN',
                     permitted: 'CREATE,DELETE,EDIT,READ',
                     resource_instance: null
                 },
                 {
                     id: 436,
                     organization_id: 1,
+                    domain: 'Ideas',
                     uid: null,
-                    gid: 433,
+                    group: 'inventor',
+                    action: 'READ_OWN, CREATE, EDIT_OWN, DELETE_OWN',
                     permitted: 'CREATE,DELETE,EDIT,READ',
                     resource_instance: null
                 },
                 {
                     id: 437,
                     organization_id: 1,
-                    gid: 1,
+                    domain: 'IDEAS',
+                    group: 'idea-manager',
                     uid: null,
+                    action: 'READ, EDIT, DELETE',
                     permitted: 'CREATE,DELETE,EDIT,READ',
                     resource_instance: null
                 },
                 {
                     id: 438,
                     organization_id: 1,
-                    gid: 1,
+                    domain: 'Ideas',
+                    group: 'idea-reviewer',
                     uid: null,
+                    action: 'READ_SHARED, CREATE-COMMENT_SHARED',
                     permitted: 'CREATE,DELETE,EDIT,READ',
                     resource_instance: null
                 },
                 {
                     id: 439,
-                    gid: 1,
-                    uid: null,
                     organization_id: 1,
+                    domain: 'Ideas',
+                    group: 'inventor',
+                    uid: null,
+                    action: 'CREATE-COMMENT_OWN, READ-COMMENT_OWN',
                     permitted: 'CREATE,DELETE,EDIT,READ',
                     resource_instance: null
                 },
                 {
                     id: 440,
                     organization_id: 1,
-                    gid: 2,
+                    domain: 'Comments',
+                    group: 'inventor',
                     uid: null,
+                    action: 'DELETE_OWN, EDIT_OWN',
                     permitted: 'CREATE,DELETE,EDIT,READ',
                     resource_instance: null
                 },
                 {
                     id: 443,
                     organization_id: 3,
-                    gid: 100,
+                    domain: 'ideas',
+                    action: 'READ,READ_SHARED, EDIT_SHARED, READ-COMMENT_SHARED',                                        
+                    group: 'shared-idea-inventors',
                     uid: null,
                     permitted: 'CREATE,DELETE,EDIT,READ',
                     resource_instance: 13
@@ -741,56 +761,50 @@ describe('Read all from a particular Domain', () => {
                 {
                     id: 444,
                     organization_id: 3,
-                    gid: 100,
+                    domain: 'ideas',
+                    group: 'shared-idea-inventors',
                     uid: null,
+                    action: 'READ,READ_SHARED, EDIT_SHARED, READ-COMMENT_SHARED',
                     permitted: 'CREATE,DELETE,EDIT,READ',
                     resource_instance: 14
                 },
                 {
                     id: 445,
                     organization_id: 3,
-                    gid: null,
+                    domain: 'ideas',
+                    group: null,
                     uid: 5,
+                    action: 'READ,READ-COMMENT_SHARED,EDIT',
                     permitted: 'CREATE,DELETE,EDIT,READ',
                     resource_instance: 7
                 },
                 {
                     id: 446,
                     organization_id: 3,
-                    gid: null,
+                    domain: 'IdEaS',
+                    group: null,
                     uid: 5,
+                    action: 'READ_OWN, READ-COMMENT_SHARED_OWN,EDIT_OWN',
                     permitted: 'CREATE,DELETE,EDIT,READ',
                     resource_instance: 8
                 },
                 {
-                    id: 447,
-                    organization_id: 1,
-                    gid: 433,
-                    uid: null,
-                    permitted: 'CREATE,DELETE,EDIT,READ',
-                    resource_instance: 9
-                },
-                {
-                    id: 448,
-                    organization_id: 1,
-                    gid: 433,
-                    uid: null,
-                    permitted: 'CREATE,DELETE,EDIT,READ',
-                    resource_instance: 10
-                },
-                {
                     id: 449,
-                    organization_id: 1,
-                    gid: 433,
+                    organization_id: 3,
+                    domain: 'ideas',
+                    group: 'idea-reviewer',
                     uid: null,
+                    action: 'READ,READ_SHARED,READ-COMMENT_SHARED',
                     permitted: 'CREATE,DELETE,EDIT,READ',
                     resource_instance: 13
                 },
                 {
                     id: 450,
-                    organization_id: 1,
-                    gid: 433,
+                    organization_id: 3,
+                    domain: 'ideas',
+                    group: 'idea-reviewer',
                     uid: null,
+                    action: 'READ,READ_SHARED, READ-COMMENT_SHARED',
                     permitted: 'CREATE,DELETE,EDIT,READ',
                     resource_instance: 14
                 }
