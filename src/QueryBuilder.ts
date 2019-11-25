@@ -149,16 +149,84 @@ ${q.parametrized.query}
         return dq;
     }
 
-    static buildIsPermittedQuery({organizationId, userId, domain, action, checkOwnership, instanceId}: IsPermittedQueryParams): QueryBuilderResult {
-        const q = QueryBuilder.buildReadAllFromDomainQuery({organizationId: organizationId, userId: userId,
-            domain: domain, action: action, columns: ['id'],
-            query_extension: instanceId ? 'AND iii.id = :instanceId' : undefined, extended_params: {instanceId: instanceId},
-            checkOwnership: checkOwnership});
+    private static getTableNameForDomain(domain: string): string {
+        return domain.toLocaleLowerCase();
+    }
 
-        q.parametrized.query = `SELECT 1 isPermitted FROM DUAL WHERE EXISTS(
-  ${q.parametrized.query}
-);`;
-        return q;
+    static buildIsPermittedQuery({organizationId, userId, domain, action, checkOwnership, instanceId}: IsPermittedQueryParams): QueryBuilderResult {
+
+        const qPids = QueryBuilder.buildPermissionListLowLevelQuery({
+            userId:userId,
+            organizationId: organizationId,
+            columns: ['(GROUP_CONCAT(pp.id)) as id'],
+            query_extension:
+                `
+          AND pp.domain = :domain
+          AND (
+            -- apply instance filtering, if required
+                (pp.resource_instance IS NOT NULL AND pp.resource_instance = :instanceId)
+                OR pp.resource_instance IS NULL
+            )`,
+            extended_params: {domain: domain, instanceId: instanceId}
+        });
+
+        const allResourcesQueryTemplate = {
+            sql:
+`
+SELECT 1 as isPermitted FROM (
+SELECT ii.*, calculatePermittedActionsOrNull(:action, ii.is_owner, ii.pids) permitted
+FROM (
+         SELECT
+                (
+                    {{ownership_filtering}}
+                    {{ownership_is_not_applicable}}
+                ) is_owner,         
+                (
+                    ${qPids.raw}
+                ) pids
+     ) ii
+) iii
+WHERE iii.permitted IS NOT NULL`,
+            addons: {
+                ownership_filtering: {
+                    options: {propertyName: 'ownershipFilter', propertyValue: true},
+                    sql: `SELECT 1 FROM dual
+                          WHERE (
+                              :instanceId IS NOT NULL
+                                  AND EXISTS (
+                                      SELECT 1
+                                      FROM ${QueryBuilder.getTableNameForDomain(domain)} i
+                                      WHERE i.id = :instanceId
+                                        AND ((i.owner_uid IS NOT NULL AND i.owner_uid = :userid)
+                                                 OR (i.owner_gid IS NOT NULL AND
+                                                     EXISTS(
+                                                       SELECT 1
+                                                       FROM user_groups ur
+                                                       WHERE ur.gid = i.owner_gid
+                                                         AND ur.uid = :userid
+                                                     )
+                                                  )
+                                            )
+                                  )
+                              )
+                             OR :instanceId IS NULL`
+                },
+                ownership_is_not_applicable: { // if ownership is not applicable, then each resource will be treated as owned by everyone
+                    options: {propertyName: 'ownershipFilter', propertyValue: false},
+                    sql: `(0)`
+                }
+            }
+        };
+
+        const queryParams = { userid: userId, domain: domain,
+            organizationid: organizationId, instanceId: instanceId, action: action};
+
+        const rq = QueryBuilder.buildQuery(allResourcesQueryTemplate,
+            queryParams,
+            {ownershipFilter: checkOwnership,
+                organizationFilter: organizationId != null});
+
+        return rq;
     }
 
     private static buildPermissionListLowLevelQuery({organizationId, userId, columns, query_extension, extended_params}: BuildPermissionListQueryParams): QueryBuilderResult {
@@ -244,7 +312,7 @@ ${q.parametrized.query}
     (
         ${qPids.raw}
     ) pids
- FROM ${domain.toLowerCase()} i
+ FROM ${QueryBuilder.getTableNameForDomain(domain)} i
  WHERE
     TRUE != FALSE
     {{organization_filtering}}`,

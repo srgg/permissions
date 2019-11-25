@@ -117,7 +117,7 @@ BEGIN
                      INNER JOIN (SELECT 0 digit UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3  UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) n
                                 ON LENGTH(REPLACE(ppp.action, ',' , '')) <= LENGTH(ppp.action)-n.digit
         )p
-     WHERE isOwner OR (NOT isOwner AND RIGHT(LCASE(p.single_perm), 4) <> '_own'));
+     WHERE isOwner OR ((isOwner IS NULL OR NOT isOwner) AND RIGHT(LCASE(p.single_perm), 4) <> '_own'));
 
     RETURN permissions;
 END; $$

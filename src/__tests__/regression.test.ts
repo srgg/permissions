@@ -1,7 +1,6 @@
 'use strict';
 
-import {checkReadAllQuery} from "./common";
-import {getConnection} from "typeorm";
+import {checkIsPermittedQuery, checkReadAllQuery} from "./common";
 
 describe('Regression tests', () => {
     test('ReadAllQuery: calculated permissions should contains all the applicable resource permissions', async () => {
@@ -34,4 +33,10 @@ describe('Regression tests', () => {
                }
             ]`);
     });
+
+    test('Inventor should be able to create a new idea even if ideas table is empty', async ()=> {
+        await checkIsPermittedQuery({user:'user1@regression.test', domain: 'EMPTY_IDEAS', checkOwnership:true, action: 'CREATE'},
+            `[{isPermitted:'1'}]`);
+    });
+
 });
