@@ -22,6 +22,8 @@ interface BuildAllResourceQueryParamsTest {
     organizationId?: number | null;
     columns?: string[];
     checkOwnership?: boolean;
+    query_extension?: string;
+    extended_params?: object;
 }
 
 interface BuildPermissionListQueryParamsTest {
@@ -129,7 +131,9 @@ async function check_read_all_subquery(queryopts: BuildAllResourceQueryParamsTes
         action: queryopts.action,
         organizationId: oid,
         columns: queryopts.columns,
-        checkOwnership: queryopts.checkOwnership
+        checkOwnership: queryopts.checkOwnership,
+        query_extension: queryopts.query_extension,
+        extended_params: queryopts.extended_params
     });
 
     await execute_query_and_check(q.parametrized, expected);

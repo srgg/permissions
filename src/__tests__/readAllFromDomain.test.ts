@@ -650,6 +650,27 @@ describe('Read all from a particular Domain', () => {
 
     });
 
+    test('1st inventor at emca should be able to read comment on shared idea using query extension mechanism', async () => {
+        await checkReadAllSubQuery({
+                user: 'inventor1@emca', domain: 'ideas.comments', action: 'READ-COMMENT_SHARED',
+                columns: ['id', 'owner_uid', 'ideas_id', 'text', 'permitted'],
+                checkOwnership: true,
+                query_extension: 'AND lll.id = :id',
+                extended_params: {id:439}
+
+            },
+            `[
+                {
+                    id: 439,
+                    ideas_id: 13,
+                    owner_uid: 435,
+                    permitted: 'READ-COMMENT_SHARED',
+                    text: '1st comment by rewiewer1@emca on the 1st shared idea at emca'
+                }
+            ]`);
+        });
+
+
     describe('Read all from Permissions', () => {
         test('Organization admin should be able to read all permissions of the entire organization and builtin ones', async () => {
             await checkReadAllQuery({

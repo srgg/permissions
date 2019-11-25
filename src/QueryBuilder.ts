@@ -137,15 +137,27 @@ ${q.parametrized.query}
 -- END OF a standard READ ALL FROM DOMAIN query: get permitted resources from the primary domain
 ) pd ON l.ideas_id =  pd.id
 ) ll
-) lll`,
-            addons: {}
+) lll WHERE TRUE != FALSE
+        {{query_extension_point}}` ,
+            addons: {
+                query_extension_point: {
+                    options: {propertyName: 'apply_query_extension', propertyValue: true},
+                    sql: `${query_extension}`
+                },
+            }
         };
 
-        const dq = QueryBuilder.buildQuery(allSubResourcesQueryTemplate,
-            {},
-            {});
+        const queryParams = {};
 
-        dq.parametrized.params = sq.parametrized.params.concat(q.parametrized.params);
+        if (extended_params) {
+            Object.assign(queryParams, extended_params);
+        }
+
+        const dq = QueryBuilder.buildQuery(allSubResourcesQueryTemplate,
+            queryParams,
+            {apply_query_extension: !!query_extension});
+
+        dq.parametrized.params = sq.parametrized.params.concat(q.parametrized.params).concat(dq.parametrized.params);
         return dq;
     }
 
