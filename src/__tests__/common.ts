@@ -87,7 +87,7 @@ async function retrieveOrganizationIdIfNeeded(uid: number, organization?: number
     return orgId;
 }
 
-async function check_read_all_query(queryopts: BuildAllResourceQueryParamsTest, expected: string) {
+async function check_read_all_primequery(queryopts: BuildAllResourceQueryParamsTest, expected: string) {
     if ( !queryopts.columns && queryopts.domain === 'IDEAS') {
         queryopts.columns = ['id','name','organization_id', 'owner_uid', 'owner_gid', 'title', 'permitted'];
     }
@@ -95,7 +95,7 @@ async function check_read_all_query(queryopts: BuildAllResourceQueryParamsTest, 
     const uid: number = await retrieveUserIdIfNeeded(queryopts.user);
     const oid: number | null = await retrieveOrganizationIdIfNeeded(uid, queryopts.organizationId);
 
-    const q = QueryBuilder.buildReadAllFromDomainQuery({userId: uid,
+    const q = QueryBuilder.buildReadAllFromPrimaryDomainQuery({userId: uid,
         domain: queryopts.domain,
         action: queryopts.action,
         organizationId: oid,
@@ -156,7 +156,7 @@ async function check_permission_list_query(queryopts: BuildPermissionListQueryPa
 }
 
 export {
-    check_read_all_query as checkReadAllQuery,
+    check_read_all_primequery as checkReadAllQuery,
     check_read_all_subquery as checkReadAllSubQuery,
     check_permitted_query as checkIsPermittedQuery,
     check_permission_list_query as checkPermissionListQuery

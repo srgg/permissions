@@ -116,7 +116,7 @@ export class QueryBuilder {
             checkOwnership: checkOwnership},
         );
 
-        const q = QueryBuilder.buildReadAllFromDomainQuery({organizationId: organizationId, userId: userId,
+        const q = QueryBuilder.buildReadAllFromPrimaryDomainQuery({organizationId: organizationId, userId: userId,
             domain: primaryDomain, action: action, columns: ['id', 'permitted'],
             checkOwnership: checkOwnership});
 
@@ -366,9 +366,9 @@ i.organization_id = :organizationid OR i.organization_id = 1)`
 
     }
 
-    public static buildReadAllFromDomainQuery({organizationId, userId, domain, action,
+    public static buildReadAllFromPrimaryDomainQuery({organizationId, userId, domain, action,
                        columns, checkOwnership, query_extension, extended_params}: BuildAllResourceQueryParams): QueryBuilderResult {
-        const alias = 'iii';
+        const alias = 'prime';
         let cols;
 
         if (columns) {

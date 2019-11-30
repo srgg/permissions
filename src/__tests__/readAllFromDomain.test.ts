@@ -383,7 +383,7 @@ describe('Read all from a particular Domain', () => {
                     user: 'reviewer1@emca', domain: 'ideas', action: 'ReAd',
                     columns: ['id', 'name', 'permitted'],
                     checkOwnership: true,
-                    query_extension: 'AND iii.id = :idea_id',
+                    query_extension: 'AND prime.id = :idea_id',
                     extended_params: {idea_id:13}
                 },
                 `[
@@ -419,7 +419,7 @@ describe('Read all from a particular Domain', () => {
             await checkReadAllQuery({
                     user: 'admin@emca', domain: 'users', action: 'ReAd',
                     columns: ['id', 'organization_id', 'name', 'permitted',
-                        '(SELECT GROUP_CONCAT( g.name)  FROM groups g, user_groups ug WHERE g.id = ug.gid AND ug.uid = iii.id) as groups'],
+                        '(SELECT GROUP_CONCAT( g.name)  FROM groups g, user_groups ug WHERE g.id = ug.gid AND ug.uid = prime.id) as groups'],
                     checkOwnership: false
                 },
                 `[
@@ -725,7 +725,7 @@ describe('Read all from a particular Domain', () => {
         test('Organization admin should be able to read all permissions of the entire organization and builtin ones', async () => {
             await checkReadAllQuery({
                     user: 'admin@emca', domain: 'permissions', action: 'ReAd',
-                    columns: ['id', 'organization_id', 'domain', '(SELECT name FROM groups where id = iii.gid) as "group"', 'uid', 'resource_instance', 'action', 'permitted'],
+                    columns: ['id', 'organization_id', 'domain', '(SELECT name FROM groups where id = prime.gid) as "group"', 'uid', 'resource_instance', 'action', 'permitted'],
                     checkOwnership: false
                 },
                 `[
