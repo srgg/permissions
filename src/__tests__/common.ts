@@ -100,7 +100,9 @@ async function check_read_all_query(queryopts: BuildAllResourceQueryParamsTest, 
         action: queryopts.action,
         organizationId: oid,
         columns: queryopts.columns,
-        checkOwnership: queryopts.checkOwnership
+        checkOwnership: queryopts.checkOwnership,
+        query_extension: queryopts.query_extension,
+        extended_params: queryopts.extended_params
     });
 
     await execute_query_and_check(q.parametrized, expected);

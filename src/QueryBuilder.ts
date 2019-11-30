@@ -89,7 +89,7 @@ export class QueryBuilder {
         const primaryDomain = domains[0].toLowerCase();
         const secondaryDomain = domains[1].toLowerCase();
 
-        const alias = 'lll';
+        const alias = 'sub';
         let cols;
 
         if (columns) {
@@ -137,7 +137,7 @@ ${q.parametrized.query}
 -- END OF a standard READ ALL FROM DOMAIN query: get permitted resources from the primary domain
 ) pd ON l.ideas_id =  pd.id
 ) ll
-) lll WHERE TRUE != FALSE
+) ${alias} WHERE TRUE != FALSE
         {{query_extension_point}}` ,
             addons: {
                 query_extension_point: {

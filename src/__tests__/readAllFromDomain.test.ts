@@ -377,6 +377,23 @@ describe('Read all from a particular Domain', () => {
                }
             ]`);
         });
+
+        test('1st reviewer at emca should be able to read a particular shared idea using query extension mechanism', async () => {
+            await checkReadAllQuery({
+                    user: 'reviewer1@emca', domain: 'ideas', action: 'ReAd',
+                    columns: ['id', 'name', 'permitted'],
+                    checkOwnership: true,
+                    query_extension: 'AND iii.id = :idea_id',
+                    extended_params: {idea_id:13}
+                },
+                `[
+               {  
+                    id:13,
+                    name:'shared-idea1@emca',
+                    permitted:'CREATE-COMMENT_SHARED,READ,READ-COMMENT_SHARED,READ_SHARED'
+               }
+            ]`);
+        });
     });
 
     describe('Read all from USERS', () => {
@@ -650,12 +667,45 @@ describe('Read all from a particular Domain', () => {
 
     });
 
-    test('1st inventor at emca should be able to read comment on shared idea using query extension mechanism', async () => {
+    test('1st inventor at emca should be able to read all comments for a particular idea  using query extension mechanism', async () => {
+        await checkReadAllSubQuery({
+                user: 'inventor1@emca', domain: 'ideas.comments', action: 'READ-COMMENT_SHARED',
+                columns: ['id', '(SELECT name FROM users WHERE id = sub.owner_uid) as commentedBy' , 'ideas_id', 'text', 'permitted'],
+                checkOwnership: true,
+                query_extension: 'AND sub.ideas_id = :idea_id',
+                extended_params: {idea_id:13}
+            },
+            `[
+                {
+                    id: 439,
+                    ideas_id: 13,
+                    commentedBy: 'reviewer1@emca',
+                    permitted: 'READ-COMMENT_SHARED',
+                    text: '1st comment by rewiewer1@emca on the 1st shared idea at emca'
+                },
+                {
+                    id: 441,
+                    ideas_id: 13,
+                    commentedBy: 'reviewer2@emca',
+                    permitted: 'READ-COMMENT_SHARED',
+                    text: '1st comment by rewiewer2@emca on the 1st shared idea at emca'
+                },
+                {
+                    id: 443,
+                    ideas_id: 13,
+                    commentedBy: 'inventor1@emca',
+                    permitted: 'READ-COMMENT_SHARED,DELETE_OWN,EDIT_OWN',
+                    text: '1st comment by inventor1@emca on the 1st shared idea at emca'
+                }            
+            ]`);
+    });
+
+    test('1st inventor at emca should be able to read particular comment on shared idea using query extension mechanism', async () => {
         await checkReadAllSubQuery({
                 user: 'inventor1@emca', domain: 'ideas.comments', action: 'READ-COMMENT_SHARED',
                 columns: ['id', 'owner_uid', 'ideas_id', 'text', 'permitted'],
                 checkOwnership: true,
-                query_extension: 'AND lll.id = :id',
+                query_extension: 'AND sub.id = :id',
                 extended_params: {id:439}
 
             },
