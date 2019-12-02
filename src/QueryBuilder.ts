@@ -59,18 +59,19 @@ export class QueryBuilder {
 
     public static buildPermissionListQuery({organizationId, userId, columns, query_extension, extended_params}: BuildPermissionListQueryParams): QueryBuilderResult {
         const alias = 'pp';
-        if (!columns) {
-            columns = [`(calculatePermittedActions(true, GROUP_CONCAT(${alias}.id))) as permitted`,'domain'];
-        }
 
-        if (!query_extension) {
+        if (!query_extension && !columns) {
             query_extension =
-`AND ${alias}.resource_instance IS NULL
+                `AND ${alias}.resource_instance IS NULL
  GROUP BY ${alias}.domain`;
         }
 
+        if (!columns) {
+            columns = [`(calculatePermittedActions(true, GROUP_CONCAT(${alias}.id))) as permitted`, 'domain'];
+        }
+
         const q = QueryBuilder.buildPermissionListLowLevelQuery({
-            userId:userId,
+            userId: userId,
             organizationId: organizationId,
             columns: columns,
             query_extension: query_extension,
