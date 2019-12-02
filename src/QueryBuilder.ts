@@ -198,7 +198,8 @@ FROM (
                 ) pids
      ) ii
 ) iii
-WHERE iii.permitted IS NOT NULL`,
+WHERE iii.permitted IS NOT NULL
+    {{organization_filtering}}`,
             addons: {
                 ownership_filtering: {
                     options: {propertyName: 'ownershipFilter', propertyValue: true},
@@ -223,20 +224,29 @@ WHERE iii.permitted IS NOT NULL`,
                               )
                              OR :instanceId IS NULL`
                 },
-                ownership_is_not_applicable: { // if ownership is not applicable, then each resource will be treated as owned by everyone
+                ownership_is_not_applicable: {
                     options: {propertyName: 'ownershipFilter', propertyValue: false},
-                    sql: `(0)`
+                    sql: `-- ownership is not applicable
+                    (0)`
+                },
+                organization_filtering: {
+                    options: {propertyName: 'organizationFilter', propertyValue: true},
+                    sql:
+                        `-- check organization consistency
+                        AND ((SELECT organization_id FROM ${QueryBuilder.getTableNameForDomain(domain)} WHERE id = :instanceId) IN (1, :organizationid ))`
                 }
             }
         };
 
-        const queryParams = { userid: userId, domain: domain,
-            organizationid: organizationId, instanceId: instanceId, action: action};
+        const queryParams = {
+            userid: userId, domain: domain,
+            organizationid: organizationId, instanceId: instanceId, action: action
+        };
 
-        const rq = QueryBuilder.buildQuery(allResourcesQueryTemplate,
-            queryParams,
-            {ownershipFilter: checkOwnership,
-                organizationFilter: organizationId != null});
+        const rq = QueryBuilder.buildQuery(allResourcesQueryTemplate, queryParams, {
+            ownershipFilter: checkOwnership,
+            organizationFilter: organizationId != null && instanceId != null
+        });
 
         return rq;
     }
