@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es6",
     "lib": [
-      "es6",
+      "es7",
       "dom"
     ],
     "types": [
@@ -22,13 +22,13 @@
     "strictNullChecks": true,
     "typeRoots": [
       "./node_modules/@types/",
-      "./node_modules/allure2-js-commons/dist/declarations/**/",
       "./types/**/"
     ]
   },
   "exclude": [
     "./node_modules/",
-    "./lib"
+    "./lib",
+    "./src/__tests__"
   ],
   "compileOnSave": false
 }

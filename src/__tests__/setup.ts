@@ -1,6 +1,6 @@
 import { getConnectionManager } from "typeorm";
-import {Idea} from "../entity/idea";
-import {User} from "../entity/user";
+import {UserIdea} from "../entity/UserIdea.entity";
+import {User} from "../entity/User.entity";
 
 beforeAll(async () => {
     const connectionManager = getConnectionManager();
@@ -14,7 +14,7 @@ beforeAll(async () => {
         password: "user",
         database: "test",
         entities: [
-            Idea,
+            UserIdea,
             User
         ],
         synchronize: false,
