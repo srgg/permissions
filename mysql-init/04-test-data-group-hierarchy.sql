@@ -1,10 +1,10 @@
 INSERT INTO organizations (name,domain) VALUES ('TEST Group hierarchy', 'test-hierarchy.com');
 SET @test = LAST_INSERT_ID();
 
-INSERT INTO users (organization_id,name,password,password_salt) VALUES (@test, 'test1@test', 'pw1', 'salt1');
+INSERT INTO users (organizationId,name,password,password_salt) VALUES (@test, 'test1@test', 'pw1', 'salt1');
 SET @user1 = LAST_INSERT_ID();
 
-INSERT INTO users (organization_id,name,password,password_salt)  VALUES (@test, 'test2@test', 'pw2', 'salt2');
+INSERT INTO users (organizationId,name,password,password_salt)  VALUES (@test, 'test2@test', 'pw2', 'salt2');
 SET @user2 = LAST_INSERT_ID();
 
 

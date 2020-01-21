@@ -27,8 +27,7 @@
   },
   "exclude": [
     "./node_modules/",
-    "./lib",
-    "./src/__tests__"
+    "./lib"
   ],
   "compileOnSave": false
 }

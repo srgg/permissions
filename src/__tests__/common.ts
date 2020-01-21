@@ -81,28 +81,29 @@ async function retrieveOrganizationIdIfNeeded(uid: number, organization?: number
     } else if (organization) {
         orgId = organization;
     } else {
-        const rr = await getConnection().query("SELECT organization_id FROM users WHERE id = " + uid);
-        orgId = rr[0].organization_id;
+        const rr = await getConnection().query("SELECT organizationId FROM users WHERE id = " + uid);
+        orgId = rr[0].organizationId;
     }
     return orgId;
 }
 
 async function check_read_all_primequery(queryopts: BuildAllResourceQueryParamsTest, expected: string) {
-    if ( !queryopts.columns && queryopts.domain === 'IDEAS') {
-        queryopts.columns = ['id','name','organization_id', 'owner_uid', 'owner_gid', 'title', 'permitted'];
+    if (!queryopts.columns && queryopts.domain === 'USER_IDEA') {
+        queryopts.columns = ['id', 'name', 'organizationId', 'ownerUserId', 'ownerGroupId', 'title', 'permitted'];
     }
 
     const uid: number = await retrieveUserIdIfNeeded(queryopts.user);
     const oid: number | null = await retrieveOrganizationIdIfNeeded(uid, queryopts.organizationId);
 
-    const q = QueryBuilder.buildReadAllFromPrimaryDomainQuery({userId: uid,
-        domain: queryopts.domain,
+    const q = QueryBuilder.buildReadAllFromPrimaryDomainQuery({
+        userId: uid,
+        resource: queryopts.domain,
         action: queryopts.action,
         organizationId: oid,
         columns: queryopts.columns,
         checkOwnership: queryopts.checkOwnership,
-        query_extension: queryopts.query_extension,
-        extended_params: queryopts.extended_params
+        queryExtension: queryopts.query_extension,
+        extendedParams: queryopts.extended_params
     });
 
     await execute_query_and_check(q.parametrized, expected);
@@ -114,10 +115,10 @@ async function check_permitted_query(queryopts: IsPermittedQueryParamsTest, expe
 
     const q = QueryBuilder.buildIsPermittedQuery({
         userId: uid,
-        domain: queryopts.domain,
+        resource: queryopts.domain,
         action: queryopts.action,
         organizationId: oid,
-        checkOwnership: queryopts.checkOwnership === undefined ?  false : queryopts.checkOwnership,
+        checkOwnership: queryopts.checkOwnership === undefined ? false : queryopts.checkOwnership,
         instanceId: queryopts.instanceId
     });
 
@@ -128,14 +129,15 @@ async function check_read_all_subquery(queryopts: BuildAllResourceQueryParamsTes
     const uid: number = await retrieveUserIdIfNeeded(queryopts.user);
     const oid: number | null = await retrieveOrganizationIdIfNeeded(uid, queryopts.organizationId);
 
-    const q = QueryBuilder.buildReadAllFromSubDomainQuery({userId: uid,
-        domain: queryopts.domain,
+    const q = QueryBuilder.buildReadAllFromSubDomainQuery({
+        userId: uid,
+        resource: queryopts.domain,
         action: queryopts.action,
         organizationId: oid,
         columns: queryopts.columns,
         checkOwnership: queryopts.checkOwnership,
-        query_extension: queryopts.query_extension,
-        extended_params: queryopts.extended_params
+        queryExtension: queryopts.query_extension,
+        extendedParams: queryopts.extended_params
     });
 
     await execute_query_and_check(q.parametrized, expected);
@@ -145,11 +147,12 @@ async function check_permission_list_query(queryopts: BuildPermissionListQueryPa
     const uid: number = await retrieveUserIdIfNeeded(queryopts.user);
     const oid: number | null = await retrieveOrganizationIdIfNeeded(uid, queryopts.organizationId);
 
-    const q = QueryBuilder.buildPermissionListQuery({userId: uid,
+    const q = QueryBuilder.buildPermissionListQuery({
+        userId: uid,
         organizationId: oid,
         columns: queryopts.columns,
-        query_extension: queryopts.query_extension,
-        extended_params: queryopts.extended_params
+        queryExtension: queryopts.query_extension,
+        extendedParams: queryopts.extended_params
     });
 
     await execute_query_and_check(q.parametrized, expected);

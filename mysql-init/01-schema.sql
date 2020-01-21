@@ -1,96 +1,167 @@
 SET NAMES utf8mb4;
 # SET FOREIGN_KEY_CHECKS = 0;
 
-CREATE TABLE organizations (
-    id            INT AUTO_INCREMENT,
-    name          VARCHAR(100),
-    domain        VARCHAR(50),
+CREATE TABLE organizations
+(
+    id     INT AUTO_INCREMENT,
+    name   VARCHAR(100),
+    domain VARCHAR(50),
+    text   VARCHAR(256),
     CONSTRAINT pk_organizations PRIMARY KEY (id)
-) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 433
+  CHARACTER SET = utf8
+  COLLATE = utf8_general_ci;
 CREATE UNIQUE INDEX idx_organizations_name ON organizations (name);
 CREATE UNIQUE INDEX idx_organizations_domain ON organizations (domain);
 
-CREATE TABLE users (
-  id                INT AUTO_INCREMENT,
-  organization_id   INT,
-  name              VARCHAR(100),
-  password          VARCHAR(100),
-  password_salt     VARCHAR(100),
-  CONSTRAINT pk_users PRIMARY KEY (id),
-  CONSTRAINT users_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
-CREATE UNIQUE INDEX idx_users_username ON users (organization_id, name);
+CREATE VIEW organization AS
+SELECT *
+FROM organizations;
+
+CREATE TABLE users
+(
+    id             INT AUTO_INCREMENT,
+    organizationId INT,
+    name           VARCHAR(100),
+    password       VARCHAR(100),
+    password_salt  VARCHAR(100),
+    CONSTRAINT pk_users PRIMARY KEY (id),
+    CONSTRAINT users_fk01 FOREIGN KEY (organizationId) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 433
+  CHARACTER SET = utf8
+  COLLATE = utf8_general_ci;
+CREATE UNIQUE INDEX idx_users_username ON users (organizationId, name);
 
 
-CREATE TABLE groups (
-  id                INT AUTO_INCREMENT,
-  organization_id   INT,
-  parent_gid        INT DEFAULT NULL,
-  name              VARCHAR(100) NOT NULL,
-  description       VARCHAR(512),
-  CONSTRAINT pk_groups PRIMARY KEY (id),
-  CONSTRAINT groups_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT groups_fk02 FOREIGN KEY (parent_gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
+CREATE TABLE groups
+(
+    id              INT AUTO_INCREMENT,
+    organization_id INT,
+    parent_gid      INT DEFAULT NULL,
+    name            VARCHAR(100) NOT NULL,
+    description     VARCHAR(512),
+    CONSTRAINT pk_groups PRIMARY KEY (id),
+    CONSTRAINT groups_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT groups_fk02 FOREIGN KEY (parent_gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 433
+  CHARACTER SET = utf8
+  COLLATE = utf8_general_ci;
 CREATE UNIQUE INDEX idx_groups_name ON groups (organization_id, name);
 
+CREATE VIEW `group` AS
+SELECT id, organization_id as 'organizationId', parent_gid as 'parent_groupid', name, description
+FROM groups;
 
-CREATE TABLE user_groups (
-  uid   INT NOT NULL,
-  gid   INT NOT NULL,
-  CONSTRAINT pk_user_groups PRIMARY KEY (uid, gid),
-  CONSTRAINT usergroups_fk01 FOREIGN KEY (uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT usergroups_fk02 FOREIGN KEY (gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
+CREATE TABLE user_groups
+(
+    uid INT NOT NULL,
+    gid INT NOT NULL,
+    CONSTRAINT pk_user_groups PRIMARY KEY (uid, gid),
+    CONSTRAINT usergroups_fk01 FOREIGN KEY (uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT usergroups_fk02 FOREIGN KEY (gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 433
+  CHARACTER SET = utf8
+  COLLATE = utf8_general_ci;
 
-CREATE TABLE permissions (
-  id         INT AUTO_INCREMENT,
-  organization_id INT NOT NULL,
-  gid  INT,
-  uid  INT,
-  domain VARCHAR(100),
-  resource_instance INT,
-  action   VARCHAR(100),
-  CHECK ((gid IS NOT NULL AND uid IS NULL) OR (gid IS NULL AND uid IS NOT NULL)),
-  CHECK (action IS NOT NULL OR domain IS NOT NULL ),
-  CHECK (resource_instance IS NULL OR domain IS NOT NULL), -- Resource should be set if resource instance is provided
-  CONSTRAINT pk_permissions PRIMARY KEY (id),
-  CONSTRAINT permissions_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT permissions_fk02 FOREIGN KEY (gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT permissions_fk03 FOREIGN KEY (uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
+CREATE VIEW users_groups AS
+SELECT uid as 'userId', gid as 'groupId'
+FROM user_groups;
+
+CREATE TABLE permissions
+(
+    id                INT AUTO_INCREMENT,
+    organization_id   INT NOT NULL,
+    gid               INT,
+    uid               INT,
+    domain            VARCHAR(100),
+    resource_instance INT,
+    action            VARCHAR(100),
+    CHECK ((gid IS NOT NULL AND uid IS NULL) OR (gid IS NULL AND uid IS NOT NULL)),
+    CHECK (action IS NOT NULL OR domain IS NOT NULL ),
+    CHECK (resource_instance IS NULL OR domain IS NOT NULL), -- Resource should be set if resource instance is provided
+    CONSTRAINT pk_permissions PRIMARY KEY (id),
+    CONSTRAINT permissions_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT permissions_fk02 FOREIGN KEY (gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT permissions_fk03 FOREIGN KEY (uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 433
+  CHARACTER SET = utf8
+  COLLATE = utf8_general_ci;
 
 CREATE UNIQUE INDEX idx_permissions_01 ON permissions (gid, domain, resource_instance);
 CREATE UNIQUE INDEX idx_permissions_02 ON permissions (uid, domain, resource_instance);
 
 
-CREATE TABLE ideas (
-  id            INT AUTO_INCREMENT,
-  organization_id   INT NOT NULL,
-  owner_uid      INT,
-  owner_gid INT,
-  name          VARCHAR(100),
-  title         VARCHAR(100),
-  CONSTRAINT pk_ideas PRIMARY KEY (id),
-  CONSTRAINT ideas_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT ideas_fk02 FOREIGN KEY (owner_uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT ideas_fk03 FOREIGN KEY (owner_gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
+CREATE VIEW permission AS
+SELECT id,
+       organization_id   as 'organizationId',
+       gid               as 'groupId',
+       uid               as 'userId',
+       domain            as 'resource',
+       resource_instance as 'resourceId',
+       action            as 'actions'
+FROM permissions;
 
-CREATE TABLE idea_comments (
-  id            INT AUTO_INCREMENT,
-  owner_uid     INT,
-  owner_gid     INT,
-  ideas_id       INT,
-  text          VARCHAR(512),
-  CHECK (owner_gid IS NULL ), # group ownership is not supported for comments
-  CONSTRAINT pk_comments PRIMARY KEY (id),
-  CONSTRAINT comments_fk01 FOREIGN KEY (owner_uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT comments_fk02 FOREIGN KEY (ideas_id) REFERENCES ideas (id) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 433 CHARACTER SET = utf8 COLLATE = utf8_general_ci;
+CREATE TABLE ideas
+(
+    id              INT AUTO_INCREMENT,
+    organization_id INT NOT NULL,
+    owner_uid       INT,
+    owner_gid       INT,
+    name            VARCHAR(100),
+    title           VARCHAR(100),
+    CONSTRAINT pk_ideas PRIMARY KEY (id),
+    CONSTRAINT ideas_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT ideas_fk02 FOREIGN KEY (owner_uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT ideas_fk03 FOREIGN KEY (owner_gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 433
+  CHARACTER SET = utf8
+  COLLATE = utf8_general_ci;
+
+CREATE VIEW user_idea AS
+SELECT id,
+       organization_id as 'organizationId',
+       owner_uid       as 'ownerUserId',
+       owner_gid       as 'ownerGroupId',
+       name,
+       title
+FROM ideas;
+
+CREATE TABLE idea_comments
+(
+    id        INT AUTO_INCREMENT,
+    owner_uid INT,
+    owner_gid INT,
+    ideas_id  INT,
+    text      VARCHAR(512),
+    CHECK (owner_gid IS NULL ), # group ownership is not supported for comments
+    CONSTRAINT pk_comments PRIMARY KEY (id),
+    CONSTRAINT comments_fk01 FOREIGN KEY (owner_uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT comments_fk02 FOREIGN KEY (ideas_id) REFERENCES ideas (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 433
+  CHARACTER SET = utf8
+  COLLATE = utf8_general_ci;
 
 -- In order to prevent useless organization_id duplication in comments
-CREATE VIEW comments AS SELECT c.*, i.organization_id FROM idea_comments c join ideas i on c.ideas_id = i.id;
+CREATE VIEW comments AS
+SELECT c.*, i.organization_id
+FROM idea_comments c
+         join ideas i on c.ideas_id = i.id;
+
+CREATE VIEW comment AS
+SELECT id,
+       owner_uid       as 'ownerUserId',
+       owner_gid       as 'ownerGroupId',
+       ideas_id        as 'userIdeaId',
+       text,
+       organization_id as 'organizationId'
+FROM comments;
 
 DELIMITER $$
 
@@ -105,21 +176,36 @@ END; $$
 
 CREATE FUNCTION calculatePermittedActions(isOwner BOOL, permissionList VARCHAR(255)) RETURNS VARCHAR(512)
 BEGIN
-    DECLARE permissions VARCHAR(512);
+    DECLARE perm VARCHAR(512);
 
-    (SELECT GROUP_CONCAT(DISTINCT p.single_perm ORDER BY p.single_perm) INTO permissions FROM
-        (
-            SELECT Trim(SUBSTRING_INDEX(SUBSTRING_INDEX(ppp.action, ',', n.digit+1), ',', -1)) single_perm
-            FROM (
-                     SELECT * FROM permissions pp
-                     WHERE  FIND_IN_SET(pp.id, permissionList)
-                 ) ppp
-                     INNER JOIN (SELECT 0 digit UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3  UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) n
-                                ON LENGTH(REPLACE(ppp.action, ',' , '')) <= LENGTH(ppp.action)-n.digit
-        )p
-     WHERE isOwner OR ((isOwner IS NULL OR NOT isOwner) AND RIGHT(LCASE(p.single_perm), 4) <> '_own'));
+    (SELECT GROUP_CONCAT(DISTINCT p.single_perm ORDER BY p.single_perm)
+     INTO perm
+     FROM (
+              SELECT Trim(SUBSTRING_INDEX(SUBSTRING_INDEX(ppp.action, ',', n.digit + 1), ',', -1)) single_perm
+              FROM (
+                       SELECT *
+                       FROM permissions pp
+                       WHERE FIND_IN_SET(pp.id, permissionList)
+                   ) ppp
+                       INNER JOIN (SELECT 0 digit
+                                   UNION ALL
+                                   SELECT 1
+                                   UNION ALL
+                                   SELECT 2
+                                   UNION ALL
+                                   SELECT 3
+                                   UNION ALL
+                                   SELECT 4
+                                   UNION ALL
+                                   SELECT 5
+                                   UNION ALL
+                                   SELECT 6) n
+                                  ON LENGTH(REPLACE(ppp.action, ',', '')) <= LENGTH(ppp.action) - n.digit
+          ) p
+     WHERE isOwner
+        OR ((isOwner IS NULL OR NOT isOwner) AND RIGHT(LCASE(p.single_perm), 4) <> '_own'));
 
-    RETURN permissions;
+    RETURN perm;
 END; $$
 
 CREATE FUNCTION calculatePermittedActionsOrNull(requestedAction VARCHAR(100), isOwner BOOL, permissionList VARCHAR(255)) RETURNS VARCHAR(512)
@@ -151,11 +237,11 @@ BEGIN
                 SET MESSAGE_TEXT = 'Cannot add or update row: owner_uid and owner_gid can not be null.';
         END IF;
 
-        SET organization_id = (SELECT u.organization_id FROM users u where u.id= owner_uid);
+        SET organization_id = (SELECT u.organizationId FROM users u where u.id = owner_uid);
     END IF;
 
     IF owner_uid IS NOT NULL THEN
-        SET @user_org_id  = (SELECT u.organization_id FROM users u where u.id= owner_uid);
+        SET @user_org_id = (SELECT u.organizationId FROM users u where u.id = owner_uid);
 
         IF @user_org_id <> organization_id THEN
             SIGNAL SQLSTATE '45000'
@@ -229,7 +315,7 @@ BEGIN
         SELECT g.organization_id FROM groups g WHERE g.id = gid AND organization_id != 1 INTO org_id;
     ELSE
         IF uid IS NOT NULL THEN
-            SET org_id  = (SELECT u.organization_id FROM users u where u.id= uid);
+            SET org_id = (SELECT u.organizationId FROM users u where u.id = uid);
         ELSE
             SET org_id = NULL;
         END IF;
