@@ -34,6 +34,9 @@ CREATE TABLE users
   COLLATE = utf8_general_ci;
 CREATE UNIQUE INDEX idx_users_username ON users (organizationId, name);
 
+CREATE VIEW user AS
+SELECT *
+FROM users;
 
 CREATE TABLE groups
 (
