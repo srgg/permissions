@@ -49,26 +49,37 @@ VALUES (@inventor1_emca, @emca, 'inventor1@emca', 'pw1', 'salt1');
 SET @inventor2_emca = 6;
 INSERT INTO users
 VALUES (@inventor2_emca, @emca, 'inventor2@emca', 'pw2', 'salt2');
-INSERT INTO users VALUES (7, @emca, 'inventor3@emca', 'pw3', 'salt3');
-INSERT INTO users VALUES (8, @emca, 'manager@emca', 'pw4', 'salt4');
-INSERT INTO users VALUES (9, @emca, 'admin@emca', 'pw5', 'salt5');
+INSERT INTO users
+VALUES (7, @emca, 'inventor3@emca', 'pw3', 'salt3');
+INSERT INTO users
+VALUES (8, @emca, 'manager@emca', 'pw4', 'salt4');
+INSERT INTO users
+VALUES (9, @emca, 'admin@emca', 'pw5', 'salt5');
 
 
 -- Shared Idea Inventors
 SET @shared_ideas_gid = 111;
-INSERT INTO groups (id, organization_id, name, description) VALUES (@shared_ideas_gid, @emca, 'shared-ideas', 'Group includes all the imported/shared ideas.');
+INSERT INTO groups (id, organizationId, name, description)
+VALUES (@shared_ideas_gid, @emca, 'shared-ideas', 'Group includes all the imported/shared ideas.');
 
 SET @shared_iventors_gid = 100;
-INSERT INTO groups (id, organization_id, name, description) VALUES (@shared_iventors_gid, @emca, 'shared-idea-inventors', 'Inventors that can work with shared ideas');
+INSERT INTO groups (id, organizationId, name, description)
+VALUES (@shared_iventors_gid, @emca, 'shared-idea-inventors', 'Inventors that can work with shared ideas');
 -- INSERT INTO permissions (gid,resource,action) VALUES (@shared_iventors_gid, 'IdEaS', 'READ_OWN, READ_SHARED_OWN, EDIT_SHARED_OWN');
 
-INSERT INTO user_groups VALUES (1,1);
-INSERT INTO user_groups VALUES (2,1);
-INSERT INTO user_groups VALUES (3,1);
-INSERT INTO user_groups VALUES (4,2);
+INSERT INTO user_groups
+VALUES (1, 1);
+INSERT INTO user_groups
+VALUES (2, 1);
+INSERT INTO user_groups
+VALUES (3, 1);
+INSERT INTO user_groups
+VALUES (4, 2);
 
-INSERT INTO user_groups VALUES (@inventor1_emca,1);
-INSERT INTO user_groups VALUES (@inventor1_emca,@shared_iventors_gid);
+INSERT INTO user_groups
+VALUES (@inventor1_emca, 1);
+INSERT INTO user_groups
+VALUES (@inventor1_emca, @shared_iventors_gid);
 
 INSERT INTO user_groups
 VALUES (6, 1);
@@ -89,7 +100,7 @@ VALUES (9, 3); -- grant organization admin role
 call shareResourceToUser(2, 'User_idea', 1, 'READ');
 call shareResourceToUser(2, 'UsEr_IdEa', 2, 'READ_OWN');
 
-INSERT INTO ideas (id, organization_id, owner_uid, owner_gid, name, title)
+INSERT INTO ideas (id, organizationId, ownerUserId, ownerGroupId, name, title)
 VALUES (1, @acme, 1, null, 'idea1@acme', 'the 1st idea of inventor1@acme');
 
 INSERT INTO ideas
@@ -170,10 +181,10 @@ SET @idea_reviwer_gid = (SELECT id
 /*
     Since `idea-reviewer` is a built in group - it is required to provide a correspondent organization id
  */
-call shareResourceToGroup((SELECT organization_id
+call shareResourceToGroup((SELECT organizationId
                            FROM ideas
                            WHERE id = 9), @idea_reviwer_gid, 'user_idea', 9, 'READ,READ_SHARED');
-call shareResourceToGroup((SELECT organization_id
+call shareResourceToGroup((SELECT organizationId
                            FROM ideas
                            WHERE id = 10), @idea_reviwer_gid, 'user_idea', 10, 'READ,READ_SHARED');
 
@@ -190,18 +201,20 @@ INSERT INTO user_groups
 vALUES (@reviewer2, @idea_reviwer_gid);
 
 -- Create comments
-INSERT INTO comments (owner_uid, ideas_id, text)
+INSERT INTO comments (ownerUserId, userIdeaId, data)
 VALUES (@reviewer1, 9, '1st comment by rewiewer1@acme on the 1st shared idea at acme');
-INSERT INTO comments (owner_uid, ideas_id, text)
+INSERT INTO comments (ownerUserId, userIdeaId, data)
 VALUES (@reviewer1, 10, '1st comment by rewiewer1@acme on the 2nd shared idea at acme');
 
-INSERT INTO comments (owner_uid, ideas_id, text)
+INSERT INTO comments (ownerUserId, userIdeaId, data)
 VALUES (@reviewer2, 9, '1st comment by rewiewer2@acme on the 1st shared idea at acme');
-INSERT INTO comments (owner_uid, ideas_id, text)
+INSERT INTO comments (ownerUserId, userIdeaId, data)
 VALUES (@reviewer2, 10, '1st comment by rewiewer2@acme on the 2nd shared idea at acme');
 
-INSERT INTO comments (owner_uid, ideas_id, text) VALUES (1, 9, '1st comment by inventor1@acme on the 1st shared idea at acme');
-INSERT INTO comments (owner_uid, ideas_id, text) VALUES (1, 10, '1st comment by inventor1@acme on the 2nd shared idea at acme');
+INSERT INTO comments (ownerUserId, userIdeaId, data)
+VALUES (1, 9, '1st comment by inventor1@acme on the 1st shared idea at acme');
+INSERT INTO comments (ownerUserId, userIdeaId, data)
+VALUES (1, 10, '1st comment by inventor1@acme on the 2nd shared idea at acme');
 
 
 -- -----------------------------------
@@ -212,10 +225,10 @@ INSERT INTO comments (owner_uid, ideas_id, text) VALUES (1, 10, '1st comment by 
     Since `idea-reviewer` is a built in group - it is required to provide a correspondent organization id
  */
 
-call shareResourceToGroup((SELECT organization_id
+call shareResourceToGroup((SELECT organizationId
                            FROM ideas
                            WHERE id = 13), @idea_reviwer_gid, 'user_idea', 13, 'READ,READ_SHARED,READ-COMMENT_SHARED');
-call shareResourceToGroup((SELECT organization_id
+call shareResourceToGroup((SELECT organizationId
                            FROM ideas
                            WHERE id = 14), @idea_reviwer_gid, 'user_idea', 14, 'READ,READ_SHARED, READ-COMMENT_SHARED');
 
@@ -233,20 +246,27 @@ INSERT INTO user_groups
 vALUES (@reviewer2, @idea_reviwer_gid);
 
 -- Create comments
-INSERT INTO comments (owner_uid, ideas_id, text)
+INSERT INTO comments (ownerUserId, userIdeaId, data)
 VALUES (@reviewer1, 13, '1st comment by rewiewer1@emca on the 1st shared idea at emca');
-INSERT INTO comments (owner_uid, ideas_id, text)
+INSERT INTO comments (ownerUserId, userIdeaId, data)
 VALUES (@reviewer1, 14, '1st comment by rewiewer1@emca on the 2nd shared idea at emca');
 
-INSERT INTO comments (owner_uid, ideas_id, text)
+INSERT INTO comments (ownerUserId, userIdeaId, data)
 VALUES (@reviewer2, 13, '1st comment by rewiewer2@emca on the 1st shared idea at emca');
-INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@reviewer2, 14, '1st comment by rewiewer2@emca on the 2nd shared idea at emca');
+INSERT INTO comments (ownerUserId, userIdeaId, data)
+VALUES (@reviewer2, 14, '1st comment by rewiewer2@emca on the 2nd shared idea at emca');
 
-INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@inventor1_emca, 13, '1st comment by inventor1@emca on the 1st shared idea at emca');
-INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@inventor1_emca, 14, '1st comment by inventor1@emca on the 2nd shared idea at emca');
+INSERT INTO comments (ownerUserId, userIdeaId, data)
+VALUES (@inventor1_emca, 13, '1st comment by inventor1@emca on the 1st shared idea at emca');
+INSERT INTO comments (ownerUserId, userIdeaId, data)
+VALUES (@inventor1_emca, 14, '1st comment by inventor1@emca on the 2nd shared idea at emca');
 
-INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@inventor1_emca, 7, '1st comment by inventor1@emca on the 1st idea of inventor2@emca');
-INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@inventor1_emca, 8, '1st comment by inventor1@emca on the 2nd idea of inventor2@emca');
+INSERT INTO comments (ownerUserId, userIdeaId, data)
+VALUES (@inventor1_emca, 7, '1st comment by inventor1@emca on the 1st idea of inventor2@emca');
+INSERT INTO comments (ownerUserId, userIdeaId, data)
+VALUES (@inventor1_emca, 8, '1st comment by inventor1@emca on the 2nd idea of inventor2@emca');
 
-INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@inventor2_emca, 7, '1st comment by inventor2@emca on the 1st idea of inventor2@emca');
-INSERT INTO comments (owner_uid, ideas_id, text) VALUES (@inventor2_emca, 8, '1st comment by inventor2@emca on the 2nd idea of inventor2@emca');
+INSERT INTO comments (ownerUserId, userIdeaId, data)
+VALUES (@inventor2_emca, 7, '1st comment by inventor2@emca on the 1st idea of inventor2@emca');
+INSERT INTO comments (ownerUserId, userIdeaId, data)
+VALUES (@inventor2_emca, 8, '1st comment by inventor2@emca on the 2nd idea of inventor2@emca');

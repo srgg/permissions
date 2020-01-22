@@ -419,7 +419,7 @@ describe('Read all from a particular Domain', () => {
             await checkReadAllQuery({
                     user: 'admin@emca', domain: 'users', action: 'ReAd',
                     columns: ['id', 'organizationId', 'name', 'permitted',
-                        '(SELECT GROUP_CONCAT( g.name)  FROM groups g, user_groups ug WHERE g.id = ug.gid AND ug.uid = prime.id) as groups'],
+                        '(SELECT GROUP_CONCAT( g.name)  FROM groups g, user_groups ug WHERE g.id = ug.groupId AND ug.userId = prime.id) as groups'],
                     checkOwnership: false
                 },
                 `[
@@ -500,7 +500,7 @@ describe('Read all from a particular Domain', () => {
                 name: 'common organization',
                 permitted: 'CREATE,DELETE,EDIT,READ',
                 pids: '1',
-                text: null
+                description: null
             },
             {
                 domain: 'paltform.com',
@@ -509,7 +509,7 @@ describe('Read all from a particular Domain', () => {
                 name: 'PLATFORM',
                 permitted: 'CREATE,DELETE,EDIT,READ',
                 pids: '1',
-                text: null
+                description: null
             },
             {
                 domain: 'acme.com',
@@ -518,7 +518,7 @@ describe('Read all from a particular Domain', () => {
                 name: 'ACME',
                 permitted: 'CREATE,DELETE,EDIT,READ',
                 pids: '1',
-                text: null
+                description: null
             },
             {
                 domain: 'emca.com',
@@ -527,7 +527,7 @@ describe('Read all from a particular Domain', () => {
                 name: 'EMCA',
                 permitted: 'CREATE,DELETE,EDIT,READ',
                 pids: '1',
-                text: null
+                description: null
             },
             {
                 domain: 'test-hierarchy.com',
@@ -536,7 +536,7 @@ describe('Read all from a particular Domain', () => {
                 name: 'TEST Group hierarchy',
                 permitted: 'CREATE,DELETE,EDIT,READ',
                 pids: '1',
-                text: null
+                description: null
             },
             {
                 domain: 'regression.test',
@@ -545,7 +545,7 @@ describe('Read all from a particular Domain', () => {
                 name: 'Regression test',
                 permitted: 'CREATE,DELETE,EDIT,READ',
                 pids: '1',
-                text: null
+                description: null
             }]`
         );
     });
@@ -555,7 +555,7 @@ describe('Read all from a particular Domain', () => {
         test('1st reviewer at emca should be able to read comments on shared ideas the only (of the entire organization)', async () => {
             await checkReadAllSubQuery({
                     user: 'reviewer1@emca', domain: 'user_idea.comment', action: 'READ-COMMENT_SHARED',
-                    columns: ['id', 'ownerUserId', 'userIdeaId', 'text', 'permitted'],
+                    columns: ['id', 'ownerUserId', 'userIdeaId', 'data', 'permitted'],
                     checkOwnership: true
                     // ,organizationId: null
                 },
@@ -565,42 +565,42 @@ describe('Read all from a particular Domain', () => {
                     userIdeaId: 13,
                     ownerUserId: 435,
                     permitted: 'READ-COMMENT_SHARED,DELETE_OWN,EDIT_OWN,READ_OWN',
-                    text: '1st comment by rewiewer1@emca on the 1st shared idea at emca'
+                    data: '1st comment by rewiewer1@emca on the 1st shared idea at emca'
                 },
                 {
                     id: 440,
                     userIdeaId: 14,
                     ownerUserId: 435,
                     permitted: 'READ-COMMENT_SHARED,DELETE_OWN,EDIT_OWN,READ_OWN',
-                    text: '1st comment by rewiewer1@emca on the 2nd shared idea at emca'
+                    data: '1st comment by rewiewer1@emca on the 2nd shared idea at emca'
                 },
                 {
                     id: 441,
                     userIdeaId: 13,
                     ownerUserId: 436,
                     permitted: 'READ-COMMENT_SHARED',
-                    text: '1st comment by rewiewer2@emca on the 1st shared idea at emca'
+                    data: '1st comment by rewiewer2@emca on the 1st shared idea at emca'
                 },
                 {
                     id: 442,
                     userIdeaId: 14,
                     ownerUserId: 436,
                     permitted: 'READ-COMMENT_SHARED',
-                    text: '1st comment by rewiewer2@emca on the 2nd shared idea at emca'
+                    data: '1st comment by rewiewer2@emca on the 2nd shared idea at emca'
                 },
                 {
                     id: 443,
                     userIdeaId: 13,
                     ownerUserId: 5,
                     permitted: 'READ-COMMENT_SHARED',
-                    text: '1st comment by inventor1@emca on the 1st shared idea at emca'
+                    data: '1st comment by inventor1@emca on the 1st shared idea at emca'
                 },
                 {
                     id: 444,
                     userIdeaId: 14,
                     ownerUserId: 5,
                     permitted: 'READ-COMMENT_SHARED',
-                    text: '1st comment by inventor1@emca on the 2nd shared idea at emca'
+                    data: '1st comment by inventor1@emca on the 2nd shared idea at emca'
                 }
             ]`);
         });
@@ -608,7 +608,7 @@ describe('Read all from a particular Domain', () => {
         test('1st inventor at emca should be able to read comments on shared ideas including p2p sharing.', async () => {
             await checkReadAllSubQuery({
                     user: 'inventor1@emca', domain: 'user_idea.comment', action: 'READ-COMMENT_SHARED',
-                    columns: ['id', 'ownerUserId', 'userIdeaId', 'text', 'permitted'],
+                    columns: ['id', 'ownerUserId', 'userIdeaId', 'data', 'permitted'],
                     checkOwnership: true
                 },
                 `[
@@ -617,56 +617,56 @@ describe('Read all from a particular Domain', () => {
                     userIdeaId: 13,
                     ownerUserId: 435,
                     permitted: 'READ-COMMENT_SHARED',
-                    text: '1st comment by rewiewer1@emca on the 1st shared idea at emca'
+                    data: '1st comment by rewiewer1@emca on the 1st shared idea at emca'
                 },
                 {
                     id: 440,
                     userIdeaId: 14,
                     ownerUserId: 435,
                     permitted: 'READ-COMMENT_SHARED',
-                    text: '1st comment by rewiewer1@emca on the 2nd shared idea at emca'
+                    data: '1st comment by rewiewer1@emca on the 2nd shared idea at emca'
                 },
                 {
                     id: 441,
                     userIdeaId: 13,
                     ownerUserId: 436,
                     permitted: 'READ-COMMENT_SHARED',
-                    text: '1st comment by rewiewer2@emca on the 1st shared idea at emca'
+                    data: '1st comment by rewiewer2@emca on the 1st shared idea at emca'
                 },
                 {
                     id: 442,
                     userIdeaId: 14,
                     ownerUserId: 436,
                     permitted: 'READ-COMMENT_SHARED',
-                    text: '1st comment by rewiewer2@emca on the 2nd shared idea at emca'
+                    data: '1st comment by rewiewer2@emca on the 2nd shared idea at emca'
                 },
                 {
                     id: 443,
                     userIdeaId: 13,
                     ownerUserId: 5,
                     permitted: 'READ-COMMENT_SHARED,DELETE_OWN,EDIT_OWN',
-                    text: '1st comment by inventor1@emca on the 1st shared idea at emca'
+                    data: '1st comment by inventor1@emca on the 1st shared idea at emca'
                 },
                 {
                     id: 444,
                     userIdeaId: 14,
                     ownerUserId: 5,
                     permitted: 'READ-COMMENT_SHARED,DELETE_OWN,EDIT_OWN',
-                    text: '1st comment by inventor1@emca on the 2nd shared idea at emca'
+                    data: '1st comment by inventor1@emca on the 2nd shared idea at emca'
                 },
                 {
                     id: 445,
                     userIdeaId: 7,
                     ownerUserId: 5,
                     permitted: 'READ-COMMENT_SHARED,DELETE_OWN,EDIT_OWN',
-                    text: '1st comment by inventor1@emca on the 1st idea of inventor2@emca'
+                    data: '1st comment by inventor1@emca on the 1st idea of inventor2@emca'
                 },
                 {
                     id: 447,
                     userIdeaId: 7,
                     ownerUserId: 6,
                     permitted: 'READ-COMMENT_SHARED',
-                    text: '1st comment by inventor2@emca on the 1st idea of inventor2@emca'
+                    data: '1st comment by inventor2@emca on the 1st idea of inventor2@emca'
                 }
             ]`);
         });
@@ -676,7 +676,7 @@ describe('Read all from a particular Domain', () => {
     test('1st inventor at emca should be able to read all comments for a particular idea  using query extension mechanism', async () => {
         await checkReadAllSubQuery({
                 user: 'inventor1@emca', domain: 'user_idea.comment', action: 'READ-COMMENT_SHARED',
-                columns: ['id', '(SELECT name FROM users WHERE id = sub.ownerUserId) as commentedBy', 'userIdeaId', 'text', 'permitted'],
+                columns: ['id', '(SELECT name FROM users WHERE id = sub.ownerUserId) as commentedBy', 'userIdeaId', 'data', 'permitted'],
                 checkOwnership: true,
                 query_extension: 'AND sub.userIdeaId = :idea_id',
                 extended_params: {idea_id: 13}
@@ -687,21 +687,21 @@ describe('Read all from a particular Domain', () => {
                     userIdeaId: 13,
                     commentedBy: 'reviewer1@emca',
                     permitted: 'READ-COMMENT_SHARED',
-                    text: '1st comment by rewiewer1@emca on the 1st shared idea at emca'
+                    data: '1st comment by rewiewer1@emca on the 1st shared idea at emca'
                 },
                 {
                     id: 441,
                     userIdeaId: 13,
                     commentedBy: 'reviewer2@emca',
                     permitted: 'READ-COMMENT_SHARED',
-                    text: '1st comment by rewiewer2@emca on the 1st shared idea at emca'
+                    data: '1st comment by rewiewer2@emca on the 1st shared idea at emca'
                 },
                 {
                     id: 443,
                     userIdeaId: 13,
                     commentedBy: 'inventor1@emca',
                     permitted: 'READ-COMMENT_SHARED,DELETE_OWN,EDIT_OWN',
-                    text: '1st comment by inventor1@emca on the 1st shared idea at emca'
+                    data: '1st comment by inventor1@emca on the 1st shared idea at emca'
                 }            
             ]`);
     });
@@ -709,7 +709,7 @@ describe('Read all from a particular Domain', () => {
     test('1st inventor at emca should be able to read particular comment on shared idea using query extension mechanism', async () => {
         await checkReadAllSubQuery({
                 user: 'inventor1@emca', domain: 'user_idea.comment', action: 'READ-COMMENT_SHARED',
-                columns: ['id', 'ownerUserId', 'userIdeaId', 'text', 'permitted'],
+                columns: ['id', 'ownerUserId', 'userIdeaId', 'data', 'permitted'],
                 checkOwnership: true,
                 query_extension: 'AND sub.id = :id',
                 extended_params: {id: 439}
@@ -721,7 +721,7 @@ describe('Read all from a particular Domain', () => {
                     userIdeaId: 13,
                     ownerUserId: 435,
                     permitted: 'READ-COMMENT_SHARED',
-                    text: '1st comment by rewiewer1@emca on the 1st shared idea at emca'
+                    data: '1st comment by rewiewer1@emca on the 1st shared idea at emca'
                 }
             ]`);
         });

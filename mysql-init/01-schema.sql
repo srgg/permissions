@@ -3,10 +3,10 @@ SET NAMES utf8mb4;
 
 CREATE TABLE organizations
 (
-    id     INT AUTO_INCREMENT,
-    name   VARCHAR(100),
-    domain VARCHAR(50),
-    text   VARCHAR(256),
+    id          INT AUTO_INCREMENT,
+    name        VARCHAR(100),
+    domain      VARCHAR(50),
+    description VARCHAR(256),
     CONSTRAINT pk_organizations PRIMARY KEY (id)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 433
@@ -40,112 +40,102 @@ FROM users;
 
 CREATE TABLE groups
 (
-    id              INT AUTO_INCREMENT,
-    organization_id INT,
-    parent_gid      INT DEFAULT NULL,
-    name            VARCHAR(100) NOT NULL,
-    description     VARCHAR(512),
+    id             INT AUTO_INCREMENT,
+    organizationId INT,
+    parent_groupid INT DEFAULT NULL,
+    name           VARCHAR(100) NOT NULL,
+    description    VARCHAR(512),
     CONSTRAINT pk_groups PRIMARY KEY (id),
-    CONSTRAINT groups_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT groups_fk02 FOREIGN KEY (parent_gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+    CONSTRAINT groups_fk01 FOREIGN KEY (organizationId) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT groups_fk02 FOREIGN KEY (parent_groupid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 433
   CHARACTER SET = utf8
   COLLATE = utf8_general_ci;
-CREATE UNIQUE INDEX idx_groups_name ON groups (organization_id, name);
+CREATE UNIQUE INDEX idx_groups_name ON groups (organizationId, name);
 
 CREATE VIEW `group` AS
-SELECT id, organization_id as 'organizationId', parent_gid as 'parent_groupid', name, description
+SELECT *
 FROM groups;
 
 CREATE TABLE user_groups
 (
-    uid INT NOT NULL,
-    gid INT NOT NULL,
-    CONSTRAINT pk_user_groups PRIMARY KEY (uid, gid),
-    CONSTRAINT usergroups_fk01 FOREIGN KEY (uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT usergroups_fk02 FOREIGN KEY (gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+    userId  INT NOT NULL,
+    groupId INT NOT NULL,
+    CONSTRAINT pk_user_groups PRIMARY KEY (userId, groupId),
+    CONSTRAINT usergroups_fk01 FOREIGN KEY (userId) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT usergroups_fk02 FOREIGN KEY (groupId) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 433
   CHARACTER SET = utf8
   COLLATE = utf8_general_ci;
 
 CREATE VIEW users_groups AS
-SELECT uid as 'userId', gid as 'groupId'
+SELECT *
 FROM user_groups;
 
 CREATE TABLE permissions
 (
-    id                INT AUTO_INCREMENT,
-    organization_id   INT NOT NULL,
-    gid               INT,
-    uid               INT,
-    domain            VARCHAR(100),
-    resource_instance INT,
-    action            VARCHAR(100),
-    CHECK ((gid IS NOT NULL AND uid IS NULL) OR (gid IS NULL AND uid IS NOT NULL)),
-    CHECK (action IS NOT NULL OR domain IS NOT NULL ),
-    CHECK (resource_instance IS NULL OR domain IS NOT NULL), -- Resource should be set if resource instance is provided
+    id             INT AUTO_INCREMENT,
+    organizationId INT NOT NULL,
+    groupId        INT,
+    userId         INT,
+    resource       VARCHAR(100),
+    resourceId     INT,
+    actions        VARCHAR(100),
+    CHECK ((groupId IS NOT NULL AND userId IS NULL) OR (groupId IS NULL AND userId IS NOT NULL)),
+    CHECK (actions IS NOT NULL OR resource IS NOT NULL ),
+    CHECK (resourceId IS NULL OR resource IS NOT NULL), -- Resource should be set if resource instance is provided
     CONSTRAINT pk_permissions PRIMARY KEY (id),
-    CONSTRAINT permissions_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT permissions_fk02 FOREIGN KEY (gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT permissions_fk03 FOREIGN KEY (uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+    CONSTRAINT permissions_fk01 FOREIGN KEY (organizationId) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT permissions_fk02 FOREIGN KEY (groupId) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT permissions_fk03 FOREIGN KEY (userId) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 433
   CHARACTER SET = utf8
   COLLATE = utf8_general_ci;
 
-CREATE UNIQUE INDEX idx_permissions_01 ON permissions (gid, domain, resource_instance);
-CREATE UNIQUE INDEX idx_permissions_02 ON permissions (uid, domain, resource_instance);
+CREATE UNIQUE INDEX idx_permissions_01 ON permissions (groupId, resource, resourceId);
+CREATE UNIQUE INDEX idx_permissions_02 ON permissions (userId, resource, resourceId);
 
 
 CREATE VIEW permission AS
-SELECT id,
-       organization_id   as 'organizationId',
-       gid               as 'groupId',
-       uid               as 'userId',
-       domain            as 'resource',
-       resource_instance as 'resourceId',
-       action            as 'actions'
+SELECT *
 FROM permissions;
 
 CREATE TABLE ideas
 (
-    id              INT AUTO_INCREMENT,
-    organization_id INT NOT NULL,
-    owner_uid       INT,
-    owner_gid       INT,
-    name            VARCHAR(100),
-    title           VARCHAR(100),
+    id             INT AUTO_INCREMENT,
+    organizationId INT NOT NULL,
+    ownerUserId    INT,
+    ownerGroupId   INT,
+    name           VARCHAR(100),
+    title          VARCHAR(100),
     CONSTRAINT pk_ideas PRIMARY KEY (id),
-    CONSTRAINT ideas_fk01 FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT ideas_fk02 FOREIGN KEY (owner_uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT ideas_fk03 FOREIGN KEY (owner_gid) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+    CONSTRAINT ideas_fk01 FOREIGN KEY (organizationId) REFERENCES organizations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT ideas_fk02 FOREIGN KEY (ownerUserId) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT ideas_fk03 FOREIGN KEY (ownerGroupId) REFERENCES groups (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 433
   CHARACTER SET = utf8
   COLLATE = utf8_general_ci;
 
 CREATE VIEW user_idea AS
-SELECT id,
-       organization_id as 'organizationId',
-       owner_uid       as 'ownerUserId',
-       owner_gid       as 'ownerGroupId',
-       name,
-       title
+SELECT *
 FROM ideas;
 
 CREATE TABLE idea_comments
 (
-    id        INT AUTO_INCREMENT,
-    owner_uid INT,
-    owner_gid INT,
-    ideas_id  INT,
-    text      VARCHAR(512),
-    CHECK (owner_gid IS NULL ), # group ownership is not supported for comments
+    id           INT AUTO_INCREMENT,
+    ownerUserId  INT,
+    ownerGroupId INT,
+    userIdeaId   INT,
+    data         VARCHAR(512),
+    createdAt    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CHECK (ownerGroupId IS NULL ), # group ownership is not supported for comments
     CONSTRAINT pk_comments PRIMARY KEY (id),
-    CONSTRAINT comments_fk01 FOREIGN KEY (owner_uid) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT comments_fk02 FOREIGN KEY (ideas_id) REFERENCES ideas (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+    CONSTRAINT comments_fk01 FOREIGN KEY (ownerUserId) REFERENCES users (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT comments_fk02 FOREIGN KEY (userIdeaId) REFERENCES ideas (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 433
   CHARACTER SET = utf8
@@ -153,17 +143,12 @@ CREATE TABLE idea_comments
 
 -- In order to prevent useless organization_id duplication in comments
 CREATE VIEW comments AS
-SELECT c.*, i.organization_id
+SELECT c.*, i.organizationId
 FROM idea_comments c
-         join ideas i on c.ideas_id = i.id;
+         join ideas i on c.userIdeaId = i.id;
 
 CREATE VIEW comment AS
-SELECT id,
-       owner_uid       as 'ownerUserId',
-       owner_gid       as 'ownerGroupId',
-       ideas_id        as 'userIdeaId',
-       text,
-       organization_id as 'organizationId'
+SELECT *
 FROM comments;
 
 DELIMITER $$
@@ -184,7 +169,7 @@ BEGIN
     (SELECT GROUP_CONCAT(DISTINCT p.single_perm ORDER BY p.single_perm)
      INTO perm
      FROM (
-              SELECT Trim(SUBSTRING_INDEX(SUBSTRING_INDEX(ppp.action, ',', n.digit + 1), ',', -1)) single_perm
+              SELECT Trim(SUBSTRING_INDEX(SUBSTRING_INDEX(ppp.actions, ',', n.digit + 1), ',', -1)) single_perm
               FROM (
                        SELECT *
                        FROM permissions pp
@@ -203,7 +188,7 @@ BEGIN
                                    SELECT 5
                                    UNION ALL
                                    SELECT 6) n
-                                  ON LENGTH(REPLACE(ppp.action, ',', '')) <= LENGTH(ppp.action) - n.digit
+                                  ON LENGTH(REPLACE(ppp.actions, ',', '')) <= LENGTH(ppp.actions) - n.digit
           ) p
      WHERE isOwner
         OR ((isOwner IS NULL OR NOT isOwner) AND RIGHT(LCASE(p.single_perm), 4) <> '_own'));
@@ -253,7 +238,7 @@ BEGIN
     END IF;
 
     IF owner_gid IS NOT NULL THEN
-        SET @groups_org_id  = (SELECT r.organization_id FROM groups r where r.id= owner_gid);
+        SET @groups_org_id = (SELECT r.organizationId FROM groups r where r.id = owner_gid);
 
         IF @groups_org_id <> organization_id AND @groups_org_id <> 1 THEN
             SIGNAL SQLSTATE '45000'
@@ -265,35 +250,35 @@ END; $$
 CREATE TRIGGER user_groups_insert BEFORE INSERT ON user_groups FOR EACH ROW
 BEGIN
     IF triggersEnabled() THEN
-        call checkConsistencyWithinOrganization(null, New.uid, NEW.gid);
+        call checkConsistencyWithinOrganization(null, New.userId, NEW.groupId);
     END IF;
 END; $$
 
 CREATE TRIGGER user_groups_update BEFORE UPDATE ON user_groups FOR EACH ROW
 BEGIN
     IF triggersEnabled() THEN
-        call checkConsistencyWithinOrganization(null, New.uid, NEW.gid);
+        call checkConsistencyWithinOrganization(null, New.userId, NEW.groupId);
     END IF;
 END; $$
 
 CREATE TRIGGER ideas_insert BEFORE INSERT ON ideas FOR EACH ROW
 BEGIN
     IF triggersEnabled() THEN
-        call checkConsistencyWithinOrganization(NEW.organization_id, NEW.owner_uid, NEW.owner_gid);
+        call checkConsistencyWithinOrganization(NEW.organizationId, NEW.ownerUserId, NEW.ownerGroupId);
     END IF;
 END; $$
 
 CREATE TRIGGER ideas_update BEFORE UPDATE ON ideas FOR EACH ROW
 BEGIN
     IF triggersEnabled() THEN
-        call checkConsistencyWithinOrganization(NEW.organization_id, NEW.owner_uid, NEW.owner_gid);
+        call checkConsistencyWithinOrganization(NEW.organizationId, NEW.ownerUserId, NEW.ownerGroupId);
     END IF;
 END; $$
 
 CREATE TRIGGER groups_insert BEFORE INSERT ON groups FOR EACH ROW
 BEGIN
     IF triggersEnabled() THEN
-        IF NEW.parent_gid IS NOT NULL THEN
+        IF NEW.parent_groupid IS NOT NULL THEN
             SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Group hierarchy is not supported, parent_gid MUST be NULL!';
         END IF;
@@ -303,7 +288,7 @@ END; $$
 CREATE TRIGGER groups_update BEFORE UPDATE ON groups FOR EACH ROW
 BEGIN
     IF triggersEnabled() THEN
-        IF NEW.parent_gid IS NOT NULL THEN
+        IF NEW.parent_groupid IS NOT NULL THEN
             SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Group hierarchy is not supported, parent_gid MUST be NULL!';
         END IF;
@@ -315,7 +300,7 @@ BEGIN
     DECLARE org_id INT;
 
     IF gid IS NOT NULL THEN
-        SELECT g.organization_id FROM groups g WHERE g.id = gid AND organization_id != 1 INTO org_id;
+        SELECT g.organizationId FROM groups g WHERE g.id = gid AND organizationId != 1 INTO org_id;
     ELSE
         IF uid IS NOT NULL THEN
             SET org_id = (SELECT u.organizationId FROM users u where u.id = uid);
@@ -346,8 +331,8 @@ BEGIN
     DECLARE oid INT;
 
     IF triggersEnabled() THEN
-        SELECT getOrganizationIDForGidOrUid(New.organization_id, NEW.gid, NEW.uid) INTO oid;
-        SET NEW.organization_id = oid;
+        SELECT getOrganizationIDForGidOrUid(New.organizationId, NEW.groupId, NEW.userId) INTO oid;
+        SET NEW.organizationId = oid;
     END IF;
 END; $$
 
@@ -356,8 +341,8 @@ BEGIN
     DECLARE oid INT;
 
     IF triggersEnabled() THEN
-        SELECT getOrganizationIDForGidOrUid(New.organization_id, NEW.gid, NEW.uid) INTO oid;
-        SET NEW.organization_id = oid;
+        SELECT getOrganizationIDForGidOrUid(New.organizationId, NEW.groupId, NEW.userId) INTO oid;
+        SET NEW.organizationId = oid;
     END IF;
 END; $$
 
