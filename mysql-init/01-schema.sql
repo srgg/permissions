@@ -34,7 +34,7 @@ CREATE TABLE users
   COLLATE = utf8_general_ci;
 CREATE UNIQUE INDEX idx_users_username ON users (organizationId, name);
 
-CREATE VIEW user AS
+CREATE VIEW `user` AS
 SELECT *
 FROM users;
 
@@ -280,7 +280,7 @@ BEGIN
     IF triggersEnabled() THEN
         IF NEW.parent_groupid IS NOT NULL THEN
             SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Group hierarchy is not supported, parent_gid MUST be NULL!';
+                SET MESSAGE_TEXT = 'Group hierarchy is not supported, parent_groupid MUST be NULL!';
         END IF;
     END IF;
 END; $$
@@ -290,7 +290,7 @@ BEGIN
     IF triggersEnabled() THEN
         IF NEW.parent_groupid IS NOT NULL THEN
             SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = 'Group hierarchy is not supported, parent_gid MUST be NULL!';
+                SET MESSAGE_TEXT = 'Group hierarchy is not supported, parent_groupid MUST be NULL!';
         END IF;
     END IF;
 END; $$

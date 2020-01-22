@@ -59,7 +59,7 @@ describe('Permission Tests', () => {
           entities: [Permission, User, UserIdea, Comment, Group, Organization],
           logging: false,
           multipleStatements: true,
-          synchronize: true
+          synchronize: false
         }),
         PermissionModule
       ]

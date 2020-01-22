@@ -25,8 +25,8 @@
     "winston": "^3.2.1"
   },
   "scripts": {
-    "e2e": "jest --config=e2e/jest-e2e.json",
-    "test": "jest --config=jest.json"
+    "e2e": "jest --config=e2e/jest-e2e.json --testTimeout=20000",
+    "test": "jest --config=jest.json --testTimeout=20000"
   },
   "devDependencies": {
     "@types/jest": "^24.9.0",
