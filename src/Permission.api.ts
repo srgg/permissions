@@ -120,8 +120,6 @@ export class GroupPermissionData implements PermissionData {
   public description!: string;
   @Prop()
   public organizationId!: number;
-  @Prop()
-  public ownerUserId!: number;
 }
 
 export class UserPermissionData implements PermissionData {

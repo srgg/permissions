@@ -1,42 +1,53 @@
 import * as assert from 'assert';
 import * as QueryTemplater from 'query-template';
 
-export interface UserParams {
-  userId: number;
-  organizationId?: number | null;
+export interface OrganizationParams {
+    organizationId?: number | null;
 }
 
-export interface DomainParams extends UserParams {
-  resource: string;
-  action: string;
+export interface UserParams extends OrganizationParams {
+    userId: number;
 }
 
-export interface IsPermittedQueryParams extends DomainParams {
-  checkOwnership?: boolean;
-  instanceId?: number;
+export interface UserResourceParams extends UserParams {
+    resource: string;
+    action: string;
+}
+
+export interface IsPermittedQueryParams extends UserResourceParams {
+    checkOwnership?: boolean;
+    instanceId?: number;
 }
 
 export interface BuildPermissionListQueryParams extends UserParams {
   columns?: string[];
   queryExtension?: string;
-  extendedParams?: object;
+    extendedParams?: object;
 }
 
-export interface BuildAllResourceQueryParams extends DomainParams {
-  columns?: string[];
-  checkOwnership?: boolean;
-  queryExtension?: string;
-  extendedParams?: object;
+export interface BuildAllResourceQueryParams extends UserResourceParams {
+    columns?: string[];
+    checkOwnership?: boolean;
+    queryExtension?: string;
+    extendedParams?: object;
+}
+
+export interface BuildAccessListForResourceQueryParams extends OrganizationParams {
+    resource: string;
+    action: string;
+    resourceId: number;
+    columns?: string[];
+    checkOwnership?: boolean;
 }
 
 export interface ParametrizedQuery {
-  query: string;
-  params: any[];
+    query: string;
+    params: any[];
 }
 
 export interface QueryBuilderResult {
-  raw: string;
-  parametrized: ParametrizedQuery;
+    raw: string;
+    parametrized: ParametrizedQuery;
 }
 
 export interface QueryTemplateAddon {
@@ -45,18 +56,98 @@ export interface QueryTemplateAddon {
 }
 
 export class QueryBuilder {
-  public static readonly primaryDomainQueryAlias: string = 'prime';
-  public static readonly subDomainQueryAlias: string = 'sub';
+    public static readonly primaryDomainQueryAlias: string = 'prime';
+    public static readonly subDomainQueryAlias: string = 'sub';
 
-  public static buildIsPermittedQuery({
-                                        organizationId,
-                                        userId,
-                                        resource,
-                                        action,
-                                        checkOwnership,
-                                        instanceId
-                                      }: IsPermittedQueryParams): QueryBuilderResult {
-    const queryPids: QueryBuilderResult = QueryBuilder.buildPermissionListLowLevelQuery({
+    public static buildAccessListForResourceQuery({
+                                                      organizationId,
+                                                      resource,
+                                                      action,
+                                                      resourceId,
+                                                      columns,
+                                                      checkOwnership
+                                                  }: BuildAccessListForResourceQueryParams): QueryBuilderResult {
+        const alias: string = QueryBuilder.primaryDomainQueryAlias;
+
+        if (checkOwnership === undefined) {
+            checkOwnership = true;
+        }
+
+        if (!columns) {
+            columns = ["*"];
+        }
+
+        const preparedColumns: string = this.prepareColumns(columns, alias);
+
+        const accessListQueryTemplate = {
+            addons: {
+                ownership_filtering: {
+                    options: {propertyName: 'ownershipFilter', propertyValue: true},
+                    sql: ` SELECT 1 FROM \`${resource.toLocaleLowerCase()}\` ui
+                            WHERE ui.id = :resourceId 
+                                AND (
+                                    (p.groupId IS NOT NULL AND ui.ownerGroupId = p.groupId)
+                                    OR (p.userId IS NOT NULL AND ui.ownerUserId = p.userId)
+                        )`
+                },
+                ownership_is_not_applicable: {
+                    // if ownership is not applicable, then each resource will be treated as owned by everyone
+                    options: {propertyName: 'ownershipFilter', propertyValue: false},
+                    sql: '(1)'
+                }
+            },
+            sql: `SELECT ${preparedColumns}
+FROM user ${alias},
+     (
+         SELECT calculatePermittedActionsOrNull(:action, ii.is_owner, ii.id) permitted,
+                ii.*
+         FROM (
+                  SELECT
+                     -- ingest ownership flag to indicate when permission was granted to resource owner
+                     (
+                        {{ownership_filtering}}
+                        {{ownership_is_not_applicable}}
+                     ) is_owner,
+                     p.*
+                  FROM permission p
+                  WHERE
+                        LCASE(p.resource) = '${resource.toLocaleLowerCase()}'
+                        AND (p.resourceId IS NULL OR p.resourceId = :resourceId)
+                        AND p.organizationId IN (1, :organizationId) 
+              ) ii
+     ) iii
+WHERE
+    --  requested action should be granted by correspondent permission
+    iii.permitted IS NOT NULL
+    -- user must belongs to the organization that owns resource
+    AND (${alias}.organizationId = :organizationId)
+    -- 
+    AND ((iii.userId IS NOT NULL AND ${alias}.id = iii.userId)
+        OR (iii.groupId IS NOT NULL AND  EXISTS(
+                SELECT 1
+                FROM users_groups ur
+                WHERE ur.groupId = iii.groupId
+                  AND ur.userId = ${alias}.id
+            )))`
+        };
+        const queryParams: object = {resource, organizationId, resourceId, action,};
+
+        return QueryBuilder.buildQuery(accessListQueryTemplate, queryParams, {
+            // organizationFilter: organizationId != null && instanceId != null,
+            ownershipFilter: checkOwnership
+        });
+
+    }
+
+    public static buildIsPermittedQuery({
+                                            organizationId,
+                                            userId,
+                                            resource,
+                                            action,
+                                            checkOwnership,
+                                            instanceId
+                                        }: IsPermittedQueryParams): QueryBuilderResult {
+        const queryPids: QueryBuilderResult = QueryBuilder.buildPermissionListLowLevelQuery({
       columns: ['(GROUP_CONCAT(pp.id)) as id'],
       extendedParams: { resource, instanceId },
       organizationId,

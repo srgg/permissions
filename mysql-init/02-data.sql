@@ -21,6 +21,7 @@ SET @DISABLE_TRIGGERS=1;
 INSERT INTO permissions (id, organizationId, groupId,resource,actions) VALUES (1,@common_oid,  @platform_admin_gid, 'organizations', 'READ, CREATE, EDIT, DELETE');
 INSERT INTO permissions (organizationId, groupId,resource,actions) VALUES (@common_oid, @admin_gid, 'users', 'READ, CREATE, EDIT, DELETE');
 INSERT INTO permissions (organizationId, groupId,resource,actions) VALUES (@common_oid, @admin_gid, 'permission', 'READ, CREATE, EDIT, DELETE');
+INSERT INTO permissions (organizationId, groupId,resource,actions) VALUES (@common_oid, @admin_gid, 'group', 'READ, CREATE, EDIT, DELETE');
 
 -- Comments
 INSERT INTO permissions (organizationId, groupId,resource,actions) VALUES (@common_oid, @reviewer_gid, 'Comment', 'READ_OWN, DELETE_OWN, EDIT_OWN');

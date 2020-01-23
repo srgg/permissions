@@ -34,6 +34,15 @@ interface BuildPermissionListQueryParamsTest {
     extended_params?: object;
 }
 
+interface BuildAccessListForResourceQueryParamsTest {
+    organizationId?: number;
+    resource: string;
+    action: string;
+    resourceId: number;
+    columns?: string[];
+    checkOwnership?: boolean;
+}
+
 async function execute_query_and_check(q: ParametrizedQuery, expected: string) {
     // console.log("SQL query:", q.query);
     const r = await getConnection().query(q.query, q.params);
@@ -74,17 +83,25 @@ async function retrieveUserIdIfNeeded(user: number|string): Promise<number> {
     return uid;
 }
 
-async function retrieveOrganizationIdIfNeeded(uid: number, organization?: number|null): Promise<number|null> {
+async function retrieveOrganizationIdByResourceIfNeeded(resource: string, rid: number, organization?: number | null): Promise<number | null> {
     let orgId;
     if (organization === null) {
         orgId = null;
     } else if (organization) {
         orgId = organization;
     } else {
-        const rr = await getConnection().query("SELECT organizationId FROM users WHERE id = " + uid);
+        const rr = await getConnection().query(`SELECT organizationId FROM \`${resource.toLowerCase()}\` WHERE id = ${rid}`);
         orgId = rr[0].organizationId;
+
+        if (orgId === 1) {
+            throw new Error('Organization Id can not be determined automatically, therefore it must be provided manually');
+        }
     }
     return orgId;
+}
+
+async function retrieveOrganizationIdIfNeeded(uid: number, organization?: number | null): Promise<number | null> {
+    return retrieveOrganizationIdByResourceIfNeeded('users', uid, organization);
 }
 
 async function check_read_all_primequery(queryopts: BuildAllResourceQueryParamsTest, expected: string) {
@@ -158,9 +175,28 @@ async function check_permission_list_query(queryopts: BuildPermissionListQueryPa
     await execute_query_and_check(q.parametrized, expected);
 }
 
+async function check_access_list_query(queryopts: BuildAccessListForResourceQueryParamsTest, expected: string) {
+    const oid: number | null = await retrieveOrganizationIdByResourceIfNeeded(
+        queryopts.resource,
+        queryopts.resourceId,
+        queryopts.organizationId
+    );
+
+    const q = QueryBuilder.buildAccessListForResourceQuery({
+        organizationId: oid,
+        resource: queryopts.resource,
+        action: queryopts.action,
+        resourceId: queryopts.resourceId,
+        columns: queryopts.columns,
+        checkOwnership: queryopts.checkOwnership
+    });
+    await execute_query_and_check(q.parametrized, expected);
+}
+
 export {
     check_read_all_primequery as checkReadAllQuery,
     check_read_all_subquery as checkReadAllSubQuery,
     check_permitted_query as checkIsPermittedQuery,
-    check_permission_list_query as checkPermissionListQuery
+    check_permission_list_query as checkPermissionListQuery,
+    check_access_list_query as checkAccessListQuery
 }

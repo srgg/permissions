@@ -33,13 +33,9 @@ export class Group {
   })
   public organization!: Organization;
 
-  @ManyToOne(type => User)
-  public ownerUser!: User;
-
   constructor(name: string, user: User) {
     this.name = name;
     if (user) {
-      this.ownerUser = user;
       this.organization = user.organization;
     }
   }

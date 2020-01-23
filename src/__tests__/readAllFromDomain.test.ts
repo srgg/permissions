@@ -768,6 +768,16 @@ describe('Read all from a particular Domain', () => {
                 {
                     id: 435,
                     organizationId: 1,
+                    resource: 'group',
+                    group: 'admin',
+                    userId: null,
+                    actions: 'READ, CREATE, EDIT, DELETE',
+                    permitted: 'CREATE,DELETE,EDIT,READ',
+                    resourceId: null
+                },                
+                {
+                    id: 436,
+                    organizationId: 1,
                     resource: 'Comment',
                     group: 'idea-reviewer',
                     userId: null,
@@ -776,7 +786,7 @@ describe('Read all from a particular Domain', () => {
                     resourceId: null
                 },
                 {
-                    id: 436,
+                    id: 437,
                     organizationId: 1,
                     resource: 'User_Idea',
                     userId: null,
@@ -786,7 +796,7 @@ describe('Read all from a particular Domain', () => {
                     resourceId: null
                 },
                 {
-                    id: 437,
+                    id: 438,
                     organizationId: 1,
                     resource: 'USEr_IDEA',
                     group: 'idea-manager',
@@ -796,7 +806,7 @@ describe('Read all from a particular Domain', () => {
                     resourceId: null
                 },
                 {
-                    id: 438,
+                    id: 439,
                     organizationId: 1,
                     resource: 'User_Idea',
                     group: 'idea-reviewer',
@@ -806,7 +816,7 @@ describe('Read all from a particular Domain', () => {
                     resourceId: null
                 },
                 {
-                    id: 439,
+                    id: 440,
                     organizationId: 1,
                     resource: 'User_Idea',
                     group: 'inventor',
@@ -816,7 +826,7 @@ describe('Read all from a particular Domain', () => {
                     resourceId: null
                 },
                 {
-                    id: 440,
+                    id: 441,
                     organizationId: 1,
                     resource: 'Comment',
                     group: 'inventor',
@@ -826,7 +836,7 @@ describe('Read all from a particular Domain', () => {
                     resourceId: null
                 },
                 {
-                    id: 443,
+                    id: 444,
                     organizationId: 3,
                     resource: 'user_idea',
                     actions: 'READ,READ_SHARED, EDIT_SHARED, READ-COMMENT_SHARED',                                        
@@ -836,7 +846,7 @@ describe('Read all from a particular Domain', () => {
                     resourceId: 13
                 },
                 {
-                    id: 444,
+                    id: 445,
                     organizationId: 3,
                     resource: 'user_idea',
                     group: 'shared-idea-inventors',
@@ -846,7 +856,7 @@ describe('Read all from a particular Domain', () => {
                     resourceId: 14
                 },
                 {
-                    id: 445,
+                    id: 446,
                     organizationId: 3,
                     resource: 'user_idea',
                     group: null,
@@ -856,7 +866,7 @@ describe('Read all from a particular Domain', () => {
                     resourceId: 7
                 },
                 {
-                    id: 446,
+                    id: 447,
                     organizationId: 3,
                     resource: 'user_IdEa',
                     group: null,
@@ -866,7 +876,7 @@ describe('Read all from a particular Domain', () => {
                     resourceId: 8
                 },
                 {
-                    id: 449,
+                    id: 450,
                     organizationId: 3,
                     resource: 'user_idea',
                     group: 'idea-reviewer',
@@ -876,7 +886,7 @@ describe('Read all from a particular Domain', () => {
                     resourceId: 13
                 },
                 {
-                    id: 450,
+                    id: 451,
                     organizationId: 3,
                     resource: 'user_idea',
                     group: 'idea-reviewer',

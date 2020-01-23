@@ -51,19 +51,19 @@ describe('Regression tests', () => {
             },
             `[
             {
-                id: 451,
+                id: 452,
                 resource: 'User_Idea',
                 actions: 'READ_OWN',
                 resourceId: null
             },
             {
-                id: 452,
+                id: 453,
                 actions: 'CREATE',
                 resource: 'User_Idea',
                 resourceId: null
             },
             {
-                id: 453,
+                id: 454,
                 actions: 'CREATE, READ, EDIT, DELETE',
                 resource: 'Empty_IDEAS',
                 resourceId: null
