@@ -11,7 +11,7 @@ interface IsPermittedQueryParamsTest {
     domain: string;
     action: string;
     organizationId?: number;
-    instanceId?: number;
+    resourceId?: number;
     checkOwnership?: boolean;
 }
 
@@ -136,7 +136,7 @@ async function check_permitted_query(queryopts: IsPermittedQueryParamsTest, expe
         action: queryopts.action,
         organizationId: oid,
         checkOwnership: queryopts.checkOwnership === undefined ? false : queryopts.checkOwnership,
-        instanceId: queryopts.instanceId
+        resourceId: queryopts.resourceId
     });
 
     await execute_query_and_check(q.parametrized, expected);

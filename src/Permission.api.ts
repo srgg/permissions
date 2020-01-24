@@ -160,7 +160,7 @@ export class PermissionsData implements PermissionData {
 
 export abstract class QueryParam {
   public columns: string[] = ['id'];
-  public instanceId!: number | undefined;
+  public resourceId!: number | undefined;
   public organizationId!: number;
   public queryExtension!: string;
   public extendedParams!: object;
@@ -181,7 +181,7 @@ export abstract class QueryParam {
   }
 
   public withInstanceId(instanceId: number | undefined): QueryParam {
-    this.instanceId = instanceId;
+    this.resourceId = instanceId;
     return this;
   }
 

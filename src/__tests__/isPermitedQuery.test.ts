@@ -56,7 +56,7 @@ describe('Instance level permissions', () => {
                 domain: 'USER_IDEA',
                 action: 'READ',
                 checkOwnership: true,
-                instanceId: 1
+                resourceId: 1
             },
             `[{isPermitted:'1'}]`);
     });
@@ -67,7 +67,7 @@ describe('Instance level permissions', () => {
                 domain: 'USER_IDEA',
                 action: 'READ',
                 checkOwnership: true,
-                instanceId: 2
+                resourceId: 2
             },
             `[]`);
     });
@@ -78,14 +78,14 @@ describe('Instance level permissions', () => {
                 domain: 'USER_IDEA',
                 action: 'READ',
                 checkOwnership: true,
-                instanceId: 11
+                resourceId: 11
             },
             `[]`);
     });
 
     test('Inventor should be able to work on correspondent own idea', async () => {
         await checkIsPermittedQuery({
-                user: 'inventor1@acme', domain: 'USER_IDEA', instanceId: 1,
+                user: 'inventor1@acme', domain: 'USER_IDEA', resourceId: 1,
                 checkOwnership: true, action: 'EDIT_OWN'
             },
             `[{isPermitted:'1'}]`);
@@ -93,14 +93,14 @@ describe('Instance level permissions', () => {
 
     test('Inventor should not be able to work on private idea owned by another inventor', async () => {
         await checkIsPermittedQuery({
-                user: 'manager@acme', domain: 'USER_IDEA', instanceId: 3,
+                user: 'manager@acme', domain: 'USER_IDEA', resourceId: 3,
                 checkOwnership: true, action: 'EDIT_OWN'
             },
             `[]`);
     });
 
     test('Organization admin should be able to read particular builtin permission', async () => {
-        await checkIsPermittedQuery({user: 'admin@emca', domain: 'PERMISSION', action: 'READ', instanceId: 433},
+        await checkIsPermittedQuery({user: 'admin@emca', domain: 'PERMISSION', action: 'READ', resourceId: 433},
             `[{isPermitted:'1'}]`);
     });
 
@@ -114,7 +114,7 @@ describe('Instance level permissions', () => {
 
     test('Inventor should have CREATE permission on any permitted idea (that includes shared ideas too) within organization', async () => {
         await checkIsPermittedQuery({
-                user: 'inventor2@acme', domain: 'USER_IDEA', instanceId: 1,
+                user: 'inventor2@acme', domain: 'USER_IDEA', resourceId: 1,
                 checkOwnership: true, action: 'CREATE'
             },
             `[{isPermitted:'1'}]`);
@@ -122,7 +122,7 @@ describe('Instance level permissions', () => {
 
     test('Inventor should not have CREATE permission on any idea from another organization', async () => {
         await checkIsPermittedQuery({
-                user: 'inventor2@acme', domain: 'USER_IDEA', instanceId: 5,
+                user: 'inventor2@acme', domain: 'USER_IDEA', resourceId: 5,
                 checkOwnership: true, action: 'CREATE'
             },
             `[]`);

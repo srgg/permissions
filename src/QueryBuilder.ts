@@ -16,7 +16,7 @@ export interface UserResourceParams extends UserParams {
 
 export interface IsPermittedQueryParams extends UserResourceParams {
     checkOwnership?: boolean;
-    instanceId?: number;
+    resourceId?: number;
 }
 
 export interface BuildPermissionListQueryParams extends UserParams {
@@ -133,7 +133,6 @@ WHERE
         const queryParams: object = {resource, organizationId, resourceId, action,};
 
         return QueryBuilder.buildQuery(accessListQueryTemplate, queryParams, {
-            // organizationFilter: organizationId != null && instanceId != null,
             ownershipFilter: checkOwnership
         });
 
@@ -145,38 +144,38 @@ WHERE
                                             resource,
                                             action,
                                             checkOwnership,
-                                            instanceId
+                                            resourceId
                                         }: IsPermittedQueryParams): QueryBuilderResult {
         const queryPids: QueryBuilderResult = QueryBuilder.buildPermissionListLowLevelQuery({
-      columns: ['(GROUP_CONCAT(pp.id)) as id'],
-      extendedParams: { resource, instanceId },
-      organizationId,
-      queryExtension: `
+            columns: ['(GROUP_CONCAT(pp.id)) as id'],
+            extendedParams: {resource, resourceId},
+            organizationId,
+            queryExtension: `
           AND pp.resource = :resource
           AND (
             -- apply instance filtering, if required
-                (pp.resourceId IS NOT NULL AND pp.resourceId = :instanceId)
+                (pp.resourceId IS NOT NULL AND pp.resourceId = :resourceId)
                 OR pp.resourceId IS NULL
             )`,
-      userId
-    });
+            userId
+        });
 
     const allResourcesQueryTemplate = {
       addons: {
         organization_filtering: {
           options: { propertyName: 'organizationFilter', propertyValue: true },
           sql: `-- check organization consistency
-                        AND ((SELECT organizationId FROM \`${resource.toLocaleLowerCase()}\` WHERE id = :instanceId) IN (1, :organizationId))`
+                        AND ((SELECT organizationId FROM \`${resource.toLocaleLowerCase()}\` WHERE id = :resourceId) IN (1, :organizationId))`
         },
         ownership_filtering: {
           options: { propertyName: 'ownershipFilter', propertyValue: true },
           sql: `SELECT 1 FROM dual
                           WHERE (
-                              :instanceId IS NOT NULL
+                              :resourceId IS NOT NULL
                                   AND EXISTS (
                                       SELECT 1
                                       FROM ${resource.toLocaleLowerCase()} i
-                                      WHERE i.id = :instanceId
+                                      WHERE i.id = :resourceId
                                         AND ((i.ownerUserId IS NOT NULL AND i.ownerUserId = :userId)
                                                  OR (i.ownerGroupId IS NOT NULL AND
                                                      EXISTS(
@@ -189,7 +188,7 @@ WHERE
                                             )
                                   )
                               )
-                             OR :instanceId IS NULL`
+                             OR :resourceId IS NULL`
         },
         ownership_is_not_applicable: {
           // if ownership is not applicable, then each resource will be treated as owned by everyone
@@ -215,11 +214,11 @@ FROM (
 WHERE iii.permitted IS NOT NULL {{organization_filtering}}`
     };
 
-    const queryParams: object = { userId, resource, organizationId, instanceId, action };
+        const queryParams: object = {userId, resource, organizationId, resourceId, action};
 
     return QueryBuilder.buildQuery(allResourcesQueryTemplate, queryParams, {
-      organizationFilter: organizationId != null && instanceId != null,
-      ownershipFilter: checkOwnership
+        organizationFilter: organizationId != null && resourceId != null,
+        ownershipFilter: checkOwnership
     });
   }
 
