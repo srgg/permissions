@@ -29,7 +29,7 @@ export class QueryBuilderAdapter {
             checkOwnership: params.checkOwnership,
             columns: params.columns,
             resource: params.resource,
-            resourceId: params.instanceId || (() => {
+            resourceId: params.resourceId || (() => {
                 throw new Error('Missing instance id');
             })()
         }).parametrized;
