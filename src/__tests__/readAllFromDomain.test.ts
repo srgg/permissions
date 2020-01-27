@@ -496,7 +496,7 @@ describe('Read all from a particular Domain', () => {
             {
                 domain: 'common.dot',
                 id: 1,
-                is_owner: 1,
+                is_owner: 0,
                 name: 'common organization',
                 permitted: 'CREATE,DELETE,EDIT,READ',
                 pids: '1',
@@ -505,7 +505,7 @@ describe('Read all from a particular Domain', () => {
             {
                 domain: 'paltform.com',
                 id: 4,
-                is_owner: 1,
+                is_owner: 0,
                 name: 'PLATFORM',
                 permitted: 'CREATE,DELETE,EDIT,READ',
                 pids: '1',
@@ -514,7 +514,7 @@ describe('Read all from a particular Domain', () => {
             {
                 domain: 'acme.com',
                 id: 2,
-                is_owner: 1,
+                is_owner: 0,
                 name: 'ACME',
                 permitted: 'CREATE,DELETE,EDIT,READ',
                 pids: '1',
@@ -523,7 +523,7 @@ describe('Read all from a particular Domain', () => {
             {
                 domain: 'emca.com',
                 id: 3,
-                is_owner: 1,
+                is_owner: 0,
                 name: 'EMCA',
                 permitted: 'CREATE,DELETE,EDIT,READ',
                 pids: '1',
@@ -532,7 +532,7 @@ describe('Read all from a particular Domain', () => {
             {
                 domain: 'test-hierarchy.com',
                 id: 433,
-                is_owner: 1,
+                is_owner: 0,
                 name: 'TEST Group hierarchy',
                 permitted: 'CREATE,DELETE,EDIT,READ',
                 pids: '1',
@@ -541,7 +541,7 @@ describe('Read all from a particular Domain', () => {
             {
                 domain: 'regression.test',
                 id: 434,
-                is_owner: 1,
+                is_owner: 0,
                 name: 'Regression test',
                 permitted: 'CREATE,DELETE,EDIT,READ',
                 pids: '1',

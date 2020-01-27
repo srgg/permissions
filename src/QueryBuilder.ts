@@ -92,7 +92,7 @@ export class QueryBuilder {
                 ownership_is_not_applicable: {
                     // if ownership is not applicable, then each resource will be treated as owned by everyone
                     options: {propertyName: 'ownershipFilter', propertyValue: false},
-                    sql: '(1)'
+                    sql: '(0)'
                 }
             },
             sql: `
@@ -399,7 +399,7 @@ i.organizationId = :organizationId OR i.organizationId = 1)`
         ownership_is_not_applicable: {
           // if ownership is not applicable, then each resource will be treated as owned by everyone
           options: { propertyName: 'ownershipFilter', propertyValue: false },
-          sql: '(1)'
+            sql: '(0)'
         }
       },
       sql: `SELECT i.*,
