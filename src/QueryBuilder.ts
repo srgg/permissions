@@ -83,12 +83,11 @@ export class QueryBuilder {
             addons: {
                 ownership_filtering: {
                     options: {propertyName: 'ownershipFilter', propertyValue: true},
-                    sql: ` SELECT 1 FROM \`${resource.toLocaleLowerCase()}\` ui
-                            WHERE ui.id = :resourceId 
-                                AND (
-                                    (p.groupId IS NOT NULL AND ui.ownerGroupId = p.groupId)
-                                    OR (p.userId IS NOT NULL AND ui.ownerUserId = p.userId)
-                        )`
+                    sql: ` calculateIsOwner(
+                               i.id,
+                               (SELECT ownerUserId FROM user_idea WHERE id = :resourceId),
+                               (SELECT ownerGroupId FROM user_idea WHERE id = :resourceId)
+                           )`
                 },
                 ownership_is_not_applicable: {
                     // if ownership is not applicable, then each resource will be treated as owned by everyone
@@ -96,39 +95,39 @@ export class QueryBuilder {
                     sql: '(1)'
                 }
             },
-            sql: `SELECT ${preparedColumns}
-FROM user ${alias},
-     (
-         SELECT calculatePermittedActionsOrNull(:action, ii.is_owner, ii.id) permitted,
-                ii.*
-         FROM (
-                  SELECT
-                     -- ingest ownership flag to indicate when permission was granted to resource owner
-                     (
-                        {{ownership_filtering}}
-                        {{ownership_is_not_applicable}}
-                     ) is_owner,
-                     p.*
-                  FROM permission p
-                  WHERE
-                        LCASE(p.resource) = '${resource.toLocaleLowerCase()}'
-                        AND (p.resourceId IS NULL OR p.resourceId = :resourceId)
-                        AND p.organizationId IN (1, :organizationId) 
-              ) ii
-     ) iii
+            sql: `
+SELECT ${preparedColumns}
+FROM ( SELECT
+           calculatePermittedActionsOrNull(
+                   :action,
+                   {{ownership_filtering}}
+                   {{ownership_is_not_applicable}}
+                   , i.pids)  as permitted
+              ,i.* FROM (
+         SELECT (
+                    SELECT GROUP_CONCAT(p.id)
+                    FROM permission p
+                    WHERE p.organizationId IN (1, :organizationId)
+                      AND LCASE(p.resource) = '${resource.toLocaleLowerCase()}'
+                      AND (p.resourceId IS NULL OR p.resourceId = :resourceId)
+
+                      AND ( -- include only permission granted to user either directly or by group membership
+                            p.userId = u.id
+                            OR EXISTS(
+                                        SELECT 1
+                                        FROM users_groups ur
+                                        WHERE ur.groupId = p.groupId
+                                          AND ur.userId = u.id
+                                    )
+                        )
+                ) as pids,
+                u.*
+         FROM user u
+         WHERE u.organizationId = :organizationId ) i
+     ) ${alias}
 WHERE
-    --  requested action should be granted by correspondent permission
-    iii.permitted IS NOT NULL
-    -- user must belongs to the organization that owns resource
-    AND (${alias}.organizationId = :organizationId)
-    -- 
-    AND ((iii.userId IS NOT NULL AND ${alias}.id = iii.userId)
-        OR (iii.groupId IS NOT NULL AND  EXISTS(
-                SELECT 1
-                FROM users_groups ur
-                WHERE ur.groupId = iii.groupId
-                  AND ur.userId = ${alias}.id
-            )))`
+    ${alias}.permitted IS NOT NULL;
+`
         };
         const queryParams: object = {resource, organizationId, resourceId, action,};
 
@@ -176,16 +175,7 @@ WHERE
                                       SELECT 1
                                       FROM ${resource.toLocaleLowerCase()} i
                                       WHERE i.id = :resourceId
-                                        AND ((i.ownerUserId IS NOT NULL AND i.ownerUserId = :userId)
-                                                 OR (i.ownerGroupId IS NOT NULL AND
-                                                     EXISTS(
-                                                       SELECT 1
-                                                       FROM users_groups ur
-                                                       WHERE ur.groupId = i.ownerGroupId
-                                                         AND ur.userId = :userId
-                                                     )
-                                                  )
-                                            )
+                                          AND calculateIsOwner(:userId, i.ownerUserId, i.ownerGroupId) 
                                   )
                               )
                              OR :resourceId IS NULL`
@@ -399,16 +389,12 @@ ${primaryDomainQuery.parametrized.query}
 i.organizationId = :organizationId OR i.organizationId = 1)`
         },
         ownership_filtering: {
-          options: { propertyName: 'ownershipFilter', propertyValue: true },
-          sql: `(i.ownerUserId IS NOT NULL AND i.ownerUserId = :userId)
-                        OR (i.ownerGroupId IS NOT NULL AND
-                            EXISTS(
-                                SELECT 1
-                                FROM users_groups ur
-                                WHERE ur.groupId = i.ownerGroupId
-                                  AND ur.userId = :userId
-                            )
-                        )`
+            options: {propertyName: 'ownershipFilter', propertyValue: true},
+            sql: ` calculateIsOwner(
+                               :userId,
+                               i.ownerUserId,
+                               i.ownerGroupId
+                           )`
         },
         ownership_is_not_applicable: {
           // if ownership is not applicable, then each resource will be treated as owned by everyone

@@ -160,7 +160,22 @@ BEGIN
     ELSE
         return TRUE;
     END IF;
-END; $$
+END;
+$$
+
+CREATE FUNCTION calculateIsOwner(uid INT, ownerUID INT, ownerGID INT) RETURNS BOOL
+BEGIN
+    DECLARE isOwner BOOL DEFAULT FALSE;
+    IF uid = ownerUID
+        OR EXISTS(SELECT 1
+                  FROM users_groups ur
+                  WHERE ur.groupId = ownerGID
+                    AND ur.userId = uid) THEN
+        SET isOwner = TRUE;
+    END IF;
+
+    RETURN isOwner;
+END $$
 
 CREATE FUNCTION calculatePermittedActions(isOwner BOOL, permissionList VARCHAR(255)) RETURNS VARCHAR(512)
 BEGIN
