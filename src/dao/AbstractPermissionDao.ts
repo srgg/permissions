@@ -14,10 +14,12 @@ export abstract class AbstractPermissionDao<R extends PermissionData> {
   public abstract async checkPermissions(userId: number, action: Action, resourceId?: number): Promise<boolean>;
 
   protected async findAffectedUsers(resource: Resource, resourceId: number): Promise<number[]> {
-    const users: UserResultSet[] = await getConnection().query(
+   //todo lint's workaround, remove comment after full implementation of QueryBuilderAdapter.buildRelatedResourceQuery
+   /* const users: UserResultSet[] = await getConnection().query(
       QueryBuilderAdapter.buildRelatedResourceQuery(resource, resourceId)
     );
-    return users.map(user => user.userId);
+    return users.map(user => user.userId);*/
+   return [];
   }
 
   protected async hasPermission(query: QueryParam): Promise<boolean> {
