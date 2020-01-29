@@ -13,9 +13,9 @@ export class QueryBuilderAdapter {
     public static buildSecondaryResourcesQuery(params: QueryParam): ParametrizedQuery {
         return QueryBuilder.buildReadAllFromSubDomainQuery({
             ...params,
-            resource: `${params.resource}.${params.subResource}`
-        })
-            .parametrized;
+            resource: `${params.resource}.${params.subResource}`,
+            userId: params.userId
+        }).parametrized;
     }
 
     public static buildPermissionListQuery(params: PermissionsListResourceQuery): ParametrizedQuery {

@@ -26,8 +26,8 @@ export class IdeaPermissionDao extends AbstractPermissionDao<IdeaPermissionData>
     return deserializedIdea;
   }
 
-  public async findUsersIdsByIdeaId(ideaId: number): Promise<number[]> {
-    return this.findAffectedUsers(Resource.IDEA, ideaId);
+  public async findUsersIdsByIdeaId(ideaId: number, orgId: number): Promise<number[]> {
+    return this.findAffectedUsers(Resource.IDEA, ideaId, orgId);
   }
 
   public async checkPermissions(userId: number, action: Action, ideaId?: number): Promise<boolean> {

@@ -9,7 +9,7 @@ import { Prop } from './util/Decorator.util';
 import { USER_GROUPS_SUB_QUERY } from './Constants';
 
 export interface UserResultSet {
-  userId: number;
+  id: number;
 }
 
 export interface ParametrizedQuery {
@@ -165,15 +165,19 @@ export abstract class QueryParam {
   public queryExtension!: string;
   public extendedParams!: object;
   public subResource!: Resource;
+  private userID!: number;
 
-  public constructor(
-    public userId: number,
-    public resource: Resource,
-    public action: Action,
-    public checkOwnership: boolean
-  ) {}
+  public constructor(public resource: Resource, public action: Action, public checkOwnership: boolean) {}
 
   public abstract prepareQuery(): ParametrizedQuery;
+
+  public get userId(): number {
+    return this.userID;
+  }
+
+  public set userId(userId: number) {
+    this.userID = userId;
+  }
 
   public withColumns(columns: string[]): QueryParam {
     this.columns = columns.length === 0 ? this.columns : columns;
@@ -202,8 +206,23 @@ export abstract class QueryParam {
 }
 
 export class PrimaryResourceQuery extends QueryParam {
+  constructor(userId: number, resource: Resource, action: Action, checkOwnership: boolean) {
+    super(resource, action, checkOwnership);
+    this.userId = userId;
+  }
+
   public prepareQuery(): ParametrizedQuery {
     return QueryBuilderAdapter.buildPrimaryResourcesQuery(this);
+  }
+}
+
+export class RelatedResourceQuery extends QueryParam {
+  constructor(resource: Resource, action: Action, checkOwnership: boolean) {
+    super(resource, action, checkOwnership);
+  }
+
+  public prepareQuery(): ParametrizedQuery {
+    return QueryBuilderAdapter.buildRelatedResourceQuery(this);
   }
 }
 
@@ -231,15 +250,10 @@ export class PermissionsListResourceQuery implements BuildPermissionListQueryPar
 }
 
 export class SecondaryResourceQuery extends QueryParam {
-  constructor(
-    public userId: number,
-    public resource: Resource,
-    public subResource: Resource,
-    public action: Action,
-    public checkOwnership: boolean
-  ) {
-    super(userId, resource, action, checkOwnership);
+  constructor(userId: number, resource: Resource, subResource: Resource, action: Action, checkOwnership: boolean) {
+    super(resource, action, checkOwnership);
     this.subResource = subResource;
+    this.userId = userId;
   }
 
   public prepareQuery(): ParametrizedQuery {

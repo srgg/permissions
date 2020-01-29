@@ -362,6 +362,26 @@ describe('Permission Tests', () => {
     }
   );
 
+  test.each([
+    [1, [1, 3], 2],
+    [2, [1, 3], 2],
+    [3, [2, 3], 2],
+    [4, [2, 3], 2],
+    [5, [1, 3, 6, 11], 2],
+    [6, [1, 3, 6, 11], 2],
+    [7, [4, 7, 8, 12], 3],
+    [8, [4, 8], 3]
+  ])(
+      'Idea #%d should be visible for users [%s] in the organization #%d',
+    async (...args: Array<number | number[]>): Promise<void> => {
+      const affectedUsersIds: number[] = await ideaPermissionDao.findUsersIdsByIdeaId(
+        args[0] as number,
+        args[2] as number
+      );
+      expect(args[1]).toEqual(affectedUsersIds);
+    }
+  );
+
   function getAllNonOrgAdmins<T extends BuiltInGroupType | number | Action>(): T[][] {
     return [
       [BuiltInGroupType.USER_INVENTOR, 2, Action.READ],

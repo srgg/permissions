@@ -2,24 +2,24 @@ import { NotFoundException } from '@nestjs/common';
 import { getConnection } from 'typeorm';
 import { Action, Resource } from '../entity/Permission.entity';
 import {
-  ParametrizedQuery,
-  PermissionData,
-  PermissionsListResourceQuery,
-  QueryParam,
-  UserResultSet
+    ParametrizedQuery,
+    PermissionData,
+    PermissionsListResourceQuery,
+    QueryParam, RelatedResourceQuery,
+    UserResultSet
 } from '../Permission.api';
 import { QueryBuilderAdapter } from '../QueryBuilderAdapter';
 
 export abstract class AbstractPermissionDao<R extends PermissionData> {
   public abstract async checkPermissions(userId: number, action: Action, resourceId?: number): Promise<boolean>;
 
-  protected async findAffectedUsers(resource: Resource, resourceId: number): Promise<number[]> {
-   //todo lint's workaround, remove comment after full implementation of QueryBuilderAdapter.buildRelatedResourceQuery
-   /* const users: UserResultSet[] = await getConnection().query(
-      QueryBuilderAdapter.buildRelatedResourceQuery(resource, resourceId)
-    );
-    return users.map(user => user.userId);*/
-   return [];
+    protected async findAffectedUsers(resource: Resource, resourceId: number, orgId: number): Promise<number[]> {
+      const relatedResourceQuery: RelatedResourceQuery = new RelatedResourceQuery(resource, Action.READ, true)
+        .withInstanceId(resourceId)
+        .withOrganizationId(orgId);
+      const parametrizedQuery: ParametrizedQuery = relatedResourceQuery.prepareQuery();
+      const users: UserResultSet[] = await getConnection().query(parametrizedQuery.query, parametrizedQuery.params);
+      return users.map(user => user.id);
   }
 
   protected async hasPermission(query: QueryParam): Promise<boolean> {
