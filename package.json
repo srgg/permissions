@@ -1,21 +1,51 @@
 {
-  "name": "perms",
+  "name": "permissions",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
+    "@nestjs/common": "^6.3.1",
+    "@nestjs/core": "^6.2.4",
+    "@nestjs/platform-express": "^6.2.4",
+    "@nestjs/testing": "^6.2.4",
+    "@nestjs/typeorm": "^6.1.1",
+    "body-parser": "^1.19.0",
+    "class-transformer": "^0.2.3",
+    "class-validator": "^0.11.0",
+    "dotenv": "^8.2.0",
+    "email-validator": "^2.0.4",
+    "lodash": "^4.17.15",
+    "morgan": "^1.9.1",
+    "nest-morgan": "^1.0.0",
+    "nest-winston": "^1.0.3",
     "query-template": "1.1.0",
-    "typeorm": "^0.2.19"
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^6.5.2",
+    "rxjs-compat": "^6.4.0",
+    "typeorm": "^0.2.9",
+    "winston": "^3.2.1"
   },
   "scripts": {
-    "start": "node app.js",
-    "test": "jest"
+    "e2e": "jest --config=e2e/jest-e2e.json --testTimeout=20000",
+    "test": "jest --config=jest.json --testTimeout=20000"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.18",
-    "@types/node": "^10.14.18",
-    "jest": "^24.9.0",
+    "@types/jest": "^24.9.0",
+    "@types/morgan": "^1.7.37",
+    "@types/node": "^10.17.13",
+    "@types/supertest": "^2.0.8",
+    "jest": "^24.8.0",
+    "jest-chain": "^1.1.2",
+    "jest-extended": "^0.11.1",
     "mysql": "^2.17.1",
-    "ts-jest": "^24.1.0",
-    "typescript": "^3.6.3"
+    "prettier": "^1.19.1",
+    "source-map-support": "^0.5.9",
+    "supertest": "^4.0.2",
+    "ts-jest": "^24.0.2",
+    "tsc-watch": "^2.2.1",
+    "tslint": "^5.20.1",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-eslint-rules": "^5.4.0",
+    "tslint-plugin-prettier": "^2.1.0",
+    "typescript": "^3.2.2"
   }
 }

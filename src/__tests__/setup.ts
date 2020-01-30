@@ -1,6 +1,6 @@
-import { getConnectionManager } from "typeorm";
-import {Idea} from "../entity/idea";
-import {User} from "../entity/user";
+import {getConnectionManager} from "typeorm";
+// import {UserIdea} from "../entity/UserIdea.entity";
+// import {User} from "../entity/User.entity";
 
 beforeAll(async () => {
     const connectionManager = getConnectionManager();
@@ -9,14 +9,17 @@ beforeAll(async () => {
         name: "default",
         type: "mysql",
         host: "localhost",
-        port: 3306,
+        // port: 3306,
+        port: 3309,
         username: "user",
         password: "user",
-        database: "test",
-        entities: [
-            Idea,
-            User
-        ],
+        // database: "test",
+        database: "dbTest",
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        // entities: [
+        //     UserIdea,
+        //     User
+        // ],
         synchronize: false,
     });
 
@@ -25,5 +28,6 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    // await getConnection().close();
+    const connectionManager = getConnectionManager();
+    await connectionManager.get("default").close();
 });

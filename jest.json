@@ -1,0 +1,33 @@
+{
+  "moduleFileExtensions": [
+    "ts",
+    "tsx",
+    "js",
+    "json"
+  ],
+  "transform": {
+    "^.+\\.tsx?$": "ts-jest"
+  },
+  "collectCoverageFrom": [
+    "src/**/*.{js,jsx,tsx,ts}",
+    "!**/node_modules/**",
+    "!**/vendor/**"
+  ],
+  "coverageReporters": [
+    "json",
+    "lcov"
+  ],
+  "testMatch": [
+    "**/__tests__/**/*.test.+(ts|tsx)"
+  ],
+  "testPathIgnorePatterns": [
+    "/node_modules/",
+    "/dist/",
+    "/lib/",
+    "/__tests__/setup.ts"
+  ],
+  "setupFilesAfterEnv": [
+    "./src/__tests__/setup.ts"
+  ],
+  "verbose": true
+}

@@ -8,11 +8,11 @@ describe('Read all user permissions on all the domains', () => {
         },
             `[
                 {
-                    domain: 'Comments',
+                    resource: 'Comment',
                     permitted: 'DELETE_OWN,EDIT_OWN'
                 },
                 {
-                    domain: 'Ideas',
+                    resource: 'User_Idea',
                     permitted: 'CREATE,CREATE-COMMENT_OWN,DELETE_OWN,EDIT_OWN,READ-COMMENT_OWN,READ_OWN'
                 }
             ]`

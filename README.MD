@@ -46,3 +46,9 @@ budget:read,edit_own:*
 
 **Note:** from the firts time it can be tricky to use instance part in conjunction with a `_own` permissions, but the rule is quite simple: 
 **if actual instance listed in the permission is not owned by the user, none of the '_own' actions are not allowed.**
+
+## How to run test
+```
+npm test
+npm run e2e
+```

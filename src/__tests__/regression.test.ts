@@ -7,7 +7,7 @@ describe('Regression tests', () => {
         // Issue:
 
         await checkReadAllQuery({
-                user: 'user1@regression.test', domain: 'IDEAS', action: 'READ',
+                user: 'user1@regression.test', domain: 'USER_IDEA', action: 'READ',
                 columns: ['name', 'title', 'permitted'],
                 checkOwnership: true
             },
@@ -22,7 +22,7 @@ describe('Regression tests', () => {
     test('ReadAllQuery: READ_OWN should be handled properly', async () => {
         // Issue:
         await checkReadAllQuery({
-                user: 'user1@regression.test', domain: 'IDEAS', action: 'READ_OWN',
+                user: 'user1@regression.test', domain: 'USER_IDEA', action: 'READ_OWN',
                 columns: ['name', 'title', 'permitted'],
                 checkOwnership: true
             },
@@ -47,26 +47,26 @@ describe('Regression tests', () => {
     test('Get permission list for a particular user should not fail if custom columns were provided', async () => {
         await checkPermissionListQuery({
                 user: 'user1@regression.test',
-                columns: ['id', 'domain', 'resource_instance', 'action']
+                columns: ['id', 'resource', 'resourceId', 'actions']
             },
             `[
             {
-                id: 451,
-                domain: 'Ideas',
-                action: 'READ_OWN',
-                resource_instance: null
-            },
-            {
                 id: 452,
-                action: 'CREATE',
-                domain: 'Ideas',
-                resource_instance: null
+                resource: 'User_Idea',
+                actions: 'READ_OWN',
+                resourceId: null
             },
             {
                 id: 453,
-                action: 'CREATE, READ, EDIT, DELETE',
-                domain: 'Empty_IDEAS',
-                resource_instance: null
+                actions: 'CREATE',
+                resource: 'User_Idea',
+                resourceId: null
+            },
+            {
+                id: 454,
+                actions: 'CREATE, READ, EDIT, DELETE',
+                resource: 'Empty_IDEAS',
+                resourceId: null
             }
         ]`)
     })
